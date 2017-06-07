@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">My_Carpathians</string>
+    <string name="title_activity_maps">Map</string>
+
+    <string name="title_activity_main">MainActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="access_token">pk.eyJ1IjoiaXZhc2h0aHlzaHluIiwiYSI6ImNqM2p4NnU0cTAwamMycXFzMHYycmFpYm8ifQ.3dZSxRQGV5NXo_h67WEDNA</string>
+    <string name="places">PLACE</string>
+    <string name="routes">ROUTES</string>
+    <string name="settings">SETTINGS</string>
+</resources>
