@@ -18,7 +18,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <EditText
-            android:id="@+id/old_email"
+            android:id="@+id/oldEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/hint_email"
@@ -27,7 +27,7 @@
              />
 
         <EditText
-            android:id="@+id/new_email"
+            android:id="@+id/newEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/hint_new_email"
@@ -36,7 +36,7 @@
             />
 
         <EditText
-            android:id="@+id/password"
+            android:id="@+id/password3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:focusableInTouchMode="true"
@@ -93,7 +93,7 @@
             android:textStyle="bold" />
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/progressBar3"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:visibility="gone" />
@@ -110,7 +110,7 @@
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/change_email_button"
+            android:id="@+id/buttonChangeEmail"
             style="?android:textAppearanceSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -119,7 +119,7 @@
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/change_password_button"
+            android:id="@+id/buttonChangePassword3"
             style="?android:textAppearanceSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -128,7 +128,7 @@
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/sending_pass_reset_button"
+            android:id="@+id/buttonSendingPassReset"
             style="?android:textAppearanceSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -137,7 +137,7 @@
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/remove_user_button"
+            android:id="@+id/buttonRemoveUserButton"
             style="?android:textAppearanceSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -146,7 +146,7 @@
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/sign_out"
+            android:id="@+id/signOut"
             style="?android:textAppearanceSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

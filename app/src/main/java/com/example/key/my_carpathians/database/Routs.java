@@ -10,8 +10,16 @@ public class Routs {
     public String nameRout;
     public String titleRout;
     public String urlRout;
-
+    public Position positionRout;
     public Routs() {
+    }
+
+    public Position getPositionRout() {
+        return positionRout;
+    }
+
+    public void setPositionRout(Position positionRout) {
+        this.positionRout = positionRout;
     }
 
     public String getNameRout() {

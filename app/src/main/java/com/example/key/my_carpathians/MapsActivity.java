@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
@@ -50,6 +51,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.key.my_carpathians.ActionActivity.GEOJSON_ROUT;
+import static com.example.key.my_carpathians.ActionActivity.LATITUDE;
+import static com.example.key.my_carpathians.ActionActivity.LONGITUDE;
 import static com.example.key.my_carpathians.StartActivity.PREFS_NAME;
 
 @EActivity
@@ -67,7 +70,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isEndNotified;
     private ProgressBar progressBar;
     private OfflineManager offlineManager;
-
+    private double lng;
+    private double lat;
     // JSON encoding/decoding
     public static final String JSON_CHARSET = "UTF-8";
     public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
@@ -77,6 +81,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         uriFromFle = mSharedPreferences.getString(GEOJSON_ROUT , "");
+        lng = getIntent().getDoubleExtra(LONGITUDE,0);
+        lat = getIntent().getDoubleExtra(LATITUDE,0);
 
         // Mapbox access token is configured here. This needs to be called either in your application
         // object or in the same activity which contains the mapview.
@@ -107,6 +113,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
+        mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                new CameraPosition.Builder()
+                        .target(new LatLng(lng, lat))  // set the camera's center position
+                        .zoom(13)  // set the camera's zoom level
+                        .tilt(20)  // set the camera's tilt
+                        .build()));
         new DrawGeoJson().execute();
     }
 
@@ -114,15 +126,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         offlineManager = OfflineManager.getInstance(MapsActivity.this);
 
         // Create a bounding box for the offline region
-        LatLngBounds latLngBounds = new LatLngBounds.Builder()
-                .include(new LatLng(49.0945, 24.2576 )) // Northeast
-                .include(new LatLng(49.1413, 24.3397 )) // Southwest
-                .build();
+        LatLngBounds bounds = mapboxMap.getProjection().getVisibleRegion().latLngBounds;
+        double minZoom = mapboxMap.getCameraPosition().zoom;
+        double maxZoom = mapboxMap.getMaxZoomLevel();
+        float pixelRatio = this.getResources().getDisplayMetrics().density;
 
         // Define the offline region
         OfflineTilePyramidRegionDefinition definition = new OfflineTilePyramidRegionDefinition(
                 mapboxMap.getStyleUrl(),
-                latLngBounds,
+                bounds,
                 9,
                 14,
                 MapsActivity.this.getResources().getDisplayMetrics().density);
@@ -131,7 +143,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         byte[] metadata;
         try {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put(JSON_FIELD_REGION_NAME, "Kalush");
+            jsonObject.put(JSON_FIELD_REGION_NAME, uriFromFle);
             String json = jsonObject.toString();
             metadata = json.getBytes(JSON_CHARSET);
         } catch (Exception exception) {

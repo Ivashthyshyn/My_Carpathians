@@ -7,7 +7,6 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -38,6 +37,9 @@ import static com.example.key.my_carpathians.StartActivity.PREFS_NAME;
 public class ActionActivity extends AppCompatActivity {
 
     public static final String GEOJSON_ROUT = "geojson_rout";
+    public static final String LATITUDE = "latitude";
+    public static final String LONGITUDE = "longitude";
+
     Places  myPlace;
     @ViewById(R.id.imageView)
     ImageView imageView;
@@ -45,8 +47,6 @@ public class ActionActivity extends AppCompatActivity {
     TextView textName;
     @ViewById(R.id.titleText)
     TextView titleText;
-    @ViewById(R.id.buttonShowOnMap)
-    Button buttonShowOnMap;
     File localFile;
 
     @Override
@@ -54,10 +54,6 @@ public class ActionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
         downloadFile();
-
-
-
-
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
         String plaseName = getIntent().getStringExtra("placeName");
@@ -87,6 +83,8 @@ public class ActionActivity extends AppCompatActivity {
     @Click(R.id.buttonShowOnMap)
     public void showOnMap(){
         Intent mapIntent = new Intent(ActionActivity.this,MapsActivity_.class);
+        mapIntent.putExtra(LONGITUDE, myPlace.getPositionPlace().getLatitude());
+        mapIntent.putExtra(LATITUDE, myPlace.getPositionPlace().getLongitude());
         startActivity(mapIntent);
     }
 
@@ -94,14 +92,14 @@ public class ActionActivity extends AppCompatActivity {
     private void downloadFile() {
         FirebaseStorage storage = FirebaseStorage.getInstance();
 
-        StorageReference httpsReference = storage.getReferenceFromUrl("gs://my-carpathians-1496328028184.appspot.com/geojson/vylky.geojson");
+        StorageReference httpsReference = storage.getReferenceFromUrl("gs://my-carpathians-1496328028184.appspot.com/geojson/NaGoverlu.geojson");
 
         File rootPath = new File(Environment.getExternalStorageDirectory(), "Routs");
         if(!rootPath.exists()) {
             rootPath.mkdirs();
         }
 
-        final File localFile = new File(rootPath,"vylky.geojson");
+        localFile = new File(rootPath,"goverla.geojson");
         final URI fileUri = localFile.toURI();
 
         httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {

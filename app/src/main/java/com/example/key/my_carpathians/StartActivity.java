@@ -1,5 +1,7 @@
 package com.example.key.my_carpathians;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,11 +10,15 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Window;
+import android.widget.Toast;
 
 import com.example.key.my_carpathians.database.Places;
 import com.example.key.my_carpathians.database.Routs;
-import com.example.key.my_carpathians.login.LoginActivity;
-import com.example.key.my_carpathians.login.SettingsActivity;
+import com.example.key.my_carpathians.login.LoginActivity_;
+import com.example.key.my_carpathians.login.SettingsActivity_;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -37,17 +43,15 @@ public class StartActivity extends AppCompatActivity {
     public static final int TYPE_OF_LIST_PLACE = 1;
     public static final int TYPE_OF_LIST_ROUTS = 2;
     public static final String PREFS_NAME = "MyPrefsFile";
-    private static final String PREF_VERSION_CODE_KEY = "version_code";
-    private static final int DOESNT_EXIST = - 1;
     private String userUid;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    public int currentVersionCode = BuildConfig.VERSION_CODE;
     public FragmentManager fragmentManager;
     public ListFragment listFragment;
     public ArrayList<Places> places = new ArrayList<>();
     public ArrayList<Routs> routs = new ArrayList<>();
     public  AlertDialog.Builder builder;
+    private Context context = StartActivity.this;
 
 
     @Override
@@ -63,15 +67,16 @@ public class StartActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     userUid = user.getUid();
+
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
-                    startActivity(new Intent(StartActivity.this, LoginActivity.class));
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
+
+                    showLoginDialog();
                 }
                 // ...
             }
         };
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
 
@@ -191,6 +196,55 @@ public class StartActivity extends AppCompatActivity {
 
     @Click(R.id.buttonSettings)
     public void buttonSettingsWasClicked(){
-        startActivity(new Intent(StartActivity.this, SettingsActivity.class));
+        startActivity(new Intent(StartActivity.this, SettingsActivity_.class));
     }
+
+    void showLoginDialog(){
+        builder = new AlertDialog.Builder(this);
+        builder.setTitle("Раді вітати вас у нашому додатку для людей які полюбляють активний відпочинок");
+        builder.setMessage("Виберіть спосіб реєстраці");
+
+        builder.setPositiveButton("Зареєструватися", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+
+                startActivity(new Intent(context, LoginActivity_.class));
+            }
+        });
+        builder.setNegativeButton("Анонімний вхід", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                signInAnonymously();
+            }
+        });
+        builder.setCancelable(true);
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            public void onCancel(DialogInterface dialog) {
+                signInAnonymously();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+    private void signInAnonymously() {
+        mAuth.signInAnonymously()
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInAnonymously:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInAnonymously:failure", task.getException());
+                            Toast.makeText(context, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+                });
+    }
+
+
 }
