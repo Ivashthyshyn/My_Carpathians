@@ -1,27 +1,34 @@
 package com.example.key.my_carpathians;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -30,9 +37,6 @@ import com.mapbox.mapboxsdk.offline.OfflineRegion;
 import com.mapbox.mapboxsdk.offline.OfflineRegionError;
 import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
 import com.mapbox.services.commons.utils.TextUtils;
 
@@ -56,30 +60,63 @@ import static com.example.key.my_carpathians.ActionActivity.LONGITUDE;
 import static com.example.key.my_carpathians.StartActivity.PREFS_NAME;
 
 @EActivity
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private MapView mapView;
     private MapboxMap mapboxMap;
     private FloatingActionButton floatingActionButton;
-    private LocationEngine locationEngine;
-    private LocationEngineListener locationEngineListener;
     private PermissionsManager permissionsManager;
     private File localFile;
     private static final String TAG = "MapsActivity";
-
+    private Location mLocation = null;
     private boolean isEndNotified;
     private ProgressBar progressBar;
     private OfflineManager offlineManager;
     private double lng;
     private double lat;
+    private boolean switchCheck = false;
     // JSON encoding/decoding
     public static final String JSON_CHARSET = "UTF-8";
     public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
     public String uriFromFle;
+    private LocationService locationService;
+    public ILocation iCapture;
+    private ServiceConnection captureServiceConnection = new ServiceConnection() {
+
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            LocationService.MyLocalBinder binder = (LocationService.MyLocalBinder) service;
+            locationService = binder.getService();
+            locationService.setOwner(iCapture);
+        }
+
+        public void onServiceDisconnected(ComponentName arg0) {
+        }
+    };
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        iCapture = new ILocation() {
+            @Override
+            public void update(Location location) {
+                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location),(14)));
+                mapboxMap.setMyLocationEnabled(true);
+            }
+
+            @Override
+            public void connectionState(int state) {
+                if (state == 1){
+                    Toast.makeText(MapsActivity.this,"This device is not supported.",Toast.LENGTH_LONG).show();
+                }else {
+                    GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+                    apiAvailability.getErrorDialog(MapsActivity.this, state, PLAY_SERVICES_RESOLUTION_REQUEST)
+                            .show();
+                }
+            }
+        };
+
         uriFromFle = mSharedPreferences.getString(GEOJSON_ROUT , "");
         lng = getIntent().getDoubleExtra(LONGITUDE,0);
         lat = getIntent().getDoubleExtra(LATITUDE,0);
@@ -91,9 +128,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // This contains the MapView in XML and needs to be called after the access token is configured.
         setContentView(R.layout.activity_maps);
 
-        // Get the location engine object for later use.
-        locationEngine = LocationSource.getLocationEngine(this);
-        locationEngine.activate();
 
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -103,12 +137,61 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mapboxMap != null) {
-                    toggleGps(!mapboxMap.isMyLocationEnabled());
+                checkGPSEnabled();
+                if (mapboxMap != null && switchCheck == false) {
+                    toggleGps();
+                    floatingActionButton.setImageResource(R.drawable. ic_location_disabled_24dp);
+                    switchCheck = true;
+                }else if ( switchCheck == true){
+                    mapboxMap.setMyLocationEnabled(false);
+                    stopService(new Intent(MapsActivity.this, LocationService.class));
+                    floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
+                    switchCheck = false;
                 }
             }
         });
     }
+
+    private void checkGPSEnabled() {
+        LocationManager lm = (LocationManager)MapsActivity.this.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            if (!gps_enabled){
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder( MapsActivity.this);
+
+                // Setting Dialog Title
+                alertDialog.setTitle("GPS is settings");
+
+                // Setting Dialog Message
+                alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+
+                // On pressing Settings button
+                alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int which) {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        MapsActivity.this.startActivity(intent);
+                    }
+                });
+
+                // on pressing cancel button
+                alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                // Showing Alert Message
+                alertDialog.show();
+
+            }
+        } catch(Exception ex) {}
+
+    }
+
+
 
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
@@ -121,7 +204,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .build()));
         new DrawGeoJson().execute();
     }
-
+    // This method creates and loads the offline region visible on the screen
     private void downloadOfflineRegion() {
         offlineManager = OfflineManager.getInstance(MapsActivity.this);
 
@@ -215,42 +298,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onResume() {
         super.onResume();
         mapView.onResume();
+        if (locationService != null) {
+            locationService.setOwner(iCapture);
+        }
+        if(switchCheck){
+            checkGPSEnabled();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mapView.onPause();
+        if (locationService != null) {
+            locationService.setOwner(null);
+        }
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         mapView.onStop();
-        offlineManager.listOfflineRegions(new OfflineManager.ListOfflineRegionsCallback() {
-            @Override
-            public void onList(OfflineRegion[] offlineRegions) {
-                if (offlineRegions.length > 0) {
-                    // delete the last item in the offlineRegions list which will be yosemite offline map
-                    offlineRegions[(offlineRegions.length - 1)].delete(new OfflineRegion.OfflineRegionDeleteCallback() {
-                        @Override
-                        public void onDelete() {
-                            Toast.makeText(MapsActivity.this, "Yosemite offline map deleted", Toast.LENGTH_LONG).show();
-                        }
-
-                        @Override
-                        public void onError(String error) {
-                            Log.e(TAG, "On Delete error: " + error);
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onError(String error) {
-                Log.e(TAG, "onListError: " + error);
-            }
-        });
     }
 
     @Override
@@ -265,9 +334,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView.onDestroy();
         // Ensure no memory leak occurs if we register the location listener but the call hasn't
         // been made yet.
-        if (locationEngineListener != null) {
-            locationEngine.removeLocationEngineListener(locationEngineListener);
-        }
+
     }
 
     @Override
@@ -276,18 +343,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView.onSaveInstanceState(outState);
     }
 
-    private void toggleGps(boolean enableGps) {
-        if (enableGps) {
-            // Check if user has granted location permission
-            permissionsManager = new PermissionsManager((PermissionsListener) this);
-            if (!PermissionsManager.areLocationPermissionsGranted(this)) {
-                permissionsManager.requestLocationPermissions(this);
-            } else {
-                enableLocation(true);
-            }
-        } else {
-            enableLocation(false);
-        }
+    // This method monitors the position of the user on the map
+    private void toggleGps() {
+        Intent intent = new Intent(this, LocationService.class);
+        startService(intent);
+        bindService(intent, captureServiceConnection, Context.BIND_AUTO_CREATE);
+        mapboxMap.getMyLocationViewSettings().setPadding(0, 200, 0, 0);
+        mapboxMap.getMyLocationViewSettings().setForegroundTintColor(Color.parseColor("#56B881"));
+        mapboxMap.getMyLocationViewSettings().setAccuracyTintColor(Color.parseColor("#FBB03B"));
+        mapboxMap.setMyLocationEnabled(true);
     }
 
     // Progress bar methods
@@ -319,71 +383,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toast.makeText(MapsActivity.this, message, Toast.LENGTH_LONG).show();
     }
 
-    private void enableLocation(boolean enabled) {
-        if (enabled) {
-            // If we have the last location of the user, we can move the camera to that position.
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            Location lastLocation = locationEngine.getLastLocation();
-            if (lastLocation != null) {
-                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation), 16));
-            }
 
-            locationEngineListener = new LocationEngineListener() {
-                @Override
-                public void onConnected() {
-                    // No action needed here.
-                }
-                @Override
-                public void onLocationChanged(Location location) {
-                    if (location != null) {
-                        // Move the map camera to where the user location is and then remove the
-                        // listener so the camera isn't constantly updating when the user location
-                        // changes. When the user disables and then enables the location again, this
-                        // listener is registered again and will adjust the camera once again.
-                        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location), 16));
-                        locationEngine.removeLocationEngineListener(this);
-                    }
-                }
-            };
-            locationEngine.addLocationEngineListener(locationEngineListener);
-            floatingActionButton.setImageResource(R.drawable.ic_location_disabled_24dp);
-        } else {
-            floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
-        }
-        // Enable or disable the location layer on the map
-        mapboxMap.setMyLocationEnabled(enabled);
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    @Override
-    public void onExplanationNeeded(List<String> permissionsToExplain) {
-        Toast.makeText(this, "This app needs location permissions in order to show its functionality.",
-                Toast.LENGTH_LONG).show();
-    }
-    @Override
-    public void onPermissionResult(boolean granted) {
-        if (granted) {
-            enableLocation(true);
-        } else {
-            Toast.makeText(this, "You didn't grant location permissions.",
-                    Toast.LENGTH_LONG).show();
-            finish();
-        }
-    }
 
+    /**
+     *
+     */
     private class DrawGeoJson extends AsyncTask<Void, Void, List<LatLng>> {
         @Override
         protected List<LatLng> doInBackground(Void... voids) {
