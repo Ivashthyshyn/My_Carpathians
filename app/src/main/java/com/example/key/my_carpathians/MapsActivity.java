@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +38,7 @@ import com.mapbox.mapboxsdk.offline.OfflineRegion;
 import com.mapbox.mapboxsdk.offline.OfflineRegionError;
 import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
-import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
+import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.commons.utils.TextUtils;
 
 import org.androidannotations.annotations.Click;
@@ -67,13 +68,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MapView mapView;
     private MapboxMap mapboxMap;
     private FloatingActionButton floatingActionButton;
-    private PermissionsManager permissionsManager;
     private File localFile;
     private static final String TAG = "MapsActivity";
     private Location mLocation = null;
     private boolean isEndNotified;
     private ProgressBar progressBar;
     private OfflineManager offlineManager;
+    public MapsActivity permissionsManager;
+    public LocationEngineListener locationEngineListener;
     private double lng;
     private double lat;
     private boolean switchCheck = false;
@@ -94,6 +96,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         public void onServiceDisconnected(ComponentName arg0) {
         }
     };
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,8 +105,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         iCapture = new ILocation() {
             @Override
             public void update(Location location) {
-                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location),(14)));
-                mapboxMap.setMyLocationEnabled(true);
+                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location), 16));
+
             }
 
             @Override
@@ -137,12 +141,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkGPSEnabled();
                 if (mapboxMap != null && switchCheck == false) {
                     toggleGps();
                     floatingActionButton.setImageResource(R.drawable. ic_location_disabled_24dp);
                     switchCheck = true;
-                }else if ( switchCheck == true){
+                }else if (switchCheck == true){
                     mapboxMap.setMyLocationEnabled(false);
                     stopService(new Intent(MapsActivity.this, LocationService.class));
                     floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
@@ -351,8 +354,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapboxMap.getMyLocationViewSettings().setPadding(0, 200, 0, 0);
         mapboxMap.getMyLocationViewSettings().setForegroundTintColor(Color.parseColor("#56B881"));
         mapboxMap.getMyLocationViewSettings().setAccuracyTintColor(Color.parseColor("#FBB03B"));
+
         mapboxMap.setMyLocationEnabled(true);
+        mapboxMap.setOnMyLocationChangeListener(myLocationChangeListener);
+        mapboxMap.setOnMyLocationChangeListener(new MapboxMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(@Nullable Location location) {
+
+            }
+        });
     }
+
 
     // Progress bar methods
     private void startProgress() {
@@ -389,7 +401,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
-
 
     /**
      *
