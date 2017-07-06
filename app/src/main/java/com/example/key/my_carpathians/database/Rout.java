@@ -6,20 +6,32 @@ import com.google.firebase.database.IgnoreExtraProperties;
  * Created by Key on 15.06.2017.
  */
 @IgnoreExtraProperties
-public class Routs {
+public class Rout {
     public String nameRout;
     public String titleRout;
     public String urlRout;
-    public Position positionRout;
-    public Routs() {
+    public String urlRoutsTrack;
+    public int routsLevel;
+
+
+
+    public Rout() {
     }
 
-    public Position getPositionRout() {
-        return positionRout;
+    public String getUrlRoutsTrack() {
+        return urlRoutsTrack;
     }
 
-    public void setPositionRout(Position positionRout) {
-        this.positionRout = positionRout;
+    public void setUrlRoutsTrack(String urlRoutsTrack) {
+        this.urlRoutsTrack = urlRoutsTrack;
+    }
+
+    public int getRoutsLevel() {
+        return routsLevel;
+    }
+
+    public void setRoutsLevel(int routsLevel) {
+        this.routsLevel = routsLevel;
     }
 
     public String getNameRout() {

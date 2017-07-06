@@ -10,22 +10,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.example.key.my_carpathians.database.Places;
-import com.example.key.my_carpathians.database.Routs;
+import com.example.key.my_carpathians.database.Place;
 
 import java.util.List;
 
-import static com.example.key.my_carpathians.StartActivity.TYPE_OF_LIST_PLACE;
-import static com.example.key.my_carpathians.StartActivity.TYPE_OF_LIST_ROUTS;
+import static com.example.key.my_carpathians.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
 
 
 /**
  * Created by Key on 10.06.2017.
  */
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
-    private int type = 0;
-    private List<?> list;
+public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAdapter.ViewHolder> {
+    private List<Place> list;
 
     /**
      * use context to intent Url
@@ -35,13 +32,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
 
 
-    public RecyclerAdapter(List<?> list,int type) {
+    public PlacesRecyclerAdapter(List<Place> list) {
             this.list = list;
-            this.type = type;
+
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-
+        public final static String PUT_EXTRA_PLASE = "placeName";
         public ImageView placeImage;
         public TextView textName;
         private  ClickListener mClickListener;
@@ -65,7 +62,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
     @Override
-    public RecyclerAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
+    public PlacesRecyclerAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View mView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item, parent, false);
         context = mView.getContext();
@@ -74,8 +71,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             @Override
             public void onPressed(String placeName) {
                 if (placeName != null){
-                    Intent intent = new Intent(context, ActionActivity_.class);
-                    intent.putExtra("placeName", placeName);
+                    Intent intent = new Intent(context, PlaceActivity_.class);
+                    intent.putExtra(PUT_EXTRA_PLASE, placeName);
                     context.startActivity(intent);
                 }
             }
@@ -86,24 +83,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(RecyclerAdapter.ViewHolder holder, int position) {
-        if (type == TYPE_OF_LIST_PLACE) {
-            List<Places> places = (List<Places>) list;
-            Places mPlace = places.get(position);
+    public void onBindViewHolder(PlacesRecyclerAdapter.ViewHolder holder, int position) {
+
+            Place mPlace = list.get(position);
             holder.textName.setText(mPlace.getNamePlace());
             Glide
                     .with(context)
                     .load(mPlace.getUrlPlace())
                     .into(holder.placeImage);
-        }else if (type == TYPE_OF_LIST_ROUTS){
-            List<Routs> routs = (List<Routs>) list;
-            Routs mRout = routs.get(position);
-            holder.textName.setText(mRout.getNameRout());
-            Glide
-                    .with(context)
-                    .load(mRout.getUrlRout())
-                    .into(holder.placeImage);
-        }
+
     }
 
     @Override

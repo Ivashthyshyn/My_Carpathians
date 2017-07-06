@@ -12,8 +12,8 @@ import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
-import com.example.key.my_carpathians.database.Places;
-import com.example.key.my_carpathians.database.Routs;
+import com.example.key.my_carpathians.database.Place;
+import com.example.key.my_carpathians.database.Rout;
 import com.example.key.my_carpathians.login.LoginActivity_;
 import com.example.key.my_carpathians.login.SettingsActivity_;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -21,12 +21,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
@@ -47,9 +47,10 @@ public class StartActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     public FragmentManager fragmentManager;
-    public ListFragment listFragment;
-    public ArrayList<Places> places = new ArrayList<>();
-    public ArrayList<Routs> routs = new ArrayList<>();
+    public PlacesListFragment placesListFragment;
+    public RoutsListFragment routsListFragment;
+    public ArrayList<Place> places = new ArrayList<>();
+    public ArrayList<Rout> routs = new ArrayList<>();
     public  AlertDialog.Builder builder;
     private Context context = StartActivity.this;
 
@@ -59,7 +60,8 @@ public class StartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_start);
-        
+
+
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -79,30 +81,26 @@ public class StartActivity extends AppCompatActivity {
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
-
+      /**
+        Place pl = new Place();
+        pl.setUrlPlace("https://firebasestorage.googleapis.com/v0/b/my-carpathians-1496328028184.appspot.com/o/placeImage%2FgoverlaWaterfall.jpg?alt=media&token=f39a13b9-7ef2-47ee-94a6-5b9726391ce5");
+        pl.setNamePlace("Говерлянський водоспад");
+        pl.setTitlePlace("Пру́тський водоспа́д (інша назва — Говерля́нський водоспа́д) — каскадний водоспад в Українських Карпатах (масив Чорногора), на річці Прут. Розташований на півдні Надвірнянського району Івано-Франківської області, на схід від вершини Говерли.\n" +
+                "\n" +
+                "Водоспад має шість каскадів, висота найбільшого — 12 м. Загальна висота падіння води — 80 м.\n" +
+                "\n" +
+                "Розташований між північно-східними відногами гір Говерли та Брескул, на краю льодовикового кару, в якому бере початок Прут.\n" +
+                "\n" +
+                "Водоспад — популярний туристичний об'єкт, пам'ятка природи. Неподалік від нього проходить стежка, що веде на вершину Говерли. Також є стежка вздовж самого потоку.");
+*/
         Query myPlace = myRef.child("Places");
-        myPlace.addChildEventListener(new ChildEventListener() {
+        myPlace.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    Places place = new Places();
-                   place = data.getValue(Places.class);
-                    places.add(place);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                    Place university = postSnapshot.getValue(Place.class);
+                    places.add(university);
                 }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
             }
 
@@ -110,35 +108,25 @@ public class StartActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-            // TODO: implement the ChildEventListener methods as documented above
-            // ...
         });
+        /**
+        Rout r = new Rout();
+        r.setNameRout("Хата - Станькова");
+        r.setTitleRout("Дуже важкий маршрут. Проходить по дорозі білямоєї хати. Потрібно оминати вибоїни на асвальті і міни закладені коровами, яких місцеве населення переганяє на пашу по цій дорозі. Також є небезпека заблукати");
+        r.setUrlRout("jfjdgk");
+        r.setUrlRoutsTrack("kgfkdjg");
+        r.setRoutsLevel(1);
 
-
-        Query myRouts = myRef.child("Routs");
-        myRouts.addChildEventListener(new ChildEventListener() {
+        myRef.child("Rout").child("Хата - Станькова").setValue(r);
+         */
+        Query myRouts = myRef.child("Rout");
+        myRouts.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    Routs rout = new Routs();
-                    rout = data.getValue(Routs.class);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                    Rout rout = postSnapshot.getValue(Rout.class);
                     routs.add(rout);
                 }
-            }
-
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
             }
 
@@ -147,6 +135,7 @@ public class StartActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
 
@@ -154,29 +143,32 @@ public class StartActivity extends AppCompatActivity {
     void buttonPlaceWasClicked(){
 
         fragmentManager = getSupportFragmentManager();
-        if(listFragment != null) {
-            fragmentManager.beginTransaction().remove(listFragment).commit();
+        if(placesListFragment != null) {
+            fragmentManager.beginTransaction().remove(placesListFragment).commit();
         }
-        listFragment = new ListFragment_();
+        placesListFragment = new PlacesListFragment_();
         android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
                 .beginTransaction();
-        fragmentTransaction.add(R.id.fragment_container, listFragment);
+        fragmentTransaction.add(R.id.fragment_container, placesListFragment);
         fragmentTransaction.commit();
-        listFragment.setList(places,TYPE_OF_LIST_PLACE);
-
+        if(places != null) {
+            placesListFragment.setList(places);
+        }
     }
     @Click(R.id.buttonRoutes)
     void buttonRoutesWasClicked(){
         fragmentManager = getSupportFragmentManager();
-        if(listFragment != null) {
-            fragmentManager.beginTransaction().remove(listFragment).commit();
+        if(routsListFragment != null) {
+            fragmentManager.beginTransaction().remove(routsListFragment).commit();
         }
-        listFragment = new ListFragment_();
+        routsListFragment = new RoutsListFragment_();
         android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
                 .beginTransaction();
-        fragmentTransaction.add(R.id.fragment_container, listFragment);
+        fragmentTransaction.add(R.id.fragment_container, routsListFragment);
         fragmentTransaction.commit();
-        listFragment.setList(routs,TYPE_OF_LIST_ROUTS);
+        if(routs != null) {
+            routsListFragment.setList(routs);
+        }
     }
 
 

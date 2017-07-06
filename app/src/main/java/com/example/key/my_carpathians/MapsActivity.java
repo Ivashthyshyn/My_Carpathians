@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -38,7 +39,6 @@ import com.mapbox.mapboxsdk.offline.OfflineRegion;
 import com.mapbox.mapboxsdk.offline.OfflineRegionError;
 import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.commons.utils.TextUtils;
 
 import org.androidannotations.annotations.Click;
@@ -55,9 +55,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.key.my_carpathians.ActionActivity.GEOJSON_ROUT;
-import static com.example.key.my_carpathians.ActionActivity.LATITUDE;
-import static com.example.key.my_carpathians.ActionActivity.LONGITUDE;
+import static com.example.key.my_carpathians.PlaceActivity.GEOJSON_ROUT;
+import static com.example.key.my_carpathians.PlaceActivity.LATITUDE;
+import static com.example.key.my_carpathians.PlaceActivity.LONGITUDE;
 import static com.example.key.my_carpathians.StartActivity.PREFS_NAME;
 
 @EActivity
@@ -75,7 +75,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ProgressBar progressBar;
     private OfflineManager offlineManager;
     public MapsActivity permissionsManager;
-    public LocationEngineListener locationEngineListener;
+
     private double lng;
     private double lat;
     private boolean switchCheck = false;
@@ -96,6 +96,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         public void onServiceDisconnected(ComponentName arg0) {
         }
     };
+    private MapboxMap.OnMyLocationChangeListener myLocationChangeListener = new MapboxMap.OnMyLocationChangeListener() {
+        @Override
+        public void onMyLocationChange(@Nullable Location location) {
+
+        }
+    };
 
 
     @Override
@@ -105,7 +111,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         iCapture = new ILocation() {
             @Override
             public void update(Location location) {
-                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location), 16));
+                myLocationChangeListener.onMyLocationChange(location);
 
             }
 
@@ -142,6 +148,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 if (mapboxMap != null && switchCheck == false) {
+                    checkGPSEnabled();
                     toggleGps();
                     floatingActionButton.setImageResource(R.drawable. ic_location_disabled_24dp);
                     switchCheck = true;
@@ -158,8 +165,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void checkGPSEnabled() {
         LocationManager lm = (LocationManager)MapsActivity.this.getSystemService(Context.LOCATION_SERVICE);
         boolean gps_enabled = false;
-        boolean network_enabled = false;
-
         try {
             gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
             if (!gps_enabled){
@@ -460,8 +465,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Draw polyline on map
                 mapboxMap.addPolyline(new PolylineOptions()
                         .addAll(points)
-                        .color(Color.parseColor("#3bb2d0"))
+                        .color(Color.parseColor("#ff6861"))
                         .width(2));
+                mapboxMap.addMarker(new MarkerOptions().position(points.get(0)).setTitle("Початок"));
+                mapboxMap.addMarker(new MarkerOptions().position(points.get(points.size()-1)).setTitle("Кінець"));
             }
         }
     }

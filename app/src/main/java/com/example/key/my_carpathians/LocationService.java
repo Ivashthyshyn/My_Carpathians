@@ -19,15 +19,14 @@ public class LocationService extends Service implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-private static final long UPDATE_INTERVAL = 1000 * 1;
-private static final long FASTEST_INTERVAL = 1000 * 5;
+private static final long UPDATE_INTERVAL = 1000 * 2;
+private static final long FASTEST_INTERVAL = 1000 * 10;
 
 private final IBinder myBinder = new MyLocalBinder();
 
 private GoogleApiClient mGoogleApiClient;
 private LocationRequest mLocationRequest;
 private ILocation owner;
-
 @Override
 public void onCreate() {
         if (isGooglePlayServicesAvailable()) {

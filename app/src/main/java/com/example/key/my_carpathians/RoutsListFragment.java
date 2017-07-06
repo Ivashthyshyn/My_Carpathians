@@ -10,35 +10,34 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.key.my_carpathians.database.Rout;
+
 import org.androidannotations.annotations.EFragment;
 
 import java.util.List;
 
-
-/**
- * Created by Key on 10.06.2017.
- */
 @EFragment
-public class ListFragment extends Fragment {
-    RecyclerView recyclerView;
-    LinearLayoutManager mLayoutManager;
-    List<?> mPlacesQuery;
-    int type = 0;
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View fragment = inflater.inflate(R.layout.fragment_recycler_list, container, false);
-        recyclerView = (RecyclerView) fragment.findViewById(R.id.recyclerView);
+public class RoutsListFragment extends Fragment {
+        RecyclerView recyclerView;
+        LinearLayoutManager mLayoutManager;
+        List<Rout> mPlacesQuery;
+        @Nullable
+        @Override
+        public View onCreateView (LayoutInflater inflater, @Nullable ViewGroup container, Bundle
+        savedInstanceState){
+        View fragment = inflater.inflate(R.layout.fragment_routs_list, container, false);
+        recyclerView = (RecyclerView) fragment.findViewById(R.id.recyclerViewForRout);
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         Log.d("debugMode", "The application stopped after this");
         recyclerView.setLayoutManager(mLayoutManager);
-        RecyclerAdapter recyclerAdapter = new RecyclerAdapter(mPlacesQuery, type);
+        RoutsRecyclerAdapter recyclerAdapter = new RoutsRecyclerAdapter(mPlacesQuery);
         recyclerView.setAdapter(recyclerAdapter);
         return fragment;
     }
-    public void setList(List<?> listQuery, int type){
-       this.mPlacesQuery = listQuery;
-       this.type = type;
+
+    public void setList(List<Rout> listQuery) {
+        this.mPlacesQuery = listQuery;
+
 
     }
 }

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/btn_login"
-    tools:context="com.example.key.my_carpathians.ActionActivity">
+    tools:context="com.example.key.my_carpathians.PlaceActivity">
 
     <ImageView
         android:id="@+id/imageView"

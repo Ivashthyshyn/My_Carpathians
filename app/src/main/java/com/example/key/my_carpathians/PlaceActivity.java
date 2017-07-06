@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.example.key.my_carpathians.database.Places;
+import com.example.key.my_carpathians.database.Place;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -31,16 +31,17 @@ import org.androidannotations.annotations.ViewById;
 import java.io.File;
 import java.net.URI;
 
+import static com.example.key.my_carpathians.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
 import static com.example.key.my_carpathians.StartActivity.PREFS_NAME;
 
 @EActivity
-public class ActionActivity extends AppCompatActivity {
+public class PlaceActivity extends AppCompatActivity {
 
     public static final String GEOJSON_ROUT = "geojson_rout";
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
 
-    Places  myPlace;
+    Place myPlace;
     @ViewById(R.id.imageView)
     ImageView imageView;
     @ViewById(R.id.textName)
@@ -56,14 +57,14 @@ public class ActionActivity extends AppCompatActivity {
         downloadFile();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
-        String plaseName = getIntent().getStringExtra("placeName");
+        String dataKey = getIntent().getStringExtra(PUT_EXTRA_PLASE);
 
-        Query myPlaces = myRef.child("Places").child("Plase").child(plaseName);
+        Query myPlaces = myRef.child("Places").child(dataKey);
         myPlaces.addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-              myPlace = dataSnapshot.getValue(Places.class);
+              myPlace = dataSnapshot.getValue(Place.class);
                 Glide
                         .with(getApplicationContext())
                         .load(myPlace.getUrlPlace())
@@ -82,19 +83,23 @@ public class ActionActivity extends AppCompatActivity {
     }
     @Click(R.id.buttonShowOnMap)
     public void showOnMap(){
-        Intent mapIntent = new Intent(ActionActivity.this,MapsActivity_.class);
+        Intent mapIntent = new Intent(PlaceActivity.this,MapsActivity_.class);
         mapIntent.putExtra(LONGITUDE, myPlace.getPositionPlace().getLatitude());
         mapIntent.putExtra(LATITUDE, myPlace.getPositionPlace().getLongitude());
         startActivity(mapIntent);
     }
 
+    @Click(R.id.buttonShowWalkRout)
+    public void buttonShowWalkRoutWasClicked(){
+
+    }
 
     private void downloadFile() {
         FirebaseStorage storage = FirebaseStorage.getInstance();
 
         StorageReference httpsReference = storage.getReferenceFromUrl("gs://my-carpathians-1496328028184.appspot.com/geojson/NaGoverlu.geojson");
 
-        File rootPath = new File(Environment.getExternalStorageDirectory(), "Routs");
+        File rootPath = new File(Environment.getExternalStorageDirectory(), "Rout");
         if(!rootPath.exists()) {
             rootPath.mkdirs();
         }
