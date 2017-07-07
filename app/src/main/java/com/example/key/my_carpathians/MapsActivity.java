@@ -30,7 +30,6 @@ import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -82,7 +81,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // JSON encoding/decoding
     public static final String JSON_CHARSET = "UTF-8";
     public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
-    public String uriFromFle;
+    public String uriFromFle = null;
     private LocationService locationService;
     public ILocation iCapture;
     private ServiceConnection captureServiceConnection = new ServiceConnection() {
@@ -127,7 +126,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
 
-        uriFromFle = mSharedPreferences.getString(GEOJSON_ROUT , "");
+        uriFromFle = getIntent().getStringExtra(GEOJSON_ROUT );
         lng = getIntent().getDoubleExtra(LONGITUDE,0);
         lat = getIntent().getDoubleExtra(LATITUDE,0);
 
@@ -210,25 +209,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .zoom(12)  // set the camera's zoom level
                         .tilt(20)  // set the camera's tilt
                         .build()));
-        new DrawGeoJson().execute();
+
+        if(uriFromFle != null) {
+            new DrawGeoJson().execute();
+        }else{
+            mapboxMap.addMarker(new MarkerOptions().position(new LatLng( lat, lng )));
+        }
     }
     // This method creates and loads the offline region visible on the screen
     private void downloadOfflineRegion() {
         offlineManager = OfflineManager.getInstance(MapsActivity.this);
-
-        // Create a bounding box for the offline region
-        LatLngBounds bounds = mapboxMap.getProjection().getVisibleRegion().latLngBounds;
-        double minZoom = mapboxMap.getCameraPosition().zoom;
-        double maxZoom = mapboxMap.getMaxZoomLevel();
-        float pixelRatio = this.getResources().getDisplayMetrics().density;
-
         // Define the offline region
         OfflineTilePyramidRegionDefinition definition = new OfflineTilePyramidRegionDefinition(
                 mapboxMap.getStyleUrl(),
-                bounds,
-                9,
-                14,
-                MapsActivity.this.getResources().getDisplayMetrics().density);
+                mapboxMap.getProjection().getVisibleRegion().latLngBounds,
+                mapboxMap.getCameraPosition().zoom,
+                mapboxMap.getMaxZoomLevel(),
+                this.getResources().getDisplayMetrics().density);
 
         // Set the metadata
         byte[] metadata;
