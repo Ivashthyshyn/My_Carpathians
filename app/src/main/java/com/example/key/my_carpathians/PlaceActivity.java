@@ -53,7 +53,7 @@ public class PlaceActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_action);
+        setContentView(R.layout.activity_place);
         downloadFile();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
@@ -81,11 +81,11 @@ public class PlaceActivity extends AppCompatActivity {
 
 
     }
-    @Click(R.id.buttonShowOnMap)
-    public void showOnMap(){
+    @Click(R.id.buttonShowPlaceOnMap)
+    public void buttonShowPlaceOnMapWasClicked(){
         Intent mapIntent = new Intent(PlaceActivity.this,MapsActivity_.class);
-        mapIntent.putExtra(LONGITUDE, myPlace.getPositionPlace().getLatitude());
-        mapIntent.putExtra(LATITUDE, myPlace.getPositionPlace().getLongitude());
+        mapIntent.putExtra(LONGITUDE, myPlace.getPositionPlace().getLongitude());
+        mapIntent.putExtra(LATITUDE, myPlace.getPositionPlace().getLatitude());
         startActivity(mapIntent);
     }
 

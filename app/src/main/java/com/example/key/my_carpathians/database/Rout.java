@@ -12,10 +12,19 @@ public class Rout {
     public String urlRout;
     public String urlRoutsTrack;
     public int routsLevel;
+    public Position positionRout;
 
 
 
     public Rout() {
+    }
+
+    public Position getPositionRout() {
+        return positionRout;
+    }
+
+    public void setPositionRout(Position positionRout) {
+        this.positionRout = positionRout;
     }
 
     public String getUrlRoutsTrack() {

@@ -206,8 +206,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.mapboxMap = mapboxMap;
         mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                 new CameraPosition.Builder()
-                        .target(new LatLng(lng, lat))  // set the camera's center position
-                        .zoom(13)  // set the camera's zoom level
+                        .target(new LatLng( lat, lng ))  // set the camera's center position
+                        .zoom(12)  // set the camera's zoom level
                         .tilt(20)  // set the camera's tilt
                         .build()));
         new DrawGeoJson().execute();
