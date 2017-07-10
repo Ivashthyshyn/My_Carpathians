@@ -30,6 +30,7 @@ import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -206,7 +207,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                 new CameraPosition.Builder()
                         .target(new LatLng( lat, lng ))  // set the camera's center position
-                        .zoom(12)  // set the camera's zoom level
+                        .zoom(10)  // set the camera's zoom level
                         .tilt(20)  // set the camera's tilt
                         .build()));
 
@@ -219,12 +220,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // This method creates and loads the offline region visible on the screen
     private void downloadOfflineRegion() {
         offlineManager = OfflineManager.getInstance(MapsActivity.this);
+        // Create a bounding box for the offline region
+        LatLngBounds latLngBounds = new LatLngBounds.Builder()
+                .include(new LatLng(48.82609257, 25.1893648)) // Northeast
+                .include(new LatLng(47.9957569, 23.99545971)) // Southwest
+                .build();
         // Define the offline region
         OfflineTilePyramidRegionDefinition definition = new OfflineTilePyramidRegionDefinition(
                 mapboxMap.getStyleUrl(),
-                mapboxMap.getProjection().getVisibleRegion().latLngBounds,
-                mapboxMap.getCameraPosition().zoom,
-                mapboxMap.getMaxZoomLevel(),
+                latLngBounds,
+                9,
+                14,
                 this.getResources().getDisplayMetrics().density);
 
         // Set the metadata

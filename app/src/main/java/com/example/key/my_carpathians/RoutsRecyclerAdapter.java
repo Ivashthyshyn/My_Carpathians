@@ -6,10 +6,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.database.Rout;
 
 import java.util.List;
@@ -38,22 +37,22 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
     public static class RoutsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public static final String PUT_EXTRA_ROUT = "routName";
-        public ImageView placeImage;
-        public TextView textName;
+        public Button buttonTypeAndLevel;
+        public TextView textNameRout;
         private  ClickListener mClickListener;
 
 
         public RoutsViewHolder(View itemView, ClickListener listener) {
             super(itemView);
             mClickListener = listener;
-            placeImage = (ImageView)itemView.findViewById(R.id.imagePlace);
-            textName = (TextView)itemView.findViewById(R.id.textNamePlace);
+            buttonTypeAndLevel = (Button) itemView.findViewById(R.id.buttonTypeAndLevel);
+            textNameRout = (TextView)itemView.findViewById(R.id.textNameRout);
 
             itemView.setOnClickListener(this);
         }
         @Override
         public void onClick(View v) {
-            mClickListener.onPressed(textName.getText().toString());
+            mClickListener.onPressed(textNameRout.getText().toString());
         }
         public interface ClickListener {
             void onPressed(String nameRout);
@@ -63,7 +62,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
     @Override
     public RoutsRecyclerAdapter.RoutsViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View mView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item, parent, false);
+                .inflate(R.layout.lis_item_for_rout, parent, false);
         context = mView.getContext();
 
         RoutsViewHolder mHolder = new RoutsViewHolder(mView, new RoutsViewHolder.ClickListener() {
@@ -84,11 +83,8 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
     @Override
     public void onBindViewHolder(RoutsViewHolder holder, int position) {
         Rout mRout = list.get(position);
-        holder.textName.setText(mRout.getNameRout());
-        Glide
-                .with(context)
-                .load(mRout.getUrlRout())
-                .into(holder.placeImage);
+        holder.textNameRout.setText(mRout.getNameRout());
+        holder.buttonTypeAndLevel.setText(Integer.toString(mRout.getRoutsLevel()));
 
     }
 

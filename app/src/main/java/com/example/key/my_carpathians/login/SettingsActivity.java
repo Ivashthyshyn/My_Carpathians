@@ -1,8 +1,10 @@
 package com.example.key.my_carpathians.login;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -11,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.StartActivity_;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -19,6 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+
 @EActivity
 public class SettingsActivity extends AppCompatActivity {
 
@@ -74,23 +78,74 @@ public class SettingsActivity extends AppCompatActivity {
         //get firebase auth instance
         auth = FirebaseAuth.getInstance();
 
-        //get current user
-        user = FirebaseAuth.getInstance().getCurrentUser();
 
 
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user == null) {
+                user = firebaseAuth.getCurrentUser();
+                if (user == null ) {
                     // user auth state is changed - user is null
                     // launch login activity
                     startActivity(new Intent(SettingsActivity.this, LoginActivity_.class));
                     finish();
+                }else if(user.getProviders().size() == 0){
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(SettingsActivity.this);
+
+                    // Setting Dialog Title
+                    alertDialog.setTitle("Authentication");
+
+                    // Setting Dialog Message
+                    alertDialog.setMessage("You need to login to access the settings");
+
+                    // On pressing Settings button
+                    alertDialog.setPositiveButton("Login", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int which) {
+                            user.delete()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Toast.makeText(SettingsActivity.this, "Your profile is deleted:( Create a account now!", Toast.LENGTH_SHORT).show();
+                                                startActivity(new Intent(SettingsActivity.this, SignupActivity.class));
+                                                finish();
+                                                progressBar.setVisibility(View.GONE);
+                                            } else {
+                                                Toast.makeText(SettingsActivity.this, "Failed to delete your account!", Toast.LENGTH_SHORT).show();
+                                                progressBar.setVisibility(View.GONE);
+                                            }
+                                        }
+                                    });
+                            signOut();
+                            SettingsActivity.this.startActivity(new Intent(SettingsActivity.this, LoginActivity_.class));
+                        }
+                    });
+
+                    // on pressing cancel button
+                    alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            SettingsActivity.this.startActivity(new Intent(SettingsActivity.this, StartActivity_.class));
+                            dialog.cancel();
+                        }
+                    });
+
+                    // Showing Alert Message
+                    alertDialog.show();
+
+
+                }else if (user.getProviders().size() > 0){
+                    changeInterface();
                 }
+
+
             }
         };
 
+
+
+
+    }
+    public void changeInterface(){
         //   Define the provider
         if (user.getProviders().get(0).equals("password")) {
             oldEmail.setVisibility(View.GONE);
@@ -106,23 +161,24 @@ public class SettingsActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
             }
         }else{
-                buttonChangeEmail.setVisibility(View.GONE);
-                buttonChangePassword3.setVisibility(View.GONE);
-                buttonSendingPassReset.setVisibility(View.GONE);
-                oldEmail.setVisibility(View.GONE);
-                newEmail.setVisibility(View.GONE);
-                password.setVisibility(View.GONE);
-                newPassword.setVisibility(View.GONE);
-                changeEmail.setVisibility(View.GONE);
-                changePassword.setVisibility(View.GONE);
-                sendEmail.setVisibility(View.GONE);
-                remove.setVisibility(View.GONE);
+            buttonChangeEmail.setVisibility(View.GONE);
+            buttonChangePassword3.setVisibility(View.GONE);
+            buttonSendingPassReset.setVisibility(View.GONE);
+            oldEmail.setVisibility(View.GONE);
+            newEmail.setVisibility(View.GONE);
+            password.setVisibility(View.GONE);
+            newPassword.setVisibility(View.GONE);
+            changeEmail.setVisibility(View.GONE);
+            changePassword.setVisibility(View.GONE);
+            sendEmail.setVisibility(View.GONE);
+            remove.setVisibility(View.GONE);
 
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
         }
     }
+
     @Click(R.id.buttonChangeEmail)
     public void buttonChangeEmailWasClicked(){
         oldEmail.setVisibility(View.GONE);
@@ -168,7 +224,7 @@ public class SettingsActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 Toast.makeText(SettingsActivity.this, "Your profile is deleted:( Create a account now!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(SettingsActivity.this, SignupActivity.class));
+                                startActivity(new Intent(SettingsActivity.this, LoginActivity_.class));
                                 finish();
                                 progressBar.setVisibility(View.GONE);
                             } else {

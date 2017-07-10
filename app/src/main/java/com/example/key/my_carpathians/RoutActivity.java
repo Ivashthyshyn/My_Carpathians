@@ -1,10 +1,15 @@
 package com.example.key.my_carpathians;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Button;
@@ -42,6 +47,7 @@ import static com.example.key.my_carpathians.StartActivity.PREFS_NAME;
 
 @EActivity
 public class RoutActivity extends AppCompatActivity {
+    private boolean connected = false;
     private static final String TEMPORARY_FILE = "fileToView";
     private static final String PREFS_LIST_ROUTS_NAME = "listOfRoutsMame";
     private File localFile;
@@ -88,8 +94,27 @@ public class RoutActivity extends AppCompatActivity {
         });
     }
 
+    public boolean isOnline() {
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) RoutActivity.this
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            connected = networkInfo != null && networkInfo.isAvailable() &&
+                    networkInfo.isConnected();
+            return connected;
+
+
+        } catch (Exception e) {
+            System.out.println("CheckConnectivity Exception: " + e.getMessage());
+            Log.v("connectivity", e.toString());
+        }
+        return connected;
+    }
+
     @Click(R.id.buttonShowRoutOnMap)
     public void buttonShowRoutOnMapWasClicked(){
+
 
         Intent mapIntent = new Intent(RoutActivity.this,MapsActivity_.class);
         mapIntent.putExtra(LONGITUDE, mRoutClass.getPositionRout().getLongitude());
@@ -98,9 +123,31 @@ public class RoutActivity extends AppCompatActivity {
         startActivity(mapIntent);
     }
 
-    @Click(R.id.buttonDounloadRout)
-    public void buttonDounloadRoutWasClicked(){
-        downloadFile(mRoutClass.getUrlRoutsTrack(), mRoutClass.getNameRout());
+    @Click(R.id.buttonDownloadRout)
+    public void buttonDownloadRoutWasClicked(){
+        if (isOnline()) {
+            downloadFile(mRoutClass.getUrlRoutsTrack(), mRoutClass.getNameRout());
+        }else {
+
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(RoutActivity.this);
+
+            // Setting Dialog Title
+            alertDialog.setTitle("Attention!");
+
+            // Setting Dialog Message
+            alertDialog.setMessage("Sorry, but you need an internet connection to download a route. After downloading the file, you can use it offline ");
+
+            // On pressing Settings button
+            alertDialog.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog,int which) {
+                    dialog.cancel();
+                }
+            });
+
+            // Showing Alert Message
+            alertDialog.show();
+
+        }
     }
 
     private void downloadFile(String uriRout, String fileName) {

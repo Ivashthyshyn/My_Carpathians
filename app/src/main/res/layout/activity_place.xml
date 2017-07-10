@@ -10,13 +10,13 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="270dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         app:srcCompat="@android:drawable/btn_star_big_on"
         tools:layout_editor_absoluteX="149dp"
-        tools:layout_editor_absoluteY="70dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        tools:layout_editor_absoluteY="70dp" />
 
     <TextView
         android:id="@+id/titleText"
