@@ -2,7 +2,7 @@ package com.example.key.my_carpathians.database;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.util.List;
+import java.io.Serializable;
 
 
 /**
@@ -10,33 +10,16 @@ import java.util.List;
  */
 
 @IgnoreExtraProperties
-public class Place {
+public class Place implements Serializable {
     public String titlePlace;
     public String urlPlace;
     public String namePlace;
     public int typePlase;
     public Position positionPlace;
-    public List<String> placesAround;
-    public List<String> routsAround;
+
 
 
     public Place() {
-    }
-
-    public List<String> getPlacesAround() {
-        return placesAround;
-    }
-
-    public void setPlacesAround(List<String> placesAround) {
-        this.placesAround = placesAround;
-    }
-
-    public List<String> getRoutsAround() {
-        return routsAround;
-    }
-
-    public void setRoutsAround(List<String> routsAround) {
-        this.routsAround = routsAround;
     }
 
     public int getTypePlase() {

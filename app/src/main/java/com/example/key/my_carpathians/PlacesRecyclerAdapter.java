@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.database.Place;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.key.my_carpathians.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
@@ -73,6 +74,8 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
                 if (placeName != null){
                     Intent intent = new Intent(context, PlaceActivity_.class);
                     intent.putExtra(PUT_EXTRA_PLASE, placeName);
+                    ArrayList<Place> arrayListPlace = (ArrayList<Place>) list;
+                    intent.putExtra("fdfd", arrayListPlace);
                     context.startActivity(intent);
                 }
             }

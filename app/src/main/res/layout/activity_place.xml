@@ -42,7 +42,7 @@
         android:textStyle="bold" />
 
     <Button
-        android:id="@+id/buttonInterestingPlaces"
+        android:id="@+id/buttonPlacesAruond"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"

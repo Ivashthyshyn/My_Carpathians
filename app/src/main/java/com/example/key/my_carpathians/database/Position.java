@@ -2,11 +2,13 @@ package com.example.key.my_carpathians.database;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.io.Serializable;
+
 /**
  * Created by Key on 29.06.2017.
  */
 @IgnoreExtraProperties
-public class Position {
+public class Position implements Serializable {
     public double longitude;
     public double latitude;
 

@@ -2,11 +2,13 @@ package com.example.key.my_carpathians.database;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.io.Serializable;
+
 /**
  * Created by Key on 15.06.2017.
  */
 @IgnoreExtraProperties
-public class Rout {
+public class Rout implements Serializable {
     public String nameRout;
     public String titleRout;
     public String urlRout;
