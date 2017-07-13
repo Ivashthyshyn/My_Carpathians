@@ -19,52 +19,53 @@ public class LocationService extends Service implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-private static final long UPDATE_INTERVAL = 1000 * 2;
-private static final long FASTEST_INTERVAL = 1000 * 10;
+    private static final long UPDATE_INTERVAL = 1000 * 2;
+    private static final long FASTEST_INTERVAL = 1000 * 10;
 
-private final IBinder myBinder = new MyLocalBinder();
+    private final IBinder myBinder = new MyLocalBinder();
 
-private GoogleApiClient mGoogleApiClient;
-private LocationRequest mLocationRequest;
-private ILocation owner;
-@Override
-public void onCreate() {
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private ILocation owner;
+
+    @Override
+    public void onCreate() {
         if (isGooglePlayServicesAvailable()) {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-        .addConnectionCallbacks(this)
-        .addOnConnectionFailedListener(this)
-        .addApi(LocationServices.API)
-        .build();
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mGoogleApiClient.connect();
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+            mLocationRequest = new LocationRequest();
+            mLocationRequest.setInterval(UPDATE_INTERVAL);
+            mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            mGoogleApiClient.connect();
         }
-        }
-
-@Override
-public void onConnected(Bundle bundle) {
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
-
-@Override
-public void onConnectionSuspended(int i) {
-        }
-
-@Override
-public void onConnectionFailed(ConnectionResult connectionResult) {
-
-        }
-
-/**
- * The binder that returns the service activity.
- */
-public class MyLocalBinder extends Binder {
-    public LocationService getService() {
-        return LocationService.this;
     }
-}
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    /**
+     * The binder that returns the service activity.
+     */
+    public class MyLocalBinder extends Binder {
+        public LocationService getService() {
+            return LocationService.this;
+        }
+    }
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -73,7 +74,7 @@ public class MyLocalBinder extends Binder {
 
     /**
      * Bound methods.
-     *
+     * <p>
      * Set the owner, to be notified when the position changes.
      *
      * @param owner
@@ -103,16 +104,16 @@ public class MyLocalBinder extends Binder {
     }
 
     private boolean isGooglePlayServicesAvailable() {
-            GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-            int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
-            if (resultCode != ConnectionResult.SUCCESS) {
-                if (apiAvailability.isUserResolvableError(resultCode)) {
-                    owner.connectionState(resultCode);
-                } else {
-                    owner.connectionState(1);
-                }
-                return false;
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                owner.connectionState(resultCode);
+            } else {
+                owner.connectionState(1);
             }
-            return true;
+            return false;
         }
+        return true;
+    }
 }
