@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians;
+package com.example.key.my_carpathians.utils;
 
 import android.app.Application;
 

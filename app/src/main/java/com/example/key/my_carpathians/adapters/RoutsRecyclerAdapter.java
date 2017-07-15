@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians;
+package com.example.key.my_carpathians.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,11 +9,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.key.my_carpathians.database.Rout;
+import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.activities.RoutActivity_;
+import com.example.key.my_carpathians.models.Rout;
 
 import java.util.List;
 
-import static com.example.key.my_carpathians.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
+import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 
 /**
  * Created by Key on 06.07.2017.

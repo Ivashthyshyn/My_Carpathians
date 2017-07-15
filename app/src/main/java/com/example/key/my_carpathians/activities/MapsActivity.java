@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians;
+package com.example.key.my_carpathians.activities;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +24,9 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.interfaces.ILocation;
+import com.example.key.my_carpathians.utils.LocationService;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -56,10 +59,10 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.key.my_carpathians.PlaceActivity.GEOJSON_ROUT;
-import static com.example.key.my_carpathians.PlaceActivity.LATITUDE;
-import static com.example.key.my_carpathians.PlaceActivity.LONGITUDE;
-import static com.example.key.my_carpathians.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.activities.PlaceActivity.GEOJSON_ROUT;
+import static com.example.key.my_carpathians.activities.PlaceActivity.LATITUDE;
+import static com.example.key.my_carpathians.activities.PlaceActivity.LONGITUDE;
+import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {

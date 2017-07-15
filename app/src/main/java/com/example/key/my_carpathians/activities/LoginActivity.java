@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians.login;
+package com.example.key.my_carpathians.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.StartActivity_;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;

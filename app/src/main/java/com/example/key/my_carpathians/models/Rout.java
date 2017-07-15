@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians.database;
+package com.example.key.my_carpathians.models;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 

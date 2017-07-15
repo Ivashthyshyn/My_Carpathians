@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians;
+package com.example.key.my_carpathians.activities;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,7 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.example.key.my_carpathians.database.Place;
+import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.models.Place;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,8 +31,8 @@ import org.androidannotations.annotations.ViewById;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.key.my_carpathians.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
-import static com.example.key.my_carpathians.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
 
 @EActivity
 public class PlaceActivity extends AppCompatActivity {

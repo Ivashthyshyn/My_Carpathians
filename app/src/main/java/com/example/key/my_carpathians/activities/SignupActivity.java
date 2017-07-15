@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians.login;
+package com.example.key.my_carpathians.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +11,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.StartActivity_;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;

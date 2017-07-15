@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians;
+package com.example.key.my_carpathians.utils;
 
 import android.app.Service;
 import android.content.Intent;
@@ -7,6 +7,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import com.example.key.my_carpathians.interfaces.ILocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -18,6 +19,7 @@ public class LocationService extends Service implements
         com.google.android.gms.location.LocationListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
+
 
     private static final long UPDATE_INTERVAL = 1000 * 2;
     private static final long FASTEST_INTERVAL = 1000 * 10;

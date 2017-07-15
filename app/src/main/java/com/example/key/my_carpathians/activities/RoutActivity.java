@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians;
+package com.example.key.my_carpathians.activities;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,7 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.example.key.my_carpathians.database.Rout;
+import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.models.Rout;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -39,11 +40,11 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.example.key.my_carpathians.PlaceActivity.GEOJSON_ROUT;
-import static com.example.key.my_carpathians.PlaceActivity.LATITUDE;
-import static com.example.key.my_carpathians.PlaceActivity.LONGITUDE;
-import static com.example.key.my_carpathians.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
-import static com.example.key.my_carpathians.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.activities.PlaceActivity.GEOJSON_ROUT;
+import static com.example.key.my_carpathians.activities.PlaceActivity.LATITUDE;
+import static com.example.key.my_carpathians.activities.PlaceActivity.LONGITUDE;
+import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 
 @EActivity
 public class RoutActivity extends AppCompatActivity {

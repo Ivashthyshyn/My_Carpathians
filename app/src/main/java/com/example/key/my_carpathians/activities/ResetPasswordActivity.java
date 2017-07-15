@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians.login;
+package com.example.key.my_carpathians.activities;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;

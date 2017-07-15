@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians;
+package com.example.key.my_carpathians.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,7 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.key.my_carpathians.database.Rout;
+import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter;
+import com.example.key.my_carpathians.models.Rout;
 
 import org.androidannotations.annotations.EFragment;
 

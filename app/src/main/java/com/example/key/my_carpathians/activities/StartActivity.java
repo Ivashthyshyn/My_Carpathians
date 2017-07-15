@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians;
+package com.example.key.my_carpathians.activities;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,10 +12,13 @@ import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
-import com.example.key.my_carpathians.database.Place;
-import com.example.key.my_carpathians.database.Rout;
-import com.example.key.my_carpathians.login.LoginActivity_;
-import com.example.key.my_carpathians.login.SettingsActivity_;
+import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.fragments.PlacesListFragment;
+import com.example.key.my_carpathians.fragments.PlacesListFragment_;
+import com.example.key.my_carpathians.fragments.RoutsListFragment;
+import com.example.key.my_carpathians.fragments.RoutsListFragment_;
+import com.example.key.my_carpathians.models.Place;
+import com.example.key.my_carpathians.models.Rout;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;

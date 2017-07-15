@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians;
+package com.example.key.my_carpathians.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,12 +10,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.example.key.my_carpathians.database.Place;
+import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.activities.PlaceActivity_;
+import com.example.key.my_carpathians.models.Place;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.key.my_carpathians.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
 
 
 /**
