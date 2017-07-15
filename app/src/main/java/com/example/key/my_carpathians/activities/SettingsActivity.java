@@ -22,13 +22,17 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
+/**
+ * Created by Key on 15.07.2017.
+ */
+
+
 @EActivity
 public class SettingsActivity extends AppCompatActivity {
-
     private FirebaseUser user;
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
-    
+
     @ViewById(R.id.oldEmail)
     EditText oldEmail;
 
@@ -40,10 +44,10 @@ public class SettingsActivity extends AppCompatActivity {
 
     @ViewById(R.id.newPassword)
     EditText newPassword;
-    
+
     @ViewById(R.id.progressBar3)
     ProgressBar progressBar;
-    
+
     @ViewById(R.id.changeEmail)
     Button changeEmail;
 
@@ -68,7 +72,7 @@ public class SettingsActivity extends AppCompatActivity {
     @ViewById(R.id.buttonSendingPassReset)
     Button buttonSendingPassReset;
 
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -232,7 +236,7 @@ public class SettingsActivity extends AppCompatActivity {
                             }
                         }
                     });
-        }  
+        }
     }
 
     @Click(R.id.changeEmail)
@@ -317,7 +321,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void signOutWasClicked(){
         signOut();
     }
-    
+
     //sign out method
     public void signOut() {
         auth.signOut();

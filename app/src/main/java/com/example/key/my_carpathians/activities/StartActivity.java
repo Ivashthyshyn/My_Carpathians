@@ -43,10 +43,7 @@ import java.util.ArrayList;
 @EActivity
 public class StartActivity extends AppCompatActivity {
     private static final String TAG = "StartActivity";
-    public static final int TYPE_OF_LIST_PLACE = 1;
-    public static final int TYPE_OF_LIST_ROUTS = 2;
     public static final String PREFS_NAME = "MyPrefsFile";
-    private String userUid;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     public FragmentManager fragmentManager;
@@ -71,8 +68,6 @@ public class StartActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    userUid = user.getUid();
-
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
 
@@ -84,18 +79,7 @@ public class StartActivity extends AppCompatActivity {
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
-      /**
-        Place pl = new Place();
-        pl.setUrlPlace("https://firebasestorage.googleapis.com/v0/b/my-carpathians-1496328028184.appspot.com/o/placeImage%2FgoverlaWaterfall.jpg?alt=media&token=f39a13b9-7ef2-47ee-94a6-5b9726391ce5");
-        pl.setNamePlace("Говерлянський водоспад");
-        pl.setTitlePlace("Пру́тський водоспа́д (інша назва — Говерля́нський водоспа́д) — каскадний водоспад в Українських Карпатах (масив Чорногора), на річці Прут. Розташований на півдні Надвірнянського району Івано-Франківської області, на схід від вершини Говерли.\n" +
-                "\n" +
-                "Водоспад має шість каскадів, висота найбільшого — 12 м. Загальна висота падіння води — 80 м.\n" +
-                "\n" +
-                "Розташований між північно-східними відногами гір Говерли та Брескул, на краю льодовикового кару, в якому бере початок Прут.\n" +
-                "\n" +
-                "Водоспад — популярний туристичний об'єкт, пам'ятка природи. Неподалік від нього проходить стежка, що веде на вершину Говерли. Також є стежка вздовж самого потоку.");
-*/
+
         Query myPlace = myRef.child("Places");
         myPlace.addValueEventListener(new ValueEventListener() {
             @Override
@@ -112,16 +96,7 @@ public class StartActivity extends AppCompatActivity {
 
             }
         });
-        /**
-        Rout r = new Rout();
-        r.setNameRout("Хата - Станькова");
-        r.setTitleRout("Дуже важкий маршрут. Проходить по дорозі білямоєї хати. Потрібно оминати вибоїни на асвальті і міни закладені коровами, яких місцеве населення переганяє на пашу по цій дорозі. Також є небезпека заблукати");
-        r.setUrlRout("jfjdgk");
-        r.setUrlRoutsTrack("kgfkdjg");
-        r.setRoutsLevel(1);
 
-        myRef.child("Rout").child("Хата - Станькова").setValue(r);
-         */
         Query myRouts = myRef.child("Rout");
         myRouts.addValueEventListener(new ValueEventListener() {
             @Override
@@ -228,7 +203,6 @@ public class StartActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInAnonymously:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
 
                         } else {
                             // If sign in fails, display a message to the user.
