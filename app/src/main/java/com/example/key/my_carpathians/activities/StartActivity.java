@@ -184,7 +184,7 @@ public class StartActivity extends AppCompatActivity {
         fragmentTransaction.add(R.id.fragment_container, placesListFragment);
         fragmentTransaction.commit();
         if(places != null) {
-            placesListFragment.setList(places);
+            placesListFragment.setList(places, routs);
         }
     }
     @Click(R.id.buttonRoutes)

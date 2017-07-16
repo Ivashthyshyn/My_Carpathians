@@ -1,15 +1,11 @@
 package com.example.key.my_carpathians.activities;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +13,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.models.Place;
+import com.example.key.my_carpathians.models.Rout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,16 +29,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PLACE_LIST;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ROUTS_LIST;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
 
 @EActivity
 public class PlaceActivity extends AppCompatActivity {
 
-
-    private boolean connected = false;
     public static final String GEOJSON_ROUT = "geojson_rout";
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
+
 
     Place myPlace;
     @ViewById(R.id.imageView)
@@ -83,24 +81,6 @@ public class PlaceActivity extends AppCompatActivity {
 
     }
 
-    public boolean isOnline() {
-        try {
-            ConnectivityManager connectivityManager = (ConnectivityManager) PlaceActivity.this
-                    .getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-            connected = networkInfo != null && networkInfo.isAvailable() &&
-                    networkInfo.isConnected();
-            return connected;
-
-
-        } catch (Exception e) {
-            System.out.println("CheckConnectivity Exception: " + e.getMessage());
-            Log.v("connectivity", e.toString());
-        }
-        return connected;
-    }
-
     @Click(R.id.buttonShowPlaceOnMap)
     public void buttonShowPlaceOnMapWasClicked(){
         Intent mapIntent = new Intent(PlaceActivity.this,MapsActivity_.class);
@@ -111,16 +91,36 @@ public class PlaceActivity extends AppCompatActivity {
         startActivity(mapIntent);
     }
 
-    @Click(R.id.buttonShowWalkRout)
-    public void buttonShowWalkRoutWasClicked(){
-
+    @Click(R.id.buttonShowAroundRout)
+    public void buttonShowAroundRoutWasClicked(){
+        List<Rout> routList = (List<Rout>) getIntent().getSerializableExtra(ROUTS_LIST);
+        List<Rout> routsAround = new ArrayList<>();
+        List<String> routsAroundName = new ArrayList<>();
+        for (int i = 0;i < routList.size();i++){
+            Rout mRout =  routList.get(i);
+            double lat = mRout.getPositionRout().getLatitude();
+            double lng = mRout.getPositionRout().getLongitude();
+            if ( myPlace.getPositionPlace().getLongitude() + 0.4 > lng
+                    && myPlace.getPositionPlace().getLongitude() - 0.4 < lng
+                    && myPlace.getPositionPlace().getLatitude() + 0.3 > lat
+                    && myPlace.getPositionPlace().getLatitude() - 0.3 < lat
+                    && !myPlace.getNamePlace().equals(mRout.getNameRout())){
+                routsAround.add(mRout);
+                routsAroundName.add(mRout.getNameRout());
+            }
+        }
+        if (routsAround.size() != 0 ) {
+            showListDialog(routsAroundName);
+        }else {
+            Toast.makeText(PlaceActivity.this, "No place around ", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Click(R.id.buttonPlacesAruond)
-    void buttonPlacesAruondWasClicked(){
-        List<Place> placeList = (List<Place>) getIntent().getSerializableExtra("fdfd");
+    void buttonPlacesAroundWasClicked(){
+        List<Place> placeList = (List<Place>) getIntent().getSerializableExtra(PLACE_LIST);
         List<Place> placesAround = new ArrayList<>();
-        List<String> placesAroudName = new ArrayList<>();
+        List<String> placesAroundName = new ArrayList<>();
         for (int i =0;i < placeList.size();i++){
             Place mPlace =  placeList.get(i);
             double lat = mPlace.getPositionPlace().getLatitude();
@@ -131,11 +131,11 @@ public class PlaceActivity extends AppCompatActivity {
                     && myPlace.getPositionPlace().getLatitude() - 0.3 < lat
                     && !myPlace.getNamePlace().equals(mPlace.getNamePlace())){
                 placesAround.add(mPlace);
-                placesAroudName.add(mPlace.getNamePlace());
+                placesAroundName.add(mPlace.getNamePlace());
             }
         }
         if (placesAround.size() != 0 ) {
-            showListDialog(placesAroudName);
+            showListDialog(placesAroundName);
         }else {
             Toast.makeText(PlaceActivity.this, "No place around ", Toast.LENGTH_SHORT).show();
         }
@@ -153,7 +153,7 @@ public class PlaceActivity extends AppCompatActivity {
                         mCheckedItems[which] = isChecked;
                     }
                 })
-                .setPositiveButton("Show on map", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Додати до карти", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         for (int i = 0; i < items.length; i++) {
@@ -161,17 +161,21 @@ public class PlaceActivity extends AppCompatActivity {
                                 placesAround.remove(i);
                                 placesAround.size();
                             }
-
                         }
-
+                        //TODO ned add method that shows routs in map
                     }
                 })
 
-                .setNegativeButton("All", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Усі", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        // When the user cancels, don't do anything.
-                        // The dialog will automatically close
+                        for (int i = 0; i < items.length; i++) {
+                            if (!mCheckedItems[i]) {
+                                placesAround.remove(i);
+                                placesAround.size();
+                            }
+                        }
+                        // TODO need add intent
                     }
                 }).create();
         dialog.show();

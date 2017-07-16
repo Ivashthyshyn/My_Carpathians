@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.activities.PlaceActivity_;
 import com.example.key.my_carpathians.models.Place;
+import com.example.key.my_carpathians.models.Rout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +26,10 @@ import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.View
  */
 
 public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAdapter.ViewHolder> {
-    private List<Place> list;
-
+    public static final String PLACE_LIST = "place_list";
+    public static final String ROUTS_LIST = "routs_list";
+    private List<Place> places;
+    private List<Rout> routs;
     /**
      * use context to intent Url
      */
@@ -35,9 +38,9 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 
 
 
-    public PlacesRecyclerAdapter(List<Place> list) {
-            this.list = list;
-
+    public PlacesRecyclerAdapter(List<Place> placeList, List<Rout> routList ) {
+            this.places = placeList;
+            this.routs = routList;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -76,8 +79,10 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
                 if (placeName != null){
                     Intent intent = new Intent(context, PlaceActivity_.class);
                     intent.putExtra(PUT_EXTRA_PLASE, placeName);
-                    ArrayList<Place> arrayListPlace = (ArrayList<Place>) list;
-                    intent.putExtra("fdfd", arrayListPlace);
+                    ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
+                    ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
+                    intent.putExtra(PLACE_LIST, arrayListPlace);
+                    intent.putExtra(ROUTS_LIST, arrayListRouts);
                     context.startActivity(intent);
                 }
             }
@@ -90,7 +95,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
     @Override
     public void onBindViewHolder(PlacesRecyclerAdapter.ViewHolder holder, int position) {
 
-            Place mPlace = list.get(position);
+            Place mPlace = places.get(position);
             holder.textName.setText(mPlace.getNamePlace());
             Glide
                     .with(context)
@@ -101,7 +106,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return places.size();
     }
 
 
