@@ -3,7 +3,11 @@ package com.example.key.my_carpathians.activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
@@ -20,6 +24,8 @@ import com.example.key.my_carpathians.fragments.RoutsListFragment_;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,10 +36,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 
 /**
@@ -42,6 +54,7 @@ import java.util.ArrayList;
  */
 @EActivity
 public class StartActivity extends AppCompatActivity {
+    private boolean connected = false;
     private static final String TAG = "StartActivity";
     public static final String PREFS_NAME = "MyPrefsFile";
     private FirebaseAuth mAuth;
@@ -103,6 +116,9 @@ public class StartActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                     Rout rout = postSnapshot.getValue(Rout.class);
+                    if (isOnline()) {
+                        downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
+                    }
                     routs.add(rout);
                 }
 
@@ -114,6 +130,44 @@ public class StartActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    /**
+     * This method is download and save routs track to SD card in package "Rout"
+     * @param urlRoutsTrack is a file address in database Storage from downloading
+     * @param nameRout is the file name that is written to SD card
+     */
+    @Background
+    public void downloadRoutToStorage(String urlRoutsTrack,  String nameRout) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference httpsReference = storage.getReferenceFromUrl(urlRoutsTrack);
+        String dsd =  httpsReference.getName();
+        File rootPath = new File(Environment.getExternalStorageDirectory(), "Rout");
+        if(!rootPath.exists()) {
+            rootPath.mkdirs();
+        }
+
+        final File localFile = new File(rootPath, dsd );
+        if (!localFile.exists()) {
+
+        final URI fileUri = localFile.toURI();
+
+        httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                mSharedPreferences.edit().putString(localFile.getName().toString(), fileUri.toString()).apply();
+
+                Log.e("firebase ",";local tem file created  created " +localFile.toString());
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+
+                Log.e("firebase ",";local tem file not created  created " +exception.toString());
+            }
+        });
+        }
     }
 
 
@@ -214,6 +268,22 @@ public class StartActivity extends AppCompatActivity {
                     }
                 });
     }
+    public boolean isOnline() {
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) StartActivity.this
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
 
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            connected = networkInfo != null && networkInfo.isAvailable() &&
+                    networkInfo.isConnected();
+            return connected;
+
+
+        } catch (Exception e) {
+            System.out.println("CheckConnectivity Exception: " + e.getMessage());
+            Log.v("connectivity", e.toString());
+        }
+        return connected;
+    }
 
 }

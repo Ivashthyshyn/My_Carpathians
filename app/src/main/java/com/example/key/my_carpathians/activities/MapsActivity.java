@@ -55,6 +55,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +67,12 @@ import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
-
-
+    
+    public MapsActivity permissionsManager;
+    public ILocation iCapture;
+    public static final String JSON_CHARSET = "UTF-8";
+    public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
+    public String nameFileFromURI = null;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -78,18 +83,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isEndNotified;
     private ProgressBar progressBar;
     private OfflineManager offlineManager;
-    public MapsActivity permissionsManager;
-
     private int regionSelected;
     private double lng;
     private double lat;
     private boolean switchCheck = false;
-    // JSON encoding/decoding
-    public static final String JSON_CHARSET = "UTF-8";
-    public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
-    public String uriFromFle = null;
     private LocationService locationService;
-    public ILocation iCapture;
     private ServiceConnection captureServiceConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -112,7 +110,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         iCapture = new ILocation() {
             @Override
             public void update(Location location) {
@@ -132,7 +129,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
 
-        uriFromFle = getIntent().getStringExtra(GEOJSON_ROUT );
+        nameFileFromURI = getIntent().getStringExtra(GEOJSON_ROUT );
         lng = getIntent().getDoubleExtra(LONGITUDE,0);
         lat = getIntent().getDoubleExtra(LATITUDE,0);
 
@@ -215,7 +212,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .tilt(20)  // set the camera's tilt
                         .build()));
 
-        if(uriFromFle != null) {
+        if(nameFileFromURI != null) {
             new DrawGeoJson().execute();
         }else{
             mapboxMap.addMarker(new MarkerOptions().position(new LatLng( lat, lng )));
@@ -585,10 +582,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected List<LatLng> doInBackground(Void... voids) {
 
             ArrayList<LatLng> points = new ArrayList<>();
-
+            SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            URI mUri = URI.create(mSharedPreferences.getString(nameFileFromURI, null));
             try {
                 // Load GeoJSON file
-                File file = new File(uriFromFle);
+                File file = new File(mUri);
                 InputStream fileInputStream = new FileInputStream(file);
                 BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
                 StringBuilder sb = new StringBuilder();

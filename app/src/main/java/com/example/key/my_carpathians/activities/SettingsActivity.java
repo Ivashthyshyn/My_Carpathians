@@ -22,6 +22,8 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
+import java.util.List;
+
 /**
  * Created by Key on 15.07.2017.
  */
@@ -92,7 +94,8 @@ public class SettingsActivity extends AppCompatActivity {
                     // launch login activity
                     startActivity(new Intent(SettingsActivity.this, LoginActivity_.class));
                     finish();
-                }else if(user.getProviders().size() == 0){
+                }else if(user.getProviders() == null || user.getProviders().size() == 0){
+                    List<String> dd =  user.getProviders();
                     AlertDialog.Builder alertDialog = new AlertDialog.Builder(SettingsActivity.this);
 
                     // Setting Dialog Title
