@@ -42,4 +42,8 @@ public class RoutsListFragment extends Fragment {
 
 
     }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
 }

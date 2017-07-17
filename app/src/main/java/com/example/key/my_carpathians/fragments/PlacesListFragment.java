@@ -46,4 +46,9 @@ public class PlacesListFragment extends Fragment {
         this.mRoutsQuery = routList;
 
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
 }

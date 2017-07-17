@@ -211,6 +211,19 @@ public class StartActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if ( placesListFragment != null){
+            fragmentManager.beginTransaction().remove(placesListFragment).commit();
+            placesListFragment = null;
+        }else if (routsListFragment != null){
+            fragmentManager.beginTransaction().remove(routsListFragment).commit();
+            routsListFragment = null;
+        }else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         if (mAuthListener != null) {
