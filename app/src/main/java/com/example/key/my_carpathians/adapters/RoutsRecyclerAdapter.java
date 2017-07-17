@@ -10,11 +10,15 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.activities.RoutActivity_;
+import com.example.key.my_carpathians.activities.ActionActivity_;
+import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PLACE_LIST;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ROUTS_LIST;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 
 /**
@@ -22,7 +26,8 @@ import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.Routs
  */
 
 public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdapter.RoutsViewHolder> {
-    private List<Rout> list;
+    private List<Rout> routs;
+    private List<Place> places;
 
     /**
      * use context to intent Url
@@ -32,15 +37,16 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
 
 
-    public RoutsRecyclerAdapter(List<Rout> list) {
-        this.list = list;
-
+    public RoutsRecyclerAdapter(List<Rout> routList, List<Place> placeList) {
+        this.routs = routList;
+        this.places = placeList;
     }
 
     public static class RoutsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public static final String PUT_EXTRA_ROUT = "routName";
         public Button buttonTypeAndLevel;
         public TextView textNameRout;
+        private Rout mRout;
         private  ClickListener mClickListener;
 
 
@@ -49,15 +55,15 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             mClickListener = listener;
             buttonTypeAndLevel = (Button) itemView.findViewById(R.id.buttonTypeAndLevel);
             textNameRout = (TextView)itemView.findViewById(R.id.textNameRout);
-
+            mRout = null;
             itemView.setOnClickListener(this);
         }
         @Override
         public void onClick(View v) {
-            mClickListener.onPressed(textNameRout.getText().toString());
+            mClickListener.onPressed(mRout);
         }
         public interface ClickListener {
-            void onPressed(String nameRout);
+            void onPressed(Rout nameRout);
         }
     }
 
@@ -69,10 +75,14 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
         RoutsViewHolder mHolder = new RoutsViewHolder(mView, new RoutsViewHolder.ClickListener() {
             @Override
-            public void onPressed(String RoutsName) {
+            public void onPressed(Rout RoutsName) {
                 if (RoutsName != null){
-                    Intent intent = new Intent(context, RoutActivity_.class);
+                    Intent intent = new Intent(context, ActionActivity_.class);
                     intent.putExtra(PUT_EXTRA_ROUT, RoutsName);
+                    ArrayList<Place> arrayListPlace = (ArrayList<Place>)places ;
+                    ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
+                    intent.putExtra(PLACE_LIST, arrayListPlace);
+                    intent.putExtra(ROUTS_LIST, arrayListRouts);
                     context.startActivity(intent);
                 }
             }
@@ -84,15 +94,15 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
     @Override
     public void onBindViewHolder(RoutsViewHolder holder, int position) {
-        Rout mRout = list.get(position);
-        holder.textNameRout.setText(mRout.getNameRout());
-        holder.buttonTypeAndLevel.setText(Integer.toString(mRout.getRoutsLevel()));
+        holder.mRout = routs.get(position);
+        holder.textNameRout.setText(holder.mRout.getNameRout());
+        holder.buttonTypeAndLevel.setText(Integer.toString(holder.mRout.getRoutsLevel()));
 
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return routs.size();
     }
 
 }

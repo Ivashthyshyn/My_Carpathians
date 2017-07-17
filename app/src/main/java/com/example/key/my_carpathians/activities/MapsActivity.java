@@ -61,10 +61,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.example.key.my_carpathians.activities.PlaceActivity.LATITUDE;
-import static com.example.key.my_carpathians.activities.PlaceActivity.LONGITUDE;
-import static com.example.key.my_carpathians.activities.PlaceActivity.SELECTED_USER_PLACES;
-import static com.example.key.my_carpathians.activities.PlaceActivity.SELECTED_USER_ROUTS;
+import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
+import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 
 @EActivity
@@ -134,8 +132,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
        selectUserRouts = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .getStringSet(SELECTED_USER_ROUTS, null);
         selectUserPlacesList = (List<Place>) getIntent().getSerializableExtra(SELECTED_USER_PLACES);
-        lng = getIntent().getDoubleExtra(LONGITUDE,0);
-        lat = getIntent().getDoubleExtra(LATITUDE,0);
 
         // Mapbox access token is configured here. This needs to be called either in your application
         // object or in the same activity which contains the mapview.
@@ -152,12 +148,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mapboxMap != null && switchCheck == false) {
+                if (mapboxMap != null && !switchCheck) {
                     checkGPSEnabled();
                     toggleGps();
                     floatingActionButton.setImageResource(R.drawable. ic_location_disabled_24dp);
                     switchCheck = true;
-                }else if (switchCheck == true){
+                }else if (switchCheck){
                     mapboxMap.setMyLocationEnabled(false);
                     stopService(new Intent(MapsActivity.this, LocationService.class));
                     floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
@@ -169,7 +165,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void checkGPSEnabled() {
         LocationManager lm = (LocationManager)MapsActivity.this.getSystemService(Context.LOCATION_SERVICE);
-        boolean gps_enabled = false;
+        boolean gps_enabled ;
         try {
             gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
             if (!gps_enabled){

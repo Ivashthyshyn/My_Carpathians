@@ -50,7 +50,7 @@
         <activity
             android:name=".activities.MapsActivity_"
             android:label="@string/title_activity_maps" />
-        <activity android:name=".activities.PlaceActivity_" />
+        <activity android:name=".activities.ActionActivity_" />
         <activity
             android:name=".activities.SettingsActivity_"
             android:label="@string/title_activity_login"
@@ -72,8 +72,6 @@
             android:name=".utils.LocationService"
             android:enabled="true"
             android:exported="true" />
-
-        <activity android:name=".activities.RoutActivity_"></activity>
     </application>
 
 </manifest>

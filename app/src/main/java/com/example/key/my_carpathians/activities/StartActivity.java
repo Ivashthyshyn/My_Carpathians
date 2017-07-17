@@ -199,7 +199,7 @@ public class StartActivity extends AppCompatActivity {
         fragmentTransaction.add(R.id.fragment_container, routsListFragment);
         fragmentTransaction.commit();
         if(routs != null) {
-            routsListFragment.setList(routs);
+            routsListFragment.setList(routs, places);
         }
     }
 
