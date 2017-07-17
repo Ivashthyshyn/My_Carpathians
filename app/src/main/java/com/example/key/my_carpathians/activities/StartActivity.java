@@ -138,11 +138,11 @@ public class StartActivity extends AppCompatActivity {
      * @param nameRout is the file name that is written to SD card
      */
     @Background
-    public void downloadRoutToStorage(String urlRoutsTrack,  String nameRout) {
+    public void downloadRoutToStorage(String urlRoutsTrack,  final String nameRout) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference httpsReference = storage.getReferenceFromUrl(urlRoutsTrack);
         String dsd =  httpsReference.getName();
-        File rootPath = new File(Environment.getExternalStorageDirectory(), "Rout");
+        File rootPath = new File(Environment.getExternalStorageDirectory(), "Routs");
         if(!rootPath.exists()) {
             rootPath.mkdirs();
         }
@@ -156,7 +156,7 @@ public class StartActivity extends AppCompatActivity {
             @Override
             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                 SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                mSharedPreferences.edit().putString(localFile.getName().toString(), fileUri.toString()).apply();
+                mSharedPreferences.edit().putString(nameRout, fileUri.toString()).apply();
 
                 Log.e("firebase ",";local tem file created  created " +localFile.toString());
             }

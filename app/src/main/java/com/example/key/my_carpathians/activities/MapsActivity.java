@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
@@ -26,6 +25,7 @@ import android.widget.Toast;
 
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.interfaces.ILocation;
+import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.utils.LocationService;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -59,10 +59,12 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import static com.example.key.my_carpathians.activities.PlaceActivity.GEOJSON_ROUT;
 import static com.example.key.my_carpathians.activities.PlaceActivity.LATITUDE;
 import static com.example.key.my_carpathians.activities.PlaceActivity.LONGITUDE;
+import static com.example.key.my_carpathians.activities.PlaceActivity.SELECTED_USER_PLACES;
+import static com.example.key.my_carpathians.activities.PlaceActivity.SELECTED_USER_ROUTS;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 
 @EActivity
@@ -72,7 +74,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public ILocation iCapture;
     public static final String JSON_CHARSET = "UTF-8";
     public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
-    public String nameFileFromURI = null;
+    public Set<String> selectUserRouts = null;
+    public List<Place> selectUserPlacesList = null;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -128,8 +131,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         };
-
-        nameFileFromURI = getIntent().getStringExtra(GEOJSON_ROUT );
+       selectUserRouts = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getStringSet(SELECTED_USER_ROUTS, null);
+        selectUserPlacesList = (List<Place>) getIntent().getSerializableExtra(SELECTED_USER_PLACES);
         lng = getIntent().getDoubleExtra(LONGITUDE,0);
         lat = getIntent().getDoubleExtra(LATITUDE,0);
 
@@ -205,6 +209,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
+
+        if(selectUserRouts != null && selectUserRouts.size() > 0) {
+            List<String> selectUserRoutsList = new ArrayList<>(selectUserRouts);
+            for (int i = 0; i < selectUserRoutsList.size(); i++) {
+                String mUriString = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                        .getString(selectUserRoutsList.get(i), null);
+                if (mUriString != null) {
+                    new DrawGeoJson(mUriString).execute();
+                }
+            }
+        }
+        if (selectUserPlacesList != null){
+            for (int i = 0; i < selectUserPlacesList.size(); i++) {
+                lat = selectUserPlacesList.get(i).getPositionPlace().getLatitude();
+                lng = selectUserPlacesList.get(i).getPositionPlace().getLongitude();
+                if (lat != 0 && lng != 0){
+                    mapboxMap.addMarker(new MarkerOptions().position(new LatLng( lat, lng )));
+
+                }
+            }
+        }
         mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                 new CameraPosition.Builder()
                         .target(new LatLng( lat, lng ))  // set the camera's center position
@@ -212,11 +237,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .tilt(20)  // set the camera's tilt
                         .build()));
 
-        if(nameFileFromURI != null) {
-            new DrawGeoJson().execute();
-        }else{
-            mapboxMap.addMarker(new MarkerOptions().position(new LatLng( lat, lng )));
-        }
     }
 
     // This method show download dialog
@@ -578,32 +598,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      *
      */
     private class DrawGeoJson extends AsyncTask<Void, Void, List<LatLng>> {
+        String mNameFileFromURI;
+        private DrawGeoJson(String uri){
+            this.mNameFileFromURI = uri;
+        }
         @Override
         protected List<LatLng> doInBackground(Void... voids) {
 
             ArrayList<LatLng> points = new ArrayList<>();
-            SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            URI mUri = URI.create(mSharedPreferences.getString(nameFileFromURI, null));
-            try {
-                // Load GeoJSON file
-                File file = new File(mUri);
-                InputStream fileInputStream = new FileInputStream(file);
-                BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
-                StringBuilder sb = new StringBuilder();
-                int cp;
-                while ((cp = rd.read()) != -1) {
-                    sb.append((char) cp);
-                }
+                URI mUri = URI.create(mNameFileFromURI);
+                try {
+                    // Load GeoJSON file
+                    File file = new File(mUri);
+                    InputStream fileInputStream = new FileInputStream(file);
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
+                    StringBuilder sb = new StringBuilder();
+                    int cp;
+                    while ((cp = rd.read()) != -1) {
+                        sb.append((char) cp);
+                    }
 
-                fileInputStream.close();
+                    fileInputStream.close();
 
-                // Parse JSON
-                JSONObject json = new JSONObject(sb.toString());
-                JSONArray features = json.getJSONArray("features");
-                JSONObject feature = features.getJSONObject(0);
-                JSONObject geometry = feature.getJSONObject("geometry");
-                if (geometry != null) {
-                    String type = geometry.getString("type");
+                    // Parse JSON
+                    JSONObject json = new JSONObject(sb.toString());
+                    JSONArray features = json.getJSONArray("features");
+                    JSONObject feature = features.getJSONObject(0);
+                    JSONObject geometry = feature.getJSONObject("geometry");
+                    if (geometry != null) {
+                        String type = geometry.getString("type");
 
                         // Our GeoJSON only has one feature: a line string
                         if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
@@ -621,7 +644,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.e(TAG, "Exception Loading GeoJSON: " + exception.toString());
                 }
 
-            return points;
+                return points;
         }
 
         @Override
@@ -629,7 +652,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             super.onPostExecute(points);
 
             if (points.size() > 0) {
-
                 // Draw polyline on map
                 mapboxMap.addPolyline(new PolylineOptions()
                         .addAll(points)
@@ -640,11 +662,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
-
     @Click(R.id.buttonDownloadOfflineRegion)
     void buttonDownloadOfflineRegion(){
         downloadRegionDialog();
     }
+
     @Click(R.id.buttonShowListRegion)
     void buttonShowListRegion(){
         downloadedRegionList();

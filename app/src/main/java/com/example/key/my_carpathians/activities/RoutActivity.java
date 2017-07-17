@@ -25,7 +25,7 @@ import org.androidannotations.annotations.ViewById;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.example.key.my_carpathians.activities.PlaceActivity.GEOJSON_ROUT;
+import static com.example.key.my_carpathians.activities.PlaceActivity.SELECTED_USER_ROUTS;
 import static com.example.key.my_carpathians.activities.PlaceActivity.LATITUDE;
 import static com.example.key.my_carpathians.activities.PlaceActivity.LONGITUDE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
@@ -83,7 +83,7 @@ public class RoutActivity extends AppCompatActivity {
         Intent mapIntent = new Intent(RoutActivity.this,MapsActivity_.class);
         mapIntent.putExtra(LONGITUDE, mRoutClass.getPositionRout().getLongitude());
         mapIntent.putExtra(LATITUDE, mRoutClass.getPositionRout().getLatitude());
-        mapIntent.putExtra(GEOJSON_ROUT, mRoutClass.getNameRout());
+        mapIntent.putExtra(SELECTED_USER_ROUTS, mRoutClass.getNameRout());
         startActivity(mapIntent);
     }
 
