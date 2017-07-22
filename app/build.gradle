@@ -76,6 +76,7 @@ dependencies {
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     testCompile 'junit:junit:4.12'
     compile 'com.google.android.gms:play-services-ads:10.0.1'
+    compile 'com.cocoahero.android:geojson:1.0.1@jar'
 }
 
 apply plugin: 'com.google.gms.google-services'

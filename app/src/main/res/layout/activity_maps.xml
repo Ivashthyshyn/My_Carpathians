@@ -7,18 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MapsActivity">
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="25dp"
-        android:layout_centerHorizontal="true"
-        android:layout_centerInParent="true"
-        android:paddingLeft="25dp"
-        android:paddingRight="25dp"
-        android:visibility="gone" />
+    tools:context=".activities.ActionActivity">
 
     <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapView"
@@ -33,21 +22,40 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
-    </com.mapbox.mapboxsdk.maps.MapView>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fabRecTrack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="11dp"
+            android:clickable="true"
+            app:backgroundTint="@color/bg_register"
+            mapbox:fabSize="mini"
+            mapbox:srcCompat="@android:drawable/ic_menu_edit" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/location_toggle_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        app:srcCompat="@drawable/ic_my_location_24dp"
-        tools:ignore="VectorDrawableCompat"
-        app:backgroundTint="@color/colorAccent"
-        android:layout_marginLeft="18dp"
-        android:layout_marginTop="11dp"
-        android:layout_toRightOf="@+id/progress_bar"
-        android:layout_toEndOf="@+id/progress_bar"
-        android:layout_marginStart="18dp" />
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/location_toggle_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="11dp"
+            app:backgroundTint="@color/bg_register"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_my_location_24dp"
+            tools:ignore="VectorDrawableCompat" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:visibility="gone" />
+    </com.mapbox.mapboxsdk.maps.MapView>
 
     <LinearLayout
         android:id="@+id/bottom_navigation"
@@ -55,7 +63,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/colorAccent"
+        android:background="@color/bg_register"
         android:elevation="8dp"
         android:orientation="horizontal"
         android:paddingTop="8dp">
@@ -66,7 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:background="@color/mapbox_blue"
             android:clickable="true"
             android:drawableTop="@drawable/ic_get_app_24dp"
             android:text="@string/download_button_text"
@@ -80,7 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:background="@color/mapbox_blue"
             android:drawableTop="@drawable/ic_list_24dp"
             android:text="@string/list_button_text"
             android:textAllCaps="false"

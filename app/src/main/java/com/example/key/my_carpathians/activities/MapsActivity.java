@@ -17,6 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -47,6 +48,7 @@ import com.mapbox.services.commons.utils.TextUtils;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.ViewById;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -67,7 +69,11 @@ import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
-    
+
+    public static final String TO_SERVICE_COMMANDS = "service_commands";
+    public static final int COMMAND_REC_TRACK = 1;
+    public static final int COMMAND_NO_SAVE_TRACK = 2;
+    public static final String TO_SERVICE_TRACK_NAME = "track_name";
     public MapsActivity permissionsManager;
     public ILocation iCapture;
     public static final String JSON_CHARSET = "UTF-8";
@@ -89,6 +95,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double lat;
     private boolean switchCheck = false;
     private LocationService locationService;
+    boolean checkForRecButton = true;
+
+    @ViewById(R.id.fabRecTrack)
+    FloatingActionButton fabRecTrack;
+
     private ServiceConnection captureServiceConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -666,6 +677,46 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Click(R.id.buttonShowListRegion)
     void buttonShowListRegion(){
         downloadedRegionList();
+    }
+
+    @Click(R.id.fabRecTrack)
+    void fabRecTrackWasClicked(){
+
+        if (checkForRecButton) {
+            Intent serviceIntent = new Intent(this, LocationService.class);
+            serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_TRACK);
+            this.startService(serviceIntent);
+            fabRecTrack.setImageResource(android.R.drawable.ic_notification_overlay);
+            checkForRecButton = false;
+        }else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+            final EditText nameTrackInput = new EditText(this);
+            nameTrackInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+            builder.setTitle("Збереження маршруту");
+            builder.setView(nameTrackInput);
+            builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                            serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameTrackInput.getText().toString());
+                            MapsActivity.this.startService(serviceIntent);
+                            fabRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
+                            checkForRecButton = false;
+                            dialog.cancel();
+                        }
+                    });
+            builder.setNegativeButton("Не збурігати", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE_TRACK);
+                    MapsActivity.this.startService(serviceIntent);
+                    fabRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
+                    checkForRecButton = false;
+                }
+            });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 }
 

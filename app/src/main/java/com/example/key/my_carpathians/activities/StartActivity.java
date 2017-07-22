@@ -141,13 +141,13 @@ public class StartActivity extends AppCompatActivity {
     public void downloadRoutToStorage(String urlRoutsTrack,  final String nameRout) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference httpsReference = storage.getReferenceFromUrl(urlRoutsTrack);
-        String dsd =  httpsReference.getName();
+        String nameFileInStorage =  httpsReference.getName();
         File rootPath = new File(Environment.getExternalStorageDirectory(), "Routs");
         if(!rootPath.exists()) {
             rootPath.mkdirs();
         }
 
-        final File localFile = new File(rootPath, dsd );
+        final File localFile = new File(rootPath, nameFileInStorage );
         if (!localFile.exists()) {
 
         final URI fileUri = localFile.toURI();
