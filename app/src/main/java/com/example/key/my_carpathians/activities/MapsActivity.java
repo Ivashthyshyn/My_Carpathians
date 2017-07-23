@@ -78,7 +78,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public ILocation iCapture;
     public static final String JSON_CHARSET = "UTF-8";
     public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
-    public Set<String> selectUserRouts = null;
+    public ArrayList<String> selectUserRouts = null;
     public List<Place> selectUserPlacesList = null;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private MapView mapView;
@@ -140,7 +140,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         };
-        selectUserRouts = (Set<String>) getIntent().getSerializableExtra(SELECTED_USER_ROUTS);
+        selectUserRouts =  getIntent().getStringArrayListExtra(SELECTED_USER_ROUTS);
         selectUserPlacesList = (List<Place>) getIntent().getSerializableExtra(SELECTED_USER_PLACES);
 
         // Mapbox access token is configured here. This needs to be called either in your application
@@ -217,10 +217,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.mapboxMap = mapboxMap;
 
         if(selectUserRouts != null && selectUserRouts.size() > 0) {
-            List<String> selectUserRoutsList = new ArrayList<>(selectUserRouts);
-            for (int i = 0; i < selectUserRoutsList.size(); i++) {
+            for (int i = 0; i < selectUserRouts.size(); i++) {
                 String mUriString = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                        .getString(selectUserRoutsList.get(i), null);
+                        .getString(selectUserRouts.get(i), null);
                 if (mUriString != null) {
                     new DrawGeoJson(mUriString).execute();
                 }

@@ -61,7 +61,6 @@ public class ActionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
-
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         routList = (List<Rout>) getIntent().getSerializableExtra(ROUTS_LIST);
         placeList = (List<Place>) getIntent().getSerializableExtra(PLACE_LIST);
@@ -225,8 +224,16 @@ public class ActionActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        selectedUserRouts.clear();
+        selectedUserPlacesStringList.clear();
+        selectedUserPlacesList.clear();
+    }
+
     @Click(R.id.buttonAddToFavorites)
-    private void buttonAddToFavoritesWasClicked(){
+    void buttonAddToFavoritesWasClicked(){
         Set<String> favoritesPlacesList = sharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>());
         favoritesPlacesList.addAll(selectedUserPlacesStringList);
         Set<String> favoritesRoutsList = sharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>());
