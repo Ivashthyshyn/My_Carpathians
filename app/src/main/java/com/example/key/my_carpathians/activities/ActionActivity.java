@@ -35,9 +35,9 @@ import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.Routs
 public class ActionActivity extends AppCompatActivity {
 
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
-    public static final String LATITUDE = "latitude";
-    public static final String LONGITUDE = "longitude";
-    public static final String SELECTED_USER_PLACES = "selectedUserPlaces";
+    public static final String SELECTED_USER_PLACES = "selected_user_places";
+    public static final String FAVORITES_ROUTS_LIST = "favorites_user_routs";
+    public static final String FAVORITES_PLACE_LIST = "favorites_user_places";
     public SharedPreferences sharedPreferences;
     List<Rout> routList;
     List<Place> placeList;
@@ -45,7 +45,10 @@ public class ActionActivity extends AppCompatActivity {
     Rout myRout;
     Position myPosition;
     String myName;
-    private List<Place> selectedUserPlacesList = new ArrayList<>();
+    ArrayList<String> selectedUserRouts = new ArrayList<>();
+    ArrayList<String> selectedUserPlacesStringList = new ArrayList<>();
+
+    private ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
     @ViewById(R.id.imageView)
     ImageView imageView;
     @ViewById(R.id.textName)
@@ -57,7 +60,7 @@ public class ActionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_place);
+        setContentView(R.layout.activity_action);
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         routList = (List<Rout>) getIntent().getSerializableExtra(ROUTS_LIST);
@@ -89,9 +92,9 @@ public class ActionActivity extends AppCompatActivity {
     @Click(R.id.buttonShowPlaceOnMap)
     public void buttonShowPlaceOnMapWasClicked(){
         selectedUserPlacesList.add(myPlace);
-        ArrayList<Place> arrayList = (ArrayList<Place>) selectedUserPlacesList;
         Intent mapIntent = new Intent(ActionActivity.this,MapsActivity_.class);
-        mapIntent.putExtra(SELECTED_USER_PLACES, arrayList);
+        mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
+        mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
         startActivity(mapIntent);
     }
 
@@ -161,22 +164,23 @@ public class ActionActivity extends AppCompatActivity {
                         for (int i = 0; i < items.length; i++) {
                             if (!mCheckedItems[i]){
                                 objectList.remove(i);
+                                stringList.remove(i);
                             }
                         }
-                        selectedUserPlacesList = objectList;
+                        selectedUserPlacesList = (ArrayList<Place>) objectList;
+                        selectedUserPlacesStringList = (ArrayList<String>) stringList;
                     }
                 })
 
-                .setNegativeButton("Детальніше", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Ні", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        for (int i = 0; i < items.length; i++) {
-                            if (!mCheckedItems[i]) {
-                                objectList.remove(i);
-                            }
-                        }
-                        // TODO need add intent
+                        objectList.clear();
+                        stringList.clear();
+                        selectedUserPlacesList = (ArrayList<Place>) objectList;
+                        selectedUserPlacesStringList = (ArrayList<String>) stringList;
                     }
+
                 }).create();
         dialog.show();
     }
@@ -195,16 +199,15 @@ public class ActionActivity extends AppCompatActivity {
                 .setPositiveButton("Додати до карти", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        Set<String> selectedUserRoutes = sharedPreferences
-                                .getStringSet(SELECTED_USER_ROUTS, new HashSet<String>());
+
+
                         for (int i = 0; i < items.length; i++) {
                             if (!mCheckedItems[i]){
                                 stringList.remove(i);
                             }else {
-                                selectedUserRoutes.add(stringList.get(i));
+                                selectedUserRouts.add(stringList.get(i));
                             }
                         }
-                        sharedPreferences.edit().putStringSet(SELECTED_USER_ROUTS, selectedUserRoutes).apply();
                     }
                 })
 
@@ -222,5 +225,17 @@ public class ActionActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    @Click(R.id.buttonAddToFavorites)
+    private void buttonAddToFavoritesWasClicked(){
+        Set<String> favoritesPlacesList = sharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>());
+        favoritesPlacesList.addAll(selectedUserPlacesStringList);
+        Set<String> favoritesRoutsList = sharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>());
+        favoritesRoutsList.addAll(selectedUserRouts);
+        boolean flagSavePlace = sharedPreferences.edit().putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList).commit();
+        boolean flagSaveRouts = sharedPreferences.edit().putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList).commit();
+        if (flagSavePlace && flagSaveRouts){
+            Toast.makeText(ActionActivity.this, " Add to favorites", Toast.LENGTH_LONG).show();
+        }
+    }
 
 }

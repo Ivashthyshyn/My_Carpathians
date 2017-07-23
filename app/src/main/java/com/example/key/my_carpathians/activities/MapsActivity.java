@@ -140,8 +140,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         };
-       selectUserRouts = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                .getStringSet(SELECTED_USER_ROUTS, null);
+        selectUserRouts = (Set<String>) getIntent().getSerializableExtra(SELECTED_USER_ROUTS);
         selectUserPlacesList = (List<Place>) getIntent().getSerializableExtra(SELECTED_USER_PLACES);
 
         // Mapbox access token is configured here. This needs to be called either in your application

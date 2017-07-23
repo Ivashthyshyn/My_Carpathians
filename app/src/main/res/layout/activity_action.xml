@@ -78,7 +78,7 @@
             android:text="Показати на карті" />
 
         <Button
-            android:id="@+id/buttonAdd"
+            android:id="@+id/buttonAddToFavorites"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

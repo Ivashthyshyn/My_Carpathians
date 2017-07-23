@@ -41,10 +41,14 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_COMMANDS;
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_TRACK_NAME;
+import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 
 
 public class LocationService extends Service implements
@@ -57,6 +61,7 @@ public class LocationService extends Service implements
     private static final long FASTEST_INTERVAL_ACTIVE = 1000 * 20;
     private static final long UPDATE_INTERVAL_PASSIVE = 1000 * 90;
     private static final long FASTEST_INTERVAL_PASSIVE = 1000 * 60;
+    public static final String CREATED_BY_USER_TRACK_LIST = "created_track_list";
 
     private final IBinder myBinder = new MyLocalBinder();
 
@@ -142,14 +147,11 @@ public class LocationService extends Service implements
 
 
         try {
+            JSONObject geoJSON = new JSONObject();
             feature.setProperties(new JSONObject());
             feature.setGeometry(lineString);
-
-            feature.setIdentifier("jhjhhjjjhhhhj");
-            JSONObject geoJSON = new JSONObject();
-            JSONArray ssss = new JSONArray();
-            ssss.put(feature.toJSON());
-            geoJSON.put("feature", ssss);
+            feature.setIdentifier("key.my_carpathians");
+            geoJSON.put("feature", new JSONArray().put(feature.toJSON()));
             geoJSON.put("type","FeatureCollection");
 
             File rootPath = new File(Environment.getExternalStorageDirectory(), "Routs");
@@ -159,7 +161,14 @@ public class LocationService extends Service implements
             output = new BufferedWriter(new FileWriter(localFile));
             output.write(geoJSON.toString());
             output.close();
-            Toast.makeText(getApplicationContext(), "Track saved", Toast.LENGTH_LONG).show();
+            SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            Set<String> CreatedByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST,new HashSet<String>());
+            CreatedByUserTrackList.add(mNameTrack);
+            mSharedPreferences.edit().putString(mNameTrack, fileUri.toString()).apply();
+            boolean isSaved = mSharedPreferences.edit().putStringSet(mNameTrack, CreatedByUserTrackList).commit();
+            if(isSaved) {
+                Toast.makeText(getApplicationContext(), "Track saved", Toast.LENGTH_LONG).show();
+            }
         } catch (Exception e) {
             Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
