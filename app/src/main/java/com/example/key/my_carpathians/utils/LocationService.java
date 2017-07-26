@@ -162,7 +162,7 @@ public class LocationService extends Service implements
             output.write(geoJSON.toString());
             output.close();
             SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> createdByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST,new HashSet<String>());
+            Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST,new HashSet<String>()));
             createdByUserTrackList.add(mNameTrack);
             mSharedPreferences.edit().putString(mNameTrack, fileUri.toString()).apply();
             mSharedPreferences.edit().putStringSet(CREATED_BY_USER_TRACK_LIST, createdByUserTrackList).apply();
