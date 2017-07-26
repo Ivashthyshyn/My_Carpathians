@@ -151,7 +151,7 @@ public class LocationService extends Service implements
             feature.setProperties(new JSONObject());
             feature.setGeometry(lineString);
             feature.setIdentifier("key.my_carpathians");
-            geoJSON.put("feature", new JSONArray().put(feature.toJSON()));
+            geoJSON.put("features", new JSONArray().put(feature.toJSON()));
             geoJSON.put("type","FeatureCollection");
 
             File rootPath = new File(Environment.getExternalStorageDirectory(), "Routs");
@@ -161,14 +161,13 @@ public class LocationService extends Service implements
             output = new BufferedWriter(new FileWriter(localFile));
             output.write(geoJSON.toString());
             output.close();
-            SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> CreatedByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST,new HashSet<String>());
-            CreatedByUserTrackList.add(mNameTrack);
+            SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            Set<String> createdByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST,new HashSet<String>());
+            createdByUserTrackList.add(mNameTrack);
             mSharedPreferences.edit().putString(mNameTrack, fileUri.toString()).apply();
-            boolean isSaved = mSharedPreferences.edit().putStringSet(mNameTrack, CreatedByUserTrackList).commit();
-            if(isSaved) {
-                Toast.makeText(getApplicationContext(), "Track saved", Toast.LENGTH_LONG).show();
-            }
+            mSharedPreferences.edit().putStringSet(CREATED_BY_USER_TRACK_LIST, createdByUserTrackList).apply();
+            Toast.makeText(getApplicationContext(), "Track saved", Toast.LENGTH_LONG).show();
+
         } catch (Exception e) {
             Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }

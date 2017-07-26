@@ -25,6 +25,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LATITUDE;
+import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LONGITUDE;
+import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_PLACE_LIST;
+import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_ROUTS_LIST;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PLACE_LIST;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ROUTS_LIST;
@@ -36,8 +40,6 @@ public class ActionActivity extends AppCompatActivity {
 
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
     public static final String SELECTED_USER_PLACES = "selected_user_places";
-    public static final String FAVORITES_ROUTS_LIST = "favorites_user_routs";
-    public static final String FAVORITES_PLACE_LIST = "favorites_user_places";
     public SharedPreferences sharedPreferences;
     List<Rout> routList;
     List<Place> placeList;
@@ -61,7 +63,7 @@ public class ActionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
-        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         routList = (List<Rout>) getIntent().getSerializableExtra(ROUTS_LIST);
         placeList = (List<Place>) getIntent().getSerializableExtra(PLACE_LIST);
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLASE);
@@ -90,7 +92,12 @@ public class ActionActivity extends AppCompatActivity {
 
     @Click(R.id.buttonShowPlaceOnMap)
     public void buttonShowPlaceOnMapWasClicked(){
-        selectedUserPlacesList.add(myPlace);
+        if(myPlace != null) {
+            selectedUserPlacesList.add(myPlace);
+        }
+        if (myRout != null){
+            selectedUserRouts.add(myRout.getNameRout());
+        }
         Intent mapIntent = new Intent(ActionActivity.this,MapsActivity_.class);
         mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
         mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
@@ -129,10 +136,10 @@ public class ActionActivity extends AppCompatActivity {
             Place mPlace =  placeList.get(i);
             double lat = mPlace.getPositionPlace().getLatitude();
             double lng = mPlace.getPositionPlace().getLongitude();
-            if ( myPosition.getLongitude() + 0.4 > lng
-                    && myPosition.getLongitude() - 0.4 < lng
-                    && myPosition.getLatitude() + 0.3 > lat
-                    && myPosition.getLatitude() - 0.3 < lat
+            if ( myPosition.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE > lng
+                    && myPosition.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE < lng
+                    && myPosition.getLatitude() + PERIMETER_SIZE_TO_LATITUDE > lat
+                    && myPosition.getLatitude() - PERIMETER_SIZE_TO_LATITUDE < lat
                     && !myName.equals(mPlace.getNamePlace())){
                 placesAround.add(mPlace);
                 placesAroundName.add(mPlace.getNamePlace());
@@ -234,15 +241,21 @@ public class ActionActivity extends AppCompatActivity {
 
     @Click(R.id.buttonAddToFavorites)
     void buttonAddToFavoritesWasClicked(){
+        if (myPlace != null) {
+            selectedUserPlacesStringList.add(myPlace.getNamePlace());
+        }
+        if(myRout != null) {
+            selectedUserRouts.add(myRout.getNameRout());
+        }
         Set<String> favoritesPlacesList = sharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>());
         favoritesPlacesList.addAll(selectedUserPlacesStringList);
         Set<String> favoritesRoutsList = sharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>());
         favoritesRoutsList.addAll(selectedUserRouts);
-        boolean flagSavePlace = sharedPreferences.edit().putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList).commit();
-        boolean flagSaveRouts = sharedPreferences.edit().putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList).commit();
-        if (flagSavePlace && flagSaveRouts){
-            Toast.makeText(ActionActivity.this, " Add to favorites", Toast.LENGTH_LONG).show();
-        }
+        sharedPreferences.edit().putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList).apply();
+        sharedPreferences.edit().putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList).apply();
+
+        Toast.makeText(ActionActivity.this, " Add to favorites", Toast.LENGTH_LONG).show();
+
     }
 
 }

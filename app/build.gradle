@@ -60,6 +60,7 @@ dependencies {
     }
 
     compile 'com.google.code.gson:gson:2.7'
+
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:support-v4:25.3.1'
@@ -74,9 +75,10 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:10.0.1'
     compile 'com.firebaseui:firebase-ui-storage:0.6.0'
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
-    testCompile 'junit:junit:4.12'
     compile 'com.google.android.gms:play-services-ads:10.0.1'
     compile 'com.cocoahero.android:geojson:1.0.1@jar'
+
+    testCompile 'junit:junit:4.12'
 }
 
 apply plugin: 'com.google.gms.google-services'

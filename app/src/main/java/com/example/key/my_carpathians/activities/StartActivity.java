@@ -17,6 +17,7 @@ import android.view.Window;
 import android.widget.Toast;
 
 import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.fragments.MyFavoritesFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
 import com.example.key.my_carpathians.fragments.RoutsListFragment;
@@ -47,6 +48,9 @@ import org.androidannotations.annotations.EActivity;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Set;
+
+import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_TRACK_LIST;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -54,18 +58,22 @@ import java.util.ArrayList;
  */
 @EActivity
 public class StartActivity extends AppCompatActivity {
+    public static final String FAVORITES_ROUTS_LIST = "favorites_user_routs";
+    public static final String FAVORITES_PLACE_LIST = "favorites_user_places";
+    public FragmentManager fragmentManager;
+    public PlacesListFragment placesListFragment;
+    public RoutsListFragment routsListFragment;
+    public MyFavoritesFragment myFavoritesFragment;
+    public ArrayList<Place> places = new ArrayList<>();
+    public ArrayList<Rout> routs = new ArrayList<>();
+    public  AlertDialog.Builder builder;
     private boolean connected = false;
     private static final String TAG = "StartActivity";
     public static final String PREFS_NAME = "MyPrefsFile";
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    public FragmentManager fragmentManager;
-    public PlacesListFragment placesListFragment;
-    public RoutsListFragment routsListFragment;
-    public ArrayList<Place> places = new ArrayList<>();
-    public ArrayList<Rout> routs = new ArrayList<>();
-    public  AlertDialog.Builder builder;
     private Context context = StartActivity.this;
+    private SharedPreferences  mSharedPreferences;
 
 
     @Override
@@ -73,8 +81,7 @@ public class StartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_start);
-
-
+        mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -155,7 +162,6 @@ public class StartActivity extends AppCompatActivity {
         httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                SharedPreferences mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
                 mSharedPreferences.edit().putString(nameRout, fileUri.toString()).apply();
 
                 Log.e("firebase ",";local tem file created  created " +localFile.toString());
@@ -175,9 +181,6 @@ public class StartActivity extends AppCompatActivity {
     void buttonPlaceWasClicked(){
 
         fragmentManager = getSupportFragmentManager();
-        if(placesListFragment != null) {
-            fragmentManager.beginTransaction().remove(placesListFragment).commit();
-        }
         placesListFragment = new PlacesListFragment_();
         android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
                 .beginTransaction();
@@ -190,9 +193,6 @@ public class StartActivity extends AppCompatActivity {
     @Click(R.id.buttonRoutes)
     void buttonRoutesWasClicked(){
         fragmentManager = getSupportFragmentManager();
-        if(routsListFragment != null) {
-            fragmentManager.beginTransaction().remove(routsListFragment).commit();
-        }
         routsListFragment = new RoutsListFragment_();
         android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
                 .beginTransaction();
@@ -215,9 +215,12 @@ public class StartActivity extends AppCompatActivity {
         if ( placesListFragment != null){
             fragmentManager.beginTransaction().remove(placesListFragment).commit();
             placesListFragment = null;
-        }else if (routsListFragment != null){
+        }else if (routsListFragment != null) {
             fragmentManager.beginTransaction().remove(routsListFragment).commit();
             routsListFragment = null;
+        }else if(myFavoritesFragment != null ){
+            fragmentManager.beginTransaction().remove(myFavoritesFragment).commit();
+            myFavoritesFragment = null;
         }else {
             super.onBackPressed();
         }
@@ -298,5 +301,26 @@ public class StartActivity extends AppCompatActivity {
         }
         return connected;
     }
-
+    @Click(R.id.buttonMyFavorites)
+    void buttonMyFavoritesWasClicked(){
+        mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Set<String> favoritesPlacesList =  mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, null);
+        Set<String> favoritesRoutsList =  mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, null);
+        Set<String> createdByUserTrackList =  mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST, null);
+        myFavoritesFragment = new MyFavoritesFragment();
+        fragmentManager = getSupportFragmentManager();
+        android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
+                .beginTransaction();
+        fragmentTransaction.add(R.id.fragment_container, myFavoritesFragment);
+        fragmentTransaction.commit();
+        if (favoritesPlacesList != null ) {
+            myFavoritesFragment.setList(favoritesPlacesList, FAVORITES_PLACE_LIST);
+        }
+        if( favoritesRoutsList != null ){
+            myFavoritesFragment.setList(favoritesRoutsList, FAVORITES_ROUTS_LIST);
+        }
+        if(createdByUserTrackList != null ){
+            myFavoritesFragment.setList(createdByUserTrackList, CREATED_BY_USER_TRACK_LIST);
+        }
+    }
 }

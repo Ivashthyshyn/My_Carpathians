@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0099cc"
-    tools:context="com.example.key.my_carpathians.StartActivity"
+    tools:context="com.example.key.my_carpathians.activities.ActionActivity"
     android:orientation="vertical">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
@@ -53,7 +53,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/buttonMyFavorites"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="10dp"

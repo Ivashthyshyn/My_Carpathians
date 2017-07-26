@@ -69,7 +69,8 @@ import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
-
+    public static final double PERIMETER_SIZE_TO_LATITUDE = 0.3;
+    public static final double PERIMETER_SIZE_TO_LONGITUDE = 0.4;
     public static final String TO_SERVICE_COMMANDS = "service_commands";
     public static final int COMMAND_REC_TRACK = 1;
     public static final int COMMAND_NO_SAVE_TRACK = 2;
@@ -84,9 +85,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MapView mapView;
     private MapboxMap mapboxMap;
     private FloatingActionButton floatingActionButton;
-    private File localFile;
     private static final String TAG = "MapsActivity";
-    private Location mLocation = null;
     private boolean isEndNotified;
     private ProgressBar progressBar;
     private OfflineManager offlineManager;
@@ -225,7 +224,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         }
-        if (selectUserPlacesList != null){
+        if (selectUserPlacesList != null && selectUserPlacesList.size() > 0){
             for (int i = 0; i < selectUserPlacesList.size(); i++) {
                 lat = selectUserPlacesList.get(i).getPositionPlace().getLatitude();
                 lng = selectUserPlacesList.get(i).getPositionPlace().getLongitude();
@@ -411,8 +410,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void downloadOfflineRegion(final String regionName) {
         // Create a bounding box for the offline region
         LatLngBounds latLngBounds = new LatLngBounds.Builder()
-                .include(new LatLng(lat + 0.3, lng + 0.4)) // Northeast
-                .include(new LatLng(lat - 0.3, lng - 0.4)) // Southwest
+                .include(new LatLng(lat + PERIMETER_SIZE_TO_LATITUDE,
+                        lng + PERIMETER_SIZE_TO_LONGITUDE)) // Northeast
+                .include(new LatLng(lat - PERIMETER_SIZE_TO_LATITUDE,
+                        lng - PERIMETER_SIZE_TO_LONGITUDE)) // Southwest
                 .build();
         // Define the offline region
         OfflineTilePyramidRegionDefinition definition = new OfflineTilePyramidRegionDefinition(
@@ -664,6 +665,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .width(2));
                 mapboxMap.addMarker(new MarkerOptions().position(points.get(0)).setTitle("Початок"));
                 mapboxMap.addMarker(new MarkerOptions().position(points.get(points.size()-1)).setTitle("Кінець"));
+                mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                        new CameraPosition.Builder()
+                                .target(new LatLng( points.get(0).getLatitude(), points.get(0).getLongitude() ))  // set the camera's center position
+                                .zoom(12)  // set the camera's zoom level
+                                .tilt(20)  // set the camera's tilt
+                                .build()));
             }
         }
     }
