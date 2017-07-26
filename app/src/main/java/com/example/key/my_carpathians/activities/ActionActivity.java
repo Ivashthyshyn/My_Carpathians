@@ -21,6 +21,7 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class ActionActivity extends AppCompatActivity {
 
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
     public static final String SELECTED_USER_PLACES = "selected_user_places";
-    public SharedPreferences sharedPreferences;
+    private SharedPreferences sharedPreferences;
     List<Rout> routList;
     List<Place> placeList;
     Place myPlace;
@@ -247,12 +248,14 @@ public class ActionActivity extends AppCompatActivity {
         if(myRout != null) {
             selectedUserRouts.add(myRout.getNameRout());
         }
-        Set<String> favoritesPlacesList = sharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>());
+        Set<String> favoritesPlacesList = new HashSet<>(sharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>()));
         favoritesPlacesList.addAll(selectedUserPlacesStringList);
-        Set<String> favoritesRoutsList = sharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>());
+        Set<String> favoritesRoutsList = new HashSet<>(sharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>()));
         favoritesRoutsList.addAll(selectedUserRouts);
-        sharedPreferences.edit().putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList).apply();
-        sharedPreferences.edit().putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList).apply();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList);
+        editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
+        editor.apply();
 
         Toast.makeText(ActionActivity.this, " Add to favorites", Toast.LENGTH_LONG).show();
 
