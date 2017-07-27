@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,11 +23,11 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static android.widget.Toast.LENGTH_LONG;
 import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LATITUDE;
 import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LONGITUDE;
 import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_PLACE_LIST;
@@ -50,7 +52,8 @@ public class ActionActivity extends AppCompatActivity {
     String myName;
     ArrayList<String> selectedUserRouts = new ArrayList<>();
     ArrayList<String> selectedUserPlacesStringList = new ArrayList<>();
-
+    boolean inAlertDialogCheckedSomething = false;
+    AlertDialog alertDialog;
     private ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
     @ViewById(R.id.imageView)
     ImageView imageView;
@@ -113,10 +116,10 @@ public class ActionActivity extends AppCompatActivity {
             Rout mRout =  routList.get(i);
             double lat = mRout.getPositionRout().getLatitude();
             double lng = mRout.getPositionRout().getLongitude();
-            if ( myPosition.getLongitude() + 0.4 > lng
-                    && myPosition.getLongitude() - 0.4 < lng
-                    && myPosition.getLatitude() + 0.3 > lat
-                    && myPosition.getLatitude() - 0.3 < lat
+            if ( myPosition.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE > lng
+                    && myPosition.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE < lng
+                    && myPosition.getLatitude() + PERIMETER_SIZE_TO_LATITUDE > lat
+                    && myPosition.getLatitude() - PERIMETER_SIZE_TO_LATITUDE < lat
                     && !myName.equals(mRout.getNameRout())){
                 routsAround.add(mRout);
                 routsAroundName.add(mRout.getNameRout());
@@ -156,80 +159,115 @@ public class ActionActivity extends AppCompatActivity {
     private void showListDialogForPlaces(final List<String> stringList, final List<Place> objectList) {
         final boolean[] mCheckedItems = new boolean[stringList.size()];
         final CharSequence[] items = stringList.toArray(new CharSequence[stringList.size()]);
-        AlertDialog dialog = new AlertDialog.Builder(ActionActivity.this)
+        AlertDialog.Builder dialog = new AlertDialog.Builder(ActionActivity.this)
                 .setTitle(getString(R.string.navigate_title))
                 .setMultiChoiceItems(items, mCheckedItems,  new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog,
                                         int which, boolean isChecked) {
+                        if(isChecked){
+                            inAlertDialogCheckedSomething = true;
+                        }
                         mCheckedItems[which] = isChecked;
                     }
                 })
                 .setPositiveButton("Додати до карти", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        for (int i = 0; i < items.length; i++) {
-                            if (!mCheckedItems[i]){
-                                objectList.remove(i);
-                                stringList.remove(i);
-                            }
-                        }
-                        selectedUserPlacesList = (ArrayList<Place>) objectList;
-                        selectedUserPlacesStringList = (ArrayList<String>) stringList;
-                    }
+                    public void onClick(DialogInterface dialog, int id) {}
                 })
 
                 .setNegativeButton("Ні", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        objectList.clear();
-                        stringList.clear();
-                        selectedUserPlacesList = (ArrayList<Place>) objectList;
-                        selectedUserPlacesStringList = (ArrayList<String>) stringList;
+                    public void onClick(DialogInterface dialog, int id) {}
+                });
+        alertDialog = dialog.create();
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (inAlertDialogCheckedSomething){
+                    for (int i = 0; i < items.length; i++) {
+                        if (!mCheckedItems[i]) {
+                            objectList.remove(i);
+                            stringList.remove(i);
+                        }
                     }
+                    selectedUserPlacesList = (ArrayList<Place>) objectList;
+                    selectedUserPlacesStringList = (ArrayList<String>) stringList;
 
-                }).create();
-        dialog.show();
+                    inAlertDialogCheckedSomething = false;
+                    alertDialog.dismiss();
+                }else{
+                    Toast.makeText(ActionActivity.this, "Please selected something",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
     private void showListDialogForRouts(final List<String> stringList, final List<Rout> objectList) {
         final boolean[] mCheckedItems = new boolean[stringList.size()];
         final CharSequence[] items = stringList.toArray(new CharSequence[stringList.size()]);
-        AlertDialog dialog = new AlertDialog.Builder(ActionActivity.this)
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(ActionActivity.this)
                 .setTitle(getString(R.string.navigate_title))
                 .setMultiChoiceItems(items, mCheckedItems,  new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog,
                                         int which, boolean isChecked) {
+                        if(isChecked){
+                            inAlertDialogCheckedSomething = true;
+                        }
                         mCheckedItems[which] = isChecked;
                     }
                 })
                 .setPositiveButton("Додати до карти", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-
-
-                        for (int i = 0; i < items.length; i++) {
-                            if (!mCheckedItems[i]){
-                                stringList.remove(i);
-                            }else {
-                                selectedUserRouts.add(stringList.get(i));
-                            }
-                        }
                     }
                 })
 
                 .setNegativeButton("Детальніше", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        for (int i = 0; i < items.length; i++) {
-                            if (!mCheckedItems[i]) {
-                                objectList.remove(i);
-                            }
-                        }
-                        // TODO need add intent
                     }
-                }).create();
-        dialog.show();
+                });
+        alertDialog = dialog.create();
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (inAlertDialogCheckedSomething){
+                    for (int i = 0; i < items.length; i++) {
+                        if (mCheckedItems[i]) {
+                           selectedUserRouts.add(stringList.get(i));
+                        }
+                        inAlertDialogCheckedSomething = false;
+                        alertDialog.dismiss();
+                    }
+                }else{
+                    Toast.makeText(ActionActivity.this, "Please selected something",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (inAlertDialogCheckedSomething){
+                    for (int i = 0; i < items.length; i++) {
+                        if (mCheckedItems[i]) {
+                           selectedUserRouts.add(stringList.get(i));
+                        }
+                        inAlertDialogCheckedSomething = false;
+                        alertDialog.dismiss();
+                    }
+                }else{
+                    Toast.makeText(ActionActivity.this, "Please selected something",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Override
@@ -257,7 +295,7 @@ public class ActionActivity extends AppCompatActivity {
         editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
         editor.apply();
 
-        Toast.makeText(ActionActivity.this, " Add to favorites", Toast.LENGTH_LONG).show();
+        Toast.makeText(ActionActivity.this, " Add to favorites", LENGTH_LONG).show();
 
     }
 

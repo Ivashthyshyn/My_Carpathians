@@ -8,31 +8,21 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.cocoahero.android.geojson.Feature;
-import com.cocoahero.android.geojson.Geometry;
-import com.cocoahero.android.geojson.GeometryCollection;
 import com.cocoahero.android.geojson.LineString;
-import com.cocoahero.android.geojson.Point;
 import com.cocoahero.android.geojson.Position;
-import com.cocoahero.android.geojson.PositionList;
 import com.example.key.my_carpathians.interfaces.ILocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FileDownloadTask;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+
 
 import org.json.JSONArray;
-import org.json.JSONException;
+
 import org.json.JSONObject;
 
 import java.io.BufferedWriter;
@@ -43,7 +33,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_COMMANDS;

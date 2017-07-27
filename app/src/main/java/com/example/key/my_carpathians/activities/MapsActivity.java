@@ -30,7 +30,11 @@ import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.utils.LocationService;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -229,7 +233,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 lat = selectUserPlacesList.get(i).getPositionPlace().getLatitude();
                 lng = selectUserPlacesList.get(i).getPositionPlace().getLongitude();
                 if (lat != 0 && lng != 0){
-                    mapboxMap.addMarker(new MarkerOptions().position(new LatLng( lat, lng )));
+                    IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
+                    Icon icon = iconFactory.fromResource(R.drawable.marcer);
+
+                    mapboxMap.addMarker(new MarkerViewOptions().icon(icon).position(new LatLng( lat, lng )));
 
                 }
             }
@@ -663,8 +670,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .addAll(points)
                         .color(Color.parseColor("#ff6861"))
                         .width(2));
-                mapboxMap.addMarker(new MarkerOptions().position(points.get(0)).setTitle("Початок"));
-                mapboxMap.addMarker(new MarkerOptions().position(points.get(points.size()-1)).setTitle("Кінець"));
+                IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
+                Icon iconStart = iconFactory.fromResource(R.drawable.marcer_flag_start);
+                Icon iconFinish = iconFactory.fromResource(R.drawable.marcer_flag_finish);
+                mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(points.get(0)).title("Початок"));
+                mapboxMap.addMarker(new MarkerViewOptions().icon(iconFinish).position(points.get(points.size()-1)).title("Кінець"));
                 mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                         new CameraPosition.Builder()
                                 .target(new LatLng( points.get(0).getLatitude(), points.get(0).getLongitude() ))  // set the camera's center position
