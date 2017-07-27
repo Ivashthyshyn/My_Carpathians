@@ -65,6 +65,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
@@ -663,12 +664,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         protected void onPostExecute(List<LatLng> points) {
             super.onPostExecute(points);
+            String[] mColors = {
+                    "#39add1", // light blue
+                    "#3079ab", // dark blue
+                    "#c25975", // mauve
+                    "#e15258", // red
+                    "#f9845b", // orange
+                    "#838cc7", // lavender
+                    "#7d669e", // purple
+                    "#53bbb4", // aqua
+                    "#51b46d", // green
+                    "#e0ab18", // mustard
+                    "#637a91", // dark gray
+                    "#f092b0", // pink
+                    "#b7c0c7"  // light gray
+            };
+            Random randomGenerator = new Random(); // Construct a new Random number generator
+            int randomNumber = randomGenerator.nextInt(mColors.length);
 
             if (points.size() > 0) {
                 // Draw polyline on map
                 mapboxMap.addPolyline(new PolylineOptions()
                         .addAll(points)
-                        .color(Color.parseColor("#ff6861"))
+                        .color(Color.parseColor(mColors[randomNumber]))
                         .width(2));
                 IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
                 Icon iconStart = iconFactory.fromResource(R.drawable.marcer_flag_start);
