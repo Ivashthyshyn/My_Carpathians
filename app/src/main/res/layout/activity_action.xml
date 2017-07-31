@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/btn_login"
-    tools:context="com.example.key.my_carpathians.PlaceActivity">
+    tools:context="com.example.key.my_carpathians.activities.ActionActivity">
 
     <ImageView
         android:id="@+id/imageView"
@@ -17,6 +17,11 @@
         app:srcCompat="@android:drawable/btn_star_big_on"
         tools:layout_editor_absoluteX="149dp"
         tools:layout_editor_absoluteY="70dp" />
+
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/graph"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"/>
 
     <TextView
         android:id="@+id/titleText"

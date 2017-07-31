@@ -32,8 +32,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
-import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -48,6 +46,7 @@ import com.mapbox.mapboxsdk.offline.OfflineRegion;
 import com.mapbox.mapboxsdk.offline.OfflineRegionError;
 import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
+import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.services.commons.utils.TextUtils;
 
 import org.androidannotations.annotations.Click;
@@ -66,11 +65,11 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -144,6 +143,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         };
+
         selectUserRouts =  getIntent().getStringArrayListExtra(SELECTED_USER_ROUTS);
         selectUserPlacesList = (List<Place>) getIntent().getSerializableExtra(SELECTED_USER_PLACES);
 
@@ -157,7 +157,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
-
         floatingActionButton = (FloatingActionButton) findViewById(R.id.location_toggle_fab);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -219,6 +218,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
+        Layer mapText = mapboxMap.getLayer("country-label-lg");
+        mapText.setProperties(textField("{name_ua}"));
 
         if(selectUserRouts != null && selectUserRouts.size() > 0) {
             for (int i = 0; i < selectUserRouts.size(); i++) {
@@ -242,6 +243,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         }
+
         mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                 new CameraPosition.Builder()
                         .target(new LatLng( lat, lng ))  // set the camera's center position
