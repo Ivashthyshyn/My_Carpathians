@@ -154,10 +154,10 @@ public class ActionActivity extends AppCompatActivity {
         }
         int size = points.size();
         DataPoint[] values = new DataPoint[size];
-        Integer yi = 0;
+        Integer xi = 0;
         for (int i=1; i<size; i++) {
-            Integer xi = (int)points.get(i).getAltitude();
-            yi = yi + (int)TurfMeasurement.distance(points.get(i -1),points.get(i),TurfConstants.UNIT_METERS);
+            Integer yi = (int)points.get(i).getAltitude();
+            xi = xi + (int)TurfMeasurement.distance(points.get(i -1),points.get(i),TurfConstants.UNIT_METERS);
             DataPoint v = new DataPoint(xi, yi);
             values[i] = v;
         }
