@@ -50,20 +50,21 @@
         android:id="@+id/buttonPlacesAruond"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
+        android:text="Місця"
         android:layout_alignParentTop="true"
-        android:text="Місця" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="16dp"/>
 
     <Button
         android:id="@+id/buttonShowAroundRout"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textName"
-        android:layout_alignBottom="@+id/textName"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:text="Маршрути" />
+        android:layout_below="@+id/buttonPlacesAruond"
+        android:layout_marginTop="150dp"
+        android:text="Маршрути"/>
 
     <LinearLayout
         android:layout_width="match_parent"
