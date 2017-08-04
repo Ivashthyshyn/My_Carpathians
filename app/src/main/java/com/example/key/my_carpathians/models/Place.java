@@ -14,7 +14,7 @@ public class Place implements Serializable {
     public String titlePlace;
     public String urlPlace;
     public String namePlace;
-    public int typePlase;
+    public int typePlace;
     public Position positionPlace;
 
 
@@ -22,12 +22,12 @@ public class Place implements Serializable {
     public Place() {
     }
 
-    public int getTypePlase() {
-        return typePlase;
+    public int getTypePlace() {
+        return typePlace;
     }
 
-    public void setTypePlase(int typePlase) {
-        this.typePlase = typePlase;
+    public void setTypePlace(int typePlace) {
+        this.typePlace = typePlace;
     }
 
     public Position getPositionPlace() {

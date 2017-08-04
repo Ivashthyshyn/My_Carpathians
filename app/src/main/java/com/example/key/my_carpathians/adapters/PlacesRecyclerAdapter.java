@@ -26,8 +26,8 @@ import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.View
  */
 
 public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAdapter.ViewHolder> {
-    public static final String PLACE_LIST = "place_list";
-    public static final String ROUTS_LIST = "routs_list";
+    public static final String PUT_EXTRA_PLACE_LIST = "place_list";
+    public static final String PUT_EXTRA_ROUTS_LIST = "routs_list";
     private List<Place> places;
     private List<Rout> routs;
     /**
@@ -83,8 +83,8 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
                     intent.putExtra(PUT_EXTRA_PLASE, placeName);
                     ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
                     ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
-                    intent.putExtra(PLACE_LIST, arrayListPlace);
-                    intent.putExtra(ROUTS_LIST, arrayListRouts);
+                    intent.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
+                    intent.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
                     context.startActivity(intent);
                 }
             }

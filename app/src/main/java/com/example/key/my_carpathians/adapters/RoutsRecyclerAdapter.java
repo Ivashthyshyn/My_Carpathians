@@ -28,16 +28,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PLACE_LIST;
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ROUTS_LIST;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_PLACE_LIST;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_ROUTS_LIST;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 
 /**
@@ -45,6 +47,7 @@ import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.Routs
  */
 
 public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdapter.RoutsViewHolder> {
+    public static final String PUT_EXTRA_POINTS = "put_extra_point_list";
     public Context context;
     private List<Rout> routs;
     private List<Place> places;
@@ -69,8 +72,8 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
                     intent.putExtra(PUT_EXTRA_ROUT, RoutsName);
                     ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
                     ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
-                    intent.putExtra(PLACE_LIST, arrayListPlace);
-                    intent.putExtra(ROUTS_LIST, arrayListRouts);
+                    intent.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
+                    intent.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
                     context.startActivity(intent);
                 }
             }
@@ -84,8 +87,8 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
     public void onBindViewHolder(RoutsViewHolder holder, int position) {
         holder.mRout = routs.get(position);
         holder.textNameRout.setText(holder.mRout.getNameRout());
-        holder.buttonTypeAndLevel.setText(String.valueOf(holder.mRout.getRoutsLevel()));
-        holder.textLenghtTrack.setText(String.valueOf(lenghtTrack(holder.mRout.getNameRout())));
+        holder.textLengthTrack.setText(lengthRout(
+                getRoutPointsList(holder.mRout.getNameRout())));
         switch (holder.mRout.getRoutsLevel()) {
             case 1:
                 holder.buttonTypeAndLevel.setBackgroundResource(R.drawable.green_shape);
@@ -98,8 +101,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         }
     }
 
-    private double lenghtTrack(String nameRout) {
-
+    public List<Position> getRoutPointsList(String nameRout) {
         List<Position> points = new ArrayList<>();
         URI mUri = URI.create(context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .getString(nameRout, null));
@@ -115,7 +117,6 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             }
 
             fileInputStream.close();
-
             // Parse JSON
             JSONObject json = new JSONObject(sb.toString());
             JSONArray features = json.getJSONArray("features");
@@ -128,10 +129,10 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
                 if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
 
                     // Get the Coordinates
-                    JSONArray coords = geometry.getJSONArray("coordinates");
-                    for (int lc = 0; lc < coords.length(); lc++) {
-                        JSONArray coord = coords.getJSONArray(lc);
-                        Position position = Position.fromCoordinates(coord.getDouble(1), coord.getDouble(0), coord.getDouble(2));
+                    JSONArray coordinates = geometry.getJSONArray("coordinates");
+                    for (int lc = 0; lc < coordinates.length(); lc++) {
+                        JSONArray coordinate = coordinates.getJSONArray(lc);
+                        Position position = Position.fromCoordinates(coordinate.getDouble(1), coordinate.getDouble(0), coordinate.getDouble(2));
                         points.add(position);
                     }
                 }
@@ -139,12 +140,19 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         } catch (Exception exception) {
             Log.e(TAG, "Exception Loading GeoJSON: " + exception.toString());
         }
-        LineString d = LineString.fromCoordinates(points);
+        return points;
+    }
+
+    private String lengthRout(List<Position> positionList) {
+
+        LineString lineString = LineString.fromCoordinates(positionList);
         double dis = 0;
-        if (points.size() > 0) {
-            dis = TurfMeasurement.lineDistance(d, TurfConstants.UNIT_KILOMETERS);
+        if (positionList.size() > 0) {
+            dis = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_KILOMETERS);
         }
-        return dis;
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.CEILING);
+        return df.format(dis) + "km";
     }
 
     @Override
@@ -154,9 +162,9 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
     public static class RoutsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public static final String PUT_EXTRA_ROUT = "routName";
-        Button buttonTypeAndLevel;
-        TextView textNameRout;
-        TextView textLenghtTrack;
+        public Button buttonTypeAndLevel;
+        public TextView textNameRout;
+        public TextView textLengthTrack;
         private Rout mRout;
         private ClickListener mClickListener;
 
@@ -166,7 +174,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             mClickListener = listener;
             buttonTypeAndLevel = (Button) itemView.findViewById(R.id.buttonTypeAndLevel);
             textNameRout = (TextView) itemView.findViewById(R.id.textNameRout);
-            textLenghtTrack = (TextView) itemView.findViewById(R.id.textLenghtTrack);
+            textLengthTrack = (TextView) itemView.findViewById(R.id.textLenghtTrack);
             mRout = null;
             itemView.setOnClickListener(this);
         }

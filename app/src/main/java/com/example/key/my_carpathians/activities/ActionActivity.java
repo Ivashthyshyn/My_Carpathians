@@ -17,6 +17,7 @@ import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.mapbox.services.api.utils.turf.TurfConstants;
@@ -50,9 +51,10 @@ import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_S
 import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_PLACE_LIST;
 import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_ROUTS_LIST;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PLACE_LIST;
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ROUTS_LIST;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_PLACE_LIST;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_ROUTS_LIST;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
+import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.PUT_EXTRA_POINTS;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 
 @EActivity
@@ -62,6 +64,7 @@ public class ActionActivity extends AppCompatActivity {
     public static final String SELECTED_USER_PLACES = "selected_user_places";
     public List<Rout> routList;
     public List<Place> placeList;
+    public List<Position> pointsRout;
     public Place myPlace;
     public Rout myRout;
     public com.example.key.my_carpathians.models.Position myPosition;
@@ -87,8 +90,9 @@ public class ActionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
         sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        routList = (List<Rout>) getIntent().getSerializableExtra(ROUTS_LIST);
-        placeList = (List<Place>) getIntent().getSerializableExtra(PLACE_LIST);
+        routList = (List<Rout>) getIntent().getSerializableExtra(PUT_EXTRA_ROUTS_LIST);
+        placeList = (List<Place>) getIntent().getSerializableExtra(PUT_EXTRA_PLACE_LIST);
+        pointsRout = (List<Position>)getIntent().getSerializableExtra(PUT_EXTRA_POINTS);
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLASE);
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
         if (myPlace != null) {
@@ -163,7 +167,12 @@ public class ActionActivity extends AppCompatActivity {
         }
         values[0] = new DataPoint((int)points.get(0).getAltitude(),0);
         LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
+        series.setThickness(8);
         graphView.addSeries(series);
+        GridLabelRenderer gridLabel = graphView.getGridLabelRenderer();
+        gridLabel.setHorizontalAxisTitle("meters");
+        gridLabel.setVerticalAxisTitle("meters");
+
 
     }
 

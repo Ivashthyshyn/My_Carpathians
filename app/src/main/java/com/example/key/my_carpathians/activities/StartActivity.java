@@ -149,7 +149,8 @@ public class StartActivity extends AppCompatActivity {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference httpsReference = storage.getReferenceFromUrl(urlRoutsTrack);
         String nameFileInStorage =  httpsReference.getName();
-        File rootPath = new File(Environment.getExternalStorageDirectory(), "Routs");
+        File rootPath = new File(context.getExternalFilesDir(
+                Environment.DIRECTORY_DOWNLOADS), "Routs");
         if(!rootPath.exists()) {
             rootPath.mkdirs();
         }

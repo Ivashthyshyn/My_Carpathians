@@ -143,11 +143,11 @@ public class LocationService extends Service implements
             geoJSON.put("features", new JSONArray().put(feature.toJSON()));
             geoJSON.put("type","FeatureCollection");
 
-            File rootPath = new File(Environment.getExternalStorageDirectory(), "Routs");
-            Writer output = null;
+            File rootPath = new File(getApplicationContext().getExternalFilesDir(
+                    Environment.DIRECTORY_DOWNLOADS), "Routs");
             final File localFile = new File(rootPath, mNameTrack +".geojson" );
             final URI fileUri = localFile.toURI();
-            output = new BufferedWriter(new FileWriter(localFile));
+            Writer output = new BufferedWriter(new FileWriter(localFile));
             output.write(geoJSON.toString());
             output.close();
             SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
