@@ -14,13 +14,14 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -88,7 +89,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private MapView mapView;
     private MapboxMap mapboxMap;
-    private FloatingActionButton floatingActionButton;
+    private ImageButton floatingActionButton;
     private static final String TAG = "MapsActivity";
     private boolean isEndNotified;
     private ProgressBar progressBar;
@@ -101,7 +102,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     boolean checkForRecButton = true;
 
     @ViewById(R.id.fabRecTrack)
-    FloatingActionButton fabRecTrack;
+    ImageButton fabRecTrack;
+
+    @ViewById(R.id.toolsContainer)
+    LinearLayout toolsContainer;
+
 
     private ServiceConnection captureServiceConnection = new ServiceConnection() {
 
@@ -157,7 +162,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
-        floatingActionButton = (FloatingActionButton) findViewById(R.id.location_toggle_fab);
+        floatingActionButton = (ImageButton) findViewById(R.id.location_toggle_fab);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -165,11 +170,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     checkGPSEnabled();
                     toggleGps();
                     floatingActionButton.setImageResource(R.drawable. ic_location_disabled_24dp);
+
+                   // fabRecTrack.setLayoutParams(new LinearLayout.LayoutParams(50,50));
+                   // floatingActionButton.setLayoutParams(new LinearLayout.LayoutParams(50,50));
+                    fabRecTrack.setVisibility(View.VISIBLE);
                     switchCheck = true;
                 }else if (switchCheck){
                     mapboxMap.setMyLocationEnabled(false);
                     stopService(new Intent(MapsActivity.this, LocationService.class));
                     floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
+                    //floatingActionButton.setLayoutParams(new LinearLayout.LayoutParams(60,60));
+                    fabRecTrack.setVisibility(View.GONE);
                     switchCheck = false;
                 }
             }

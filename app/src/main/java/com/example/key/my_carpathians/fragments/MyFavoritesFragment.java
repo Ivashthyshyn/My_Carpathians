@@ -3,7 +3,6 @@ package com.example.key.my_carpathians.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.ArraySet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,9 +68,10 @@ public class MyFavoritesFragment extends Fragment {
                 }
             });
         }
-        final ListView listOfTrack = (ListView) view.findViewById(R.id.listViewTrack);
+        ListView listOfTrack = (ListView) view.findViewById(R.id.listViewTrack);
         if (listTrack != null) {
-            ArrayAdapter<String> adapter2 = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, listTrack);
+            ArrayAdapter<String> adapter2 = new ArrayAdapter<>(getContext(),
+                    android.R.layout.simple_list_item_1, listTrack);
             listOfTrack.setAdapter(adapter2);
             listOfTrack.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
