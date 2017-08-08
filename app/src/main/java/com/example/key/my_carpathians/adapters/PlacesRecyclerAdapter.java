@@ -18,7 +18,7 @@ import com.example.key.my_carpathians.models.Rout;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 
 
 /**
@@ -44,7 +44,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        public final static String PUT_EXTRA_PLASE = "placeName";
+        public final static String PUT_EXTRA_PLACE = "placeName";
         public ImageView placeImage;
         public TextView textName;
         public Place mPlace;
@@ -80,7 +80,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
             public void onPressed(Place placeName) {
                 if (placeName != null){
                     Intent intent = new Intent(context, ActionActivity_.class);
-                    intent.putExtra(PUT_EXTRA_PLASE, placeName);
+                    intent.putExtra(PUT_EXTRA_PLACE, placeName);
                     ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
                     ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
                     intent.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);

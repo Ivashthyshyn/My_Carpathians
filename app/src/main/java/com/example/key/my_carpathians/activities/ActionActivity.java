@@ -53,7 +53,7 @@ import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_PLACE_LIST;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_ROUTS_LIST;
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLASE;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.PUT_EXTRA_POINTS;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 
@@ -93,7 +93,7 @@ public class ActionActivity extends AppCompatActivity {
         routList = (List<Rout>) getIntent().getSerializableExtra(PUT_EXTRA_ROUTS_LIST);
         placeList = (List<Place>) getIntent().getSerializableExtra(PUT_EXTRA_PLACE_LIST);
         pointsRout = (List<Position>)getIntent().getSerializableExtra(PUT_EXTRA_POINTS);
-        myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLASE);
+        myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
         if (myPlace != null) {
             textName.setText(myPlace.getNamePlace());

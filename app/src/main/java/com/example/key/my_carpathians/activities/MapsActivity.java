@@ -69,11 +69,13 @@ import java.util.Random;
 
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
+import static com.example.key.my_carpathians.activities.StartActivity.ACTION_MODE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+    public static final boolean REC_MODE = true;
     public static final double PERIMETER_SIZE_TO_LATITUDE = 0.3;
     public static final double PERIMETER_SIZE_TO_LONGITUDE = 0.4;
     public static final String TO_SERVICE_COMMANDS = "service_commands";
@@ -86,6 +88,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
     public ArrayList<String> selectUserRouts = null;
     public List<Place> selectUserPlacesList = null;
+    public PolylineOptions polylineOption = new PolylineOptions();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -134,14 +137,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void update(Location location) {
                 myLocationChangeListener.onMyLocationChange(location);
-
+                mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                        new CameraPosition.Builder()
+                                .target(new LatLng(location.getLatitude(), location.getLongitude()))  // set the camera's center position
+                                .build()));
+                if (!checkForRecButton) {
+                    showRecLine(new LatLng(location.getLatitude(), location.getLongitude()));
+                }
             }
 
             @Override
             public void connectionState(int state) {
-                if (state == 1){
-                    Toast.makeText(MapsActivity.this,"This device is not supported.",Toast.LENGTH_LONG).show();
-                }else {
+                if (state == 1) {
+                    Toast.makeText(MapsActivity.this, "This device is not supported.", Toast.LENGTH_LONG).show();
+                } else {
                     GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
                     apiAvailability.getErrorDialog(MapsActivity.this, state, PLAY_SERVICES_RESOLUTION_REQUEST)
                             .show();
@@ -149,7 +158,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
 
-        selectUserRouts =  getIntent().getStringArrayListExtra(SELECTED_USER_ROUTS);
+        selectUserRouts = getIntent().getStringArrayListExtra(SELECTED_USER_ROUTS);
         selectUserPlacesList = (List<Place>) getIntent().getSerializableExtra(SELECTED_USER_PLACES);
 
         // Mapbox access token is configured here. This needs to be called either in your application
@@ -166,34 +175,38 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mapboxMap != null && !switchCheck) {
-                    checkGPSEnabled();
-                    toggleGps();
-                    floatingActionButton.setImageResource(R.drawable. ic_location_disabled_24dp);
-
-                   // fabRecTrack.setLayoutParams(new LinearLayout.LayoutParams(50,50));
-                   // floatingActionButton.setLayoutParams(new LinearLayout.LayoutParams(50,50));
-                    fabRecTrack.setVisibility(View.VISIBLE);
-                    switchCheck = true;
-                }else if (switchCheck){
-                    mapboxMap.setMyLocationEnabled(false);
-                    stopService(new Intent(MapsActivity.this, LocationService.class));
-                    floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
-                    //floatingActionButton.setLayoutParams(new LinearLayout.LayoutParams(60,60));
-                    fabRecTrack.setVisibility(View.GONE);
-                    switchCheck = false;
-                }
+                startGPS();
             }
         });
     }
 
+    private void startGPS() {
+        if (mapboxMap != null && !switchCheck) {
+            checkGPSEnabled();
+            toggleGps();
+            floatingActionButton.setImageResource(R.drawable.ic_location_disabled_24dp);
+
+            // fabRecTrack.setLayoutParams(new LinearLayout.LayoutParams(50,50));
+            // floatingActionButton.setLayoutParams(new LinearLayout.LayoutParams(50,50));
+            fabRecTrack.setVisibility(View.VISIBLE);
+            switchCheck = true;
+        } else if (switchCheck) {
+            mapboxMap.setMyLocationEnabled(false);
+            stopService(new Intent(MapsActivity.this, LocationService.class));
+            floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
+            //floatingActionButton.setLayoutParams(new LinearLayout.LayoutParams(60,60));
+            fabRecTrack.setVisibility(View.GONE);
+            switchCheck = false;
+        }
+    }
+
     private void checkGPSEnabled() {
-        LocationManager lm = (LocationManager)MapsActivity.this.getSystemService(Context.LOCATION_SERVICE);
-        boolean gps_enabled ;
+        LocationManager lm = (LocationManager) MapsActivity.this.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled;
         try {
             gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            if (!gps_enabled){
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder( MapsActivity.this);
+            if (!gps_enabled) {
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MapsActivity.this);
 
                 // Setting Dialog Title
                 alertDialog.setTitle("GPS is settings");
@@ -203,7 +216,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 // On pressing Settings button
                 alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,int which) {
+                    public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         MapsActivity.this.startActivity(intent);
                     }
@@ -220,10 +233,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 alertDialog.show();
 
             }
-        } catch(Exception ex) {}
+        } catch (Exception ex) {
+        }
 
     }
-
 
 
     @Override
@@ -232,7 +245,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Layer mapText = mapboxMap.getLayer("country-label-lg");
         mapText.setProperties(textField("{name_ua}"));
 
-        if(selectUserRouts != null && selectUserRouts.size() > 0) {
+        if (selectUserRouts != null && selectUserRouts.size() > 0) {
             for (int i = 0; i < selectUserRouts.size(); i++) {
                 String mUriString = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                         .getString(selectUserRouts.get(i), null);
@@ -241,26 +254,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         }
-        if (selectUserPlacesList != null && selectUserPlacesList.size() > 0){
+        if (selectUserPlacesList != null && selectUserPlacesList.size() > 0) {
             for (int i = 0; i < selectUserPlacesList.size(); i++) {
                 lat = selectUserPlacesList.get(i).getPositionPlace().getLatitude();
                 lng = selectUserPlacesList.get(i).getPositionPlace().getLongitude();
-                if (lat != 0 && lng != 0){
+                if (lat != 0 && lng != 0) {
                     IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
                     Icon icon = iconFactory.fromResource(R.drawable.marcer);
 
-                    mapboxMap.addMarker(new MarkerViewOptions().icon(icon).position(new LatLng( lat, lng )));
+                    mapboxMap.addMarker(new MarkerViewOptions().icon(icon).position(new LatLng(lat, lng)));
 
                 }
             }
         }
-
-        mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
-                new CameraPosition.Builder()
-                        .target(new LatLng( lat, lng ))  // set the camera's center position
-                        .zoom(10)  // set the camera's zoom level
-                        .tilt(20)  // set the camera's tilt
-                        .build()));
+        if (getIntent().getBooleanExtra(ACTION_MODE, false)) {
+            startGPS();
+        } else {
+            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                    new CameraPosition.Builder()
+                            .target(new LatLng(lat, lng))  // set the camera's center position
+                            .zoom(10)  // set the camera's zoom level
+                            .tilt(20)  // set the camera's tilt
+                            .build()));
+        }
 
     }
 
@@ -523,7 +539,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (locationService != null) {
             locationService.setOwner(iCapture);
         }
-        if(switchCheck){
+        if (switchCheck) {
             checkGPSEnabled();
         }
     }
@@ -615,7 +631,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -626,52 +641,54 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private class DrawGeoJson extends AsyncTask<Void, Void, List<LatLng>> {
         String mNameFileFromURI;
-        private DrawGeoJson(String uri){
+
+        private DrawGeoJson(String uri) {
             this.mNameFileFromURI = uri;
         }
+
         @Override
         protected List<LatLng> doInBackground(Void... voids) {
 
             ArrayList<LatLng> points = new ArrayList<>();
-                URI mUri = URI.create(mNameFileFromURI);
-                try {
-                    // Load GeoJSON file
-                    File file = new File(mUri);
-                    InputStream fileInputStream = new FileInputStream(file);
-                    BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
-                    StringBuilder sb = new StringBuilder();
-                    int cp;
-                    while ((cp = rd.read()) != -1) {
-                        sb.append((char) cp);
-                    }
-
-                    fileInputStream.close();
-
-                    // Parse JSON
-                    JSONObject json = new JSONObject(sb.toString());
-                    JSONArray features = json.getJSONArray("features");
-                    JSONObject feature = features.getJSONObject(0);
-                    JSONObject geometry = feature.getJSONObject("geometry");
-                    if (geometry != null) {
-                        String type = geometry.getString("type");
-
-                        // Our GeoJSON only has one feature: a line string
-                        if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
-
-                            // Get the Coordinates
-                            JSONArray coords = geometry.getJSONArray("coordinates");
-                            for (int lc = 0; lc < coords.length(); lc++) {
-                                JSONArray coord = coords.getJSONArray(lc);
-                                LatLng latLng = new LatLng(coord.getDouble(1), coord.getDouble(0));
-                                points.add(latLng);
-                            }
-                        }
-                    }
-                } catch (Exception exception) {
-                    Log.e(TAG, "Exception Loading GeoJSON: " + exception.toString());
+            URI mUri = URI.create(mNameFileFromURI);
+            try {
+                // Load GeoJSON file
+                File file = new File(mUri);
+                InputStream fileInputStream = new FileInputStream(file);
+                BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
+                StringBuilder sb = new StringBuilder();
+                int cp;
+                while ((cp = rd.read()) != -1) {
+                    sb.append((char) cp);
                 }
 
-                return points;
+                fileInputStream.close();
+
+                // Parse JSON
+                JSONObject json = new JSONObject(sb.toString());
+                JSONArray features = json.getJSONArray("features");
+                JSONObject feature = features.getJSONObject(0);
+                JSONObject geometry = feature.getJSONObject("geometry");
+                if (geometry != null) {
+                    String type = geometry.getString("type");
+
+                    // Our GeoJSON only has one feature: a line string
+                    if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
+
+                        // Get the Coordinates
+                        JSONArray coords = geometry.getJSONArray("coordinates");
+                        for (int lc = 0; lc < coords.length(); lc++) {
+                            JSONArray coord = coords.getJSONArray(lc);
+                            LatLng latLng = new LatLng(coord.getDouble(1), coord.getDouble(0));
+                            points.add(latLng);
+                        }
+                    }
+                }
+            } catch (Exception exception) {
+                Log.e(TAG, "Exception Loading GeoJSON: " + exception.toString());
+            }
+
+            return points;
         }
 
         @Override
@@ -705,28 +722,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Icon iconStart = iconFactory.fromResource(R.drawable.marcer_flag_start);
                 Icon iconFinish = iconFactory.fromResource(R.drawable.marcer_flag_finish);
                 mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(points.get(0)).title("Початок"));
-                mapboxMap.addMarker(new MarkerViewOptions().icon(iconFinish).position(points.get(points.size()-1)).title("Кінець"));
+                mapboxMap.addMarker(new MarkerViewOptions().icon(iconFinish).position(points.get(points.size() - 1)).title("Кінець"));
                 mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                         new CameraPosition.Builder()
-                                .target(new LatLng( points.get(0).getLatitude(), points.get(0).getLongitude() ))  // set the camera's center position
+                                .target(new LatLng(points.get(0).getLatitude(), points.get(0).getLongitude()))  // set the camera's center position
                                 .zoom(12)  // set the camera's zoom level
                                 .tilt(20)  // set the camera's tilt
                                 .build()));
             }
         }
     }
+
     @Click(R.id.buttonDownloadOfflineRegion)
-    void buttonDownloadOfflineRegion(){
+    void buttonDownloadOfflineRegion() {
         downloadRegionDialog();
     }
 
     @Click(R.id.buttonShowListRegion)
-    void buttonShowListRegion(){
+    void buttonShowListRegion() {
         downloadedRegionList();
     }
 
     @Click(R.id.fabRecTrack)
-    void fabRecTrackWasClicked(){
+    void fabRecTrackWasClicked() {
 
         if (checkForRecButton) {
             Intent serviceIntent = new Intent(this, LocationService.class);
@@ -734,22 +752,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             this.startService(serviceIntent);
             fabRecTrack.setImageResource(android.R.drawable.ic_notification_overlay);
             checkForRecButton = false;
-        }else {
+        } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
             final EditText nameTrackInput = new EditText(this);
             nameTrackInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
             builder.setTitle("Збереження маршруту");
             builder.setView(nameTrackInput);
             builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                            serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameTrackInput.getText().toString());
-                            MapsActivity.this.startService(serviceIntent);
-                            fabRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
-                            checkForRecButton = false;
-                            dialog.cancel();
-                        }
-                    });
+                public void onClick(DialogInterface dialog, int id) {
+                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                    serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameTrackInput.getText().toString());
+                    MapsActivity.this.startService(serviceIntent);
+                    fabRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
+                    checkForRecButton = true;
+                    dialog.cancel();
+                }
+            });
             builder.setNegativeButton("Не збурігати", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -757,14 +775,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE_TRACK);
                     MapsActivity.this.startService(serviceIntent);
                     fabRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
-                    checkForRecButton = false;
+                    checkForRecButton = true;
                 }
             });
             AlertDialog alert = builder.create();
             alert.show();
         }
     }
+
+    private void showRecLine(LatLng latLng) {
+        // Draw polyline on map
+        polylineOption.add(latLng);
+        mapboxMap.addPolyline(polylineOption);
+        if (polylineOption.getPoints().size() > 1){
+            polylineOption.getPoints().remove(0);
+        }else{
+            IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
+            Icon iconStart = iconFactory.fromResource(R.drawable.marcer_flag_start);
+            mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(polylineOption
+                .getPoints().get(0)).title("Початок"));
+        }
+    }
+
 }
-
-
 

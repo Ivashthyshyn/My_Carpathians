@@ -12,6 +12,7 @@ import android.widget.ListView;
 
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.activities.MapsActivity_;
+import com.example.key.my_carpathians.interfaces.Comunicator;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -25,7 +26,7 @@ import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_US
  *
  */
 public class MyFavoritesFragment extends Fragment {
-
+    public Comunicator comunicator;
     public ArrayList<String> listPlaces;
     public ArrayList<String> listRouts;
     public ArrayList<String> listTrack;
@@ -42,29 +43,31 @@ public class MyFavoritesFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_my_favorites, container, false);
-        ListView listPlace = (ListView)view.findViewById(R.id.listViewPlace);
+        final ListView listOfPlaces = (ListView)view.findViewById(R.id.listViewPlace);
         if (listPlaces != null) {
             ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, listPlaces);
-            listPlace.setAdapter(adapter);
-            listPlace.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            listOfPlaces.setAdapter(adapter);
+            listOfPlaces.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+                    comunicator = (Comunicator)getActivity();
+                    comunicator.putStringNamePlace(listPlaces.get(i));
                 }
             });
         }
-        ListView listPlace1 = (ListView) view.findViewById(R.id.listViewRout);
-        if (listRouts != null) {
-            ArrayAdapter<String> adapter1 = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, listRouts);
-            listPlace1.setAdapter(adapter1);
-            listPlace1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        final ListView listOfRouts = (ListView) view.findViewById(R.id.listViewRout);
+        if (this.listRouts != null) {
+            ArrayAdapter<String> adapter1 = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, this.listRouts);
+            listOfRouts.setAdapter(adapter1);
+            listOfRouts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+                    comunicator = (Comunicator)getActivity();
+                    comunicator.putStringNameRout(listRouts.get(i) );
                 }
             });
         }
@@ -77,10 +80,10 @@ public class MyFavoritesFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                    ArrayList<String> selectedUserRout = new ArrayList<>();
-                    selectedUserRout.add(listTrack.get(i));
+                    ArrayList<String> selectedUserTrack = new ArrayList<>();
+                    selectedUserTrack.add(listTrack.get(i));
                     Intent mapsActivityIntent = new Intent(getContext(), MapsActivity_.class);
-                    mapsActivityIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRout);
+                    mapsActivityIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserTrack);
                     startActivity(mapsActivityIntent);
                 }
             });

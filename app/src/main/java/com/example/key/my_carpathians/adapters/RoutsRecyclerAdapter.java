@@ -66,10 +66,10 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
         RoutsViewHolder mHolder = new RoutsViewHolder(mView, new RoutsViewHolder.ClickListener() {
             @Override
-            public void onPressed(Rout RoutsName) {
-                if (RoutsName != null) {
+            public void onPressed(Rout routObject) {
+                if (routObject != null) {
                     Intent intent = new Intent(context, ActionActivity_.class);
-                    intent.putExtra(PUT_EXTRA_ROUT, RoutsName);
+                    intent.putExtra(PUT_EXTRA_ROUT, routObject);
                     ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
                     ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
                     intent.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);

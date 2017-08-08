@@ -16,12 +16,14 @@ import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.fragments.MyFavoritesFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
 import com.example.key.my_carpathians.fragments.RoutsListFragment;
 import com.example.key.my_carpathians.fragments.RoutsListFragment_;
+import com.example.key.my_carpathians.interfaces.Comunicator;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -50,6 +52,11 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Set;
 
+import io.fabric.sdk.android.Fabric;
+
+import static com.example.key.my_carpathians.activities.MapsActivity.REC_MODE;
+import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
+import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_TRACK_LIST;
 
 /**
@@ -57,9 +64,10 @@ import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_US
  * status bar and navigation/system bar) with user interaction.
  */
 @EActivity
-public class StartActivity extends AppCompatActivity {
+public class StartActivity extends AppCompatActivity implements Comunicator {
     public static final String FAVORITES_ROUTS_LIST = "favorites_user_routs";
     public static final String FAVORITES_PLACE_LIST = "favorites_user_places";
+    public static final String ACTION_MODE = "action_mode";
     public FragmentManager fragmentManager;
     public PlacesListFragment placesListFragment;
     public RoutsListFragment routsListFragment;
@@ -79,6 +87,7 @@ public class StartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_start);
         mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -138,6 +147,7 @@ public class StartActivity extends AppCompatActivity {
         });
 
     }
+
 
     /**
      * This method is download and save routs track to SD card in package "Rout"
@@ -323,5 +333,33 @@ public class StartActivity extends AppCompatActivity {
         if(createdByUserTrackList != null ){
             myFavoritesFragment.setList(createdByUserTrackList, CREATED_BY_USER_TRACK_LIST);
         }
+    }
+
+    @Override
+    public void putStringNameRout(String name) {
+        for (int i = 0; i < routs.size(); i++){
+            if (routs.get(i).getNameRout().equals(name)){
+                Intent intentActionActivity = new Intent(context, ActionActivity_.class);
+                intentActionActivity.putExtra(PUT_EXTRA_ROUT, routs.get(i));
+                startActivity(intentActionActivity);
+            }
+        }
+    }
+
+    @Override
+    public void putStringNamePlace(String name) {
+        for (int i = 0; i < places.size(); i++){
+            if (places.get(i).getNamePlace().equals(name)){
+                Intent intentActionActivity = new Intent(context, ActionActivity_.class);
+                intentActionActivity.putExtra(PUT_EXTRA_PLACE, places.get(i));
+                startActivity(intentActionActivity);
+            }
+        }
+    }
+    @Click(R.id.buttonFastRec)
+    void buttonFastRecWasClicked(){
+        Intent intentMapActivity = new Intent(context, MapsActivity_.class);
+        intentMapActivity.putExtra(ACTION_MODE, REC_MODE);
+        startActivity(intentMapActivity);
     }
 }
