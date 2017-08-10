@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
@@ -19,6 +20,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -33,7 +38,9 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
+import com.mapbox.mapboxsdk.annotations.Polyline;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -89,6 +96,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public ArrayList<String> selectUserRouts = null;
     public List<Place> selectUserPlacesList = null;
     public PolylineOptions polylineOption = new PolylineOptions();
+    public Polyline recLine;
+    public Marker startMarker;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -133,6 +142,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         iCapture = new ILocation() {
             @Override
             public void update(Location location) {
@@ -579,6 +590,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
+        outState.putBoolean("switchCheck", switchCheck);
+        outState.putBoolean("checkForRecButton", checkForRecButton);
     }
 
     // This method monitors the position of the user on the map
@@ -750,7 +763,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent serviceIntent = new Intent(this, LocationService.class);
             serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_TRACK);
             this.startService(serviceIntent);
-            fabRecTrack.setImageResource(android.R.drawable.ic_notification_overlay);
+
+            autoOrientationOff(true);
+            flashingColorAnimation(true);
             checkForRecButton = false;
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
@@ -763,19 +778,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
                     serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameTrackInput.getText().toString());
                     MapsActivity.this.startService(serviceIntent);
-                    fabRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
                     checkForRecButton = true;
+                    autoOrientationOff(false);
+                    flashingColorAnimation(false);
                     dialog.cancel();
                 }
             });
-            builder.setNegativeButton("Не збурігати", new DialogInterface.OnClickListener() {
+            builder.setNegativeButton("Не зберігати", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
                     serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE_TRACK);
                     MapsActivity.this.startService(serviceIntent);
-                    fabRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
+                    autoOrientationOff(false);
                     checkForRecButton = true;
+                    flashingColorAnimation(false);
                 }
             });
             AlertDialog alert = builder.create();
@@ -783,19 +800,56 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /**
+     * This method turns on and turns off flashing animation for button fabRecTrack.
+     */
+    private void flashingColorAnimation(boolean b) {
+        fabRecTrack.setImageResource(android.R.drawable.ic_notification_overlay);
+        if(b) {
+            Animation mAnimation = new AlphaAnimation(1, 0);
+            mAnimation.setDuration(300);
+            mAnimation.setInterpolator(new LinearInterpolator());
+            mAnimation.setRepeatCount(Animation.INFINITE);
+            mAnimation.setRepeatMode(Animation.REVERSE);
+            fabRecTrack.startAnimation(mAnimation);
+        }else {
+            fabRecTrack.clearAnimation();
+            fabRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
+            mapboxMap.removePolyline(recLine);
+            mapboxMap.removeMarker(startMarker);
+        }
+    }
+
+    /**
+     * This method turns off rotation of the device while recording a track, and turns on after rec.
+     */
+    private void autoOrientationOff(boolean b) {
+        if (b) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        }else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+        }
+    }
+
     private void showRecLine(LatLng latLng) {
         // Draw polyline on map
         polylineOption.add(latLng);
-        mapboxMap.addPolyline(polylineOption);
+        recLine = mapboxMap.addPolyline(polylineOption);
         if (polylineOption.getPoints().size() > 1){
             polylineOption.getPoints().remove(0);
         }else{
             IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
             Icon iconStart = iconFactory.fromResource(R.drawable.marcer_flag_start);
-            mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(polylineOption
+            startMarker = mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(polylineOption
                 .getPoints().get(0)).title("Початок"));
         }
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        switchCheck =  savedInstanceState.getBoolean("switchCheck");
+        checkForRecButton = savedInstanceState.getBoolean("checkForRecButton");
+    }
 }
 
