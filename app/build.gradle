@@ -97,6 +97,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:10.0.1'
     compile 'com.cocoahero.android:geojson:1.0.1@jar'
     compile 'com.jjoe64:graphview:4.2.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
 }
 
