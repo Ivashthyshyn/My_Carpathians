@@ -90,7 +90,6 @@ public class ActionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         routList = (List<Rout>) getIntent().getSerializableExtra(PUT_EXTRA_ROUTS_LIST);
         placeList = (List<Place>) getIntent().getSerializableExtra(PUT_EXTRA_PLACE_LIST);

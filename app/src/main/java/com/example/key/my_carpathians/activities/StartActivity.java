@@ -41,6 +41,7 @@ import com.example.key.my_carpathians.interfaces.Comunicator;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -55,6 +56,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -65,6 +68,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -122,7 +126,9 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
     private ListView mListIthemView;
     private  FirebaseUser mFirebaseUser;
     private CallbackManager mCallbackManager;
-
+    private FirebaseUser user;
+    private FirebaseAuth.AuthStateListener authListener;
+    private FirebaseAuth auth;
 
 
 
@@ -130,19 +136,24 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
     public ImageView userAccountImage;
 
     @ViewById(R.id.facebokLoginButton)
-    public Button facebookLogin;
+    public Button facebookLoginButton;
 
     @ViewById(R.id.googleLoginButton)
     public Button googleLoginButton;
 
     @ViewById(R.id.googleButton)
-    SignInButton googleButton;
+    SignInButton loginGoogle;
 
+    @ViewById(R.id.buttonLogout)
+    Button buttonLogaut;
+
+    @ViewById(R.id.buttonGoogleLogout)
+    Button buttonGoogleLogout;
    // @ViewById(R.id.greeting)
     TextView greeting;
 
     @ViewById(R.id.facebookButton)
-    LoginButton loginFacebookButton;
+    LoginButton loginFacebook;
 
     @ViewById(R.id.email)
     EditText inputEmail;
@@ -175,12 +186,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start);
-        googleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                signIn();
-            }
-        });
+        auth = FirebaseAuth.getInstance();
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mListIthemView = (ListView)findViewById(R.id.lst_menu_items);
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
@@ -191,63 +197,25 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
 
             @Override
             public void onDrawerOpened(View drawerView) {
-                loginGoogle();
+                user = auth.getCurrentUser();
+                if (user == null){
+                    showableLogInGroup(true);
+                }else if(user.isAnonymous()) {
 
-                if (mFirebaseUser == null ) {
-                    showLoginGroup();
+                    //Todo mast by code from anonymous user
+                    showInterfaceForAnonymous();
+                }else {
+                    if (user.getProviders().get(0).equals("google.com")){
+                        loginGoogle();
+                       user.getProviderData().get(0).getPhotoUrl();
 
-                }else if(mFirebaseUser.getProviders() == null || mFirebaseUser.getProviders().size() == 0){
-                    List<String> dd =  mFirebaseUser.getProviders();
-                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(StartActivity.this);
-
-                    // Setting Dialog Title
-                    alertDialog.setTitle("Authentication");
-
-                    // Setting Dialog Message
-                    alertDialog.setMessage("You need to login to access the settings");
-
-                    // On pressing Settings button
-                    alertDialog.setPositiveButton("Login", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,int which) {
-                         /**   mFirebaseUser.delete()
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()) {
-                                                Toast.makeText(StartActivity.this, "Your profile is deleted:( Create a account now!", Toast.LENGTH_SHORT).show();
-                                                startActivity(new Intent(StartActivity.this, SignupActivity.class));
-                                                finish();
-                                              //  progressBar.setVisibility(View.GONE);
-                                            } else {
-                                                Toast.makeText(StartActivity.this, "Failed to delete your account!", Toast.LENGTH_SHORT).show();
-                                             //   progressBar.setVisibility(View.GONE);
-                                            }
-                                        }
-                                    });
-                          */
-                            signOut();
-
-                            showLoginGroup();
-                        }
-                    });
-
-                    // on pressing cancel button
-                    alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            mDrawerLayout.closeDrawer(Gravity.LEFT);
-                            dialog.cancel();
-                        }
-                    });
-
-                    // Showing Alert Message
-                    alertDialog.show();
-
-
-                }else if (mFirebaseUser.getProviders().size() > 0){
-                   showSiginAutButton();
+                        buttonGoogleLogout.setVisibility(View.VISIBLE);
+                    }else if (user.getProviders().get(0).equals("facebook.com")){
+                        loginFacebook();
+                    }else if (user.getProviders().get(0).equals("password")) {
+                        buttonLogaut.setVisibility(View.VISIBLE);
+                    }
                 }
-
-
             }
 
             @Override
@@ -328,18 +296,15 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
 
     }
 
-    private void showSiginAutButton() {
-
-    }
-
-    private void showLoginGroup() {
-       facebookLogin.setVisibility(View.VISIBLE);
-       googleLoginButton.setVisibility(View.VISIBLE);
-
+    private void showInterfaceForAnonymous() {
+        buttonLogaut.setVisibility(View.VISIBLE);
+        showableLogInGroup(false);
     }
 
     private void signOut() {
         mAuth.signOut();
+        showableLogInGroup(true);
+
     }
 
 
@@ -432,8 +397,6 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 
@@ -467,6 +430,8 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         builder.setNegativeButton("Анонімний вхід", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
                 signInAnonymously();
+                mDrawerLayout.closeDrawer(Gravity.LEFT);
+
             }
         });
         builder.setCancelable(true);
@@ -568,7 +533,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
 
     @Click(R.id.buttonResetPassword)
     public void buttonResetPasswordWasClicked(){
-        startActivity(new Intent(StartActivity.this, ResetPasswordActivity.class));
+        startActivity(new Intent(StartActivity.this, ResetPasswordActivity_.class));
     }
 
     @Click(R.id.buttonCreateNewAccount)
@@ -618,43 +583,92 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
     }
 
     private void loginFacebook() {
+        updateUI(null);
+        loginFacebook.setVisibility(View.VISIBLE);
         // If using in a fragment
-
+        AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken accessToken, AccessToken accessToken2) {
+                Log.d(TAG, "onCurrentAccessTokenChanged()");
+                if (accessToken == null) {
+                updateUI(null);
+                    showableLogInGroup(false);
+                    loginFacebook.setVisibility(View.VISIBLE);
+                } else if (accessToken2 == null) {
+                    LoginManager.getInstance().logOut();
+                    auth.signOut();
+                    updateUI(null);
+                    showableLogInGroup(true);
+                }
+            }
+        };
         mCallbackManager = CallbackManager.Factory.create();
-        loginFacebookButton.setReadPermissions("email");
+
+        loginFacebook.setReadPermissions("email");
         // Callback registration
-        loginFacebookButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+        loginFacebook.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Toast toast = Toast.makeText(StartActivity.this, "Logged In", Toast.LENGTH_SHORT);
                 handleFacebookAccessToken(loginResult.getAccessToken());
                 toast.show();
-                updateUI();
+                updateUI(null);
             }
 
             @Override
             public void onCancel() {
                 // App code
-                updateUI();
+                updateUI(null);
             }
 
             @Override
             public void onError(FacebookException exception) {
-                updateUI();
+                updateUI(null);
             }
+
         });
+
+
     }
+
+    private void showableLogInGroup(boolean b) {
+        if(b){
+            inputPasswordLayout.setVisibility(View.VISIBLE);
+            inputEmailLayout.setVisibility(View.VISIBLE);
+            emailLoginButton.setVisibility(View.VISIBLE);
+            buttonResetPassword.setVisibility(View.VISIBLE);
+            buttonCreateNewAccount.setVisibility(View.VISIBLE);
+            facebookLoginButton.setVisibility(View.VISIBLE);
+            googleLoginButton.setVisibility(View.VISIBLE);
+            loginFacebook.setVisibility(View.GONE);
+            loginGoogle.setVisibility(View.GONE);
+            buttonLogaut.setVisibility(View.GONE);
+            buttonGoogleLogout.setVisibility(View.GONE);
+        }else {
+            inputPasswordLayout.setVisibility(View.GONE);
+            inputEmailLayout.setVisibility(View.GONE);
+            emailLoginButton.setVisibility(View.GONE);
+            buttonResetPassword.setVisibility(View.GONE);
+            buttonCreateNewAccount.setVisibility(View.GONE);
+            facebookLoginButton.setVisibility(View.GONE);
+            googleLoginButton.setVisibility(View.GONE);
+            buttonGoogleLogout.setVisibility(View.GONE);
+        }
+    }
+
     private void loginGoogle() {
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, (GoogleApiClient.OnConnectionFailedListener) this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+        // [END config_signin]
+        if (mGoogleApiClient== null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .build();
+        }
     }
 
     @Override
@@ -662,8 +676,9 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         super.onActivityResult(requestCode, resultCode, data);
 
         // Pass the activity result back to the Facebook SDK
-      //  mCallbackManager.onActivityResult(requestCode, resultCode, data);
-
+        if(mCallbackManager != null) {
+            mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        }
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
@@ -674,16 +689,24 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
             } else {
                 // Google Sign In failed, update UI appropriately
                 // [START_EXCLUDE]
-                updateUI();
+                updateUI(null);
                 // [END_EXCLUDE]
             }
         }
     }
 
-    private void updateUI() {
+    private void updateUI(GoogleSignInAccount account) {
+        if (account !=null ){
+            Glide
+                    .with(this)
+                    .load(account.getPhotoUrl().toString())
+                    .into(userAccountImage);
+        }
+
         boolean enableButtons = AccessToken.getCurrentAccessToken() != null;
 
         Profile profile = Profile.getCurrentProfile();
+
         if (enableButtons && profile != null) {
             Glide
                     .with(this)
@@ -697,7 +720,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
     }
 
     private void handleFacebookAccessToken(AccessToken token) {
-        //Log.d(TAG, "handleFacebookAccessToken:" + token);
+        //Log.d(TAG, "handleFacebookAccessToken:" + token)
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
@@ -715,10 +738,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
                                     Toast.LENGTH_SHORT).show();
 
                         }else{
-                            updateUI();
-
-                            LoginManager.getInstance().logOut();
-                            finish();
+                            updateUI(null);
                         }
                     }
                 });
@@ -730,7 +750,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
     }
 
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+    private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -741,22 +761,33 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
-                            updateUI();
-                            Intent intent = new Intent(StartActivity.this, StartActivity_.class);
-                            startActivity(intent);
-                            finish();
+                            loginGoogle.setVisibility(View.GONE);
+                            buttonGoogleLogout.setVisibility(View.VISIBLE);
+                            updateUI(acct);
 
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(StartActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                            updateUI();
+                            updateUI(null);
                         }
                     }
                 });
     }
 
+    private void googleSignOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        if (status.isSuccess()){
+                            signOut();
+                        }
+                        // ...
+                    }
+                });
+    }
 
 
 
@@ -767,32 +798,32 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-// An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
     }
 
    @Click(R.id.facebokLoginButton)
-    void facebokLoginButtonWasClicked(){
-        inputPasswordLayout.setVisibility(View.GONE);
-        inputEmailLayout.setVisibility(View.GONE);
-        emailLoginButton.setVisibility(View.GONE);
-        buttonResetPassword.setVisibility(View.GONE);
-        buttonCreateNewAccount.setVisibility(View.GONE);
-       loginFacebookButton.setVisibility(View.VISIBLE);
+    void facebookLoginButtonWasClicked(){
+       showableLogInGroup(false);
+       loginFacebook.setVisibility(View.VISIBLE);
        loginFacebook();
     }
 
     @Click(R.id.googleLoginButton)
     void googleLoginButtonWasClicked(){
-        inputPasswordLayout.setVisibility(View.GONE);
-        inputEmailLayout.setVisibility(View.GONE);
-        emailLoginButton.setVisibility(View.GONE);
-        buttonResetPassword.setVisibility(View.GONE);
-        buttonCreateNewAccount.setVisibility(View.GONE);
-        googleButton.setVisibility(View.VISIBLE);
+        showableLogInGroup(false);
+        loginGoogle();
+        loginGoogle.setVisibility(View.VISIBLE);
     }
 
+    @Click(R.id.buttonLogout)
+    void buttonLogoutWasClicked(){
+        signOut();
+        showableLogInGroup(true);
+    }
 
+    @Click(R.id.buttonGoogleLogout)
+    void buttonGoogleLogout(){
+        googleSignOut();
+    }
 }

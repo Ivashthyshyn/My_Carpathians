@@ -92,8 +92,6 @@ public class SettingsActivity extends AppCompatActivity {
                 if (user == null ) {
                     // user auth state is changed - user is null
                     // launch login activity
-                    startActivity(new Intent(SettingsActivity.this, LoginActivity_.class));
-                    finish();
                 }else if(user.getProviders() == null || user.getProviders().size() == 0){
                     List<String> dd =  user.getProviders();
                     AlertDialog.Builder alertDialog = new AlertDialog.Builder(SettingsActivity.this);
@@ -123,7 +121,6 @@ public class SettingsActivity extends AppCompatActivity {
                                         }
                                     });
                             signOut();
-                            SettingsActivity.this.startActivity(new Intent(SettingsActivity.this, LoginActivity_.class));
                         }
                     });
 
@@ -230,7 +227,7 @@ public class SettingsActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 Toast.makeText(SettingsActivity.this, "Your profile is deleted:( Create a account now!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(SettingsActivity.this, LoginActivity_.class));
+                                startActivity(new Intent(SettingsActivity.this, StartActivity_.class));
                                 finish();
                                 progressBar.setVisibility(View.GONE);
                             } else {
