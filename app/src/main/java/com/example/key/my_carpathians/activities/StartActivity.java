@@ -703,6 +703,8 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
                     .into(userAccountImage);
         }
 
+
+
         boolean enableButtons = AccessToken.getCurrentAccessToken() != null;
 
         Profile profile = Profile.getCurrentProfile();
