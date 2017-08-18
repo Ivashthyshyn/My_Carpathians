@@ -705,6 +705,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
 
 
 
+
         boolean enableButtons = AccessToken.getCurrentAccessToken() != null;
 
         Profile profile = Profile.getCurrentProfile();
