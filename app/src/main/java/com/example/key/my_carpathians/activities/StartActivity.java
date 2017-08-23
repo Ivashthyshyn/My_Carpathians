@@ -15,16 +15,14 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +30,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.fragments.MyFavoritesFragment;
+import com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter;
 import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
 import com.example.key.my_carpathians.fragments.RoutsListFragment;
@@ -68,7 +66,6 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -85,14 +82,24 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.fabric.sdk.android.Fabric;
 
 import static com.example.key.my_carpathians.activities.MapsActivity.REC_MODE;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_ROUT;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_TRACK_LIST;
@@ -102,82 +109,77 @@ import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_US
  * status bar and navigation/system bar) with mFirebaseUser interaction.
  */
 @EActivity
-public class StartActivity extends AppCompatActivity implements Comunicator,
-        GoogleApiClient.OnConnectionFailedListener {
-    private static final int RC_SIGN_IN = 9001;
+public class StartActivity extends AppCompatActivity implements
+        GoogleApiClient.OnConnectionFailedListener,Comunicator {
     public static final String FAVORITES_ROUTS_LIST = "favorites_user_routs";
     public static final String FAVORITES_PLACE_LIST = "favorites_user_places";
     public static final String ACTION_MODE = "action_mode";
+    public static final String PREFS_NAME = "MyPrefsFile";
+    private static final int RC_SIGN_IN = 9001;
+    private static final String TAG = "StartActivity";
+    public static final String MANUFACTURER_MODE = "manufacturer_mode";
     public FragmentManager fragmentManager;
     public PlacesListFragment placesListFragment;
     public RoutsListFragment routsListFragment;
-    public MyFavoritesFragment myFavoritesFragment;
     public ArrayList<Place> places = new ArrayList<>();
     public ArrayList<Rout> routs = new ArrayList<>();
-    public  AlertDialog.Builder builder;
+    public AlertDialog.Builder builder;
+    @ViewById(R.id.userAcountImage)
+    public CircleImageView userAccountImage;
+    @ViewById(R.id.facebokLoginButton)
+    public Button facebookLoginButton;
+    @ViewById(R.id.googleLoginButton)
+    public Button googleLoginButton;
+    @ViewById(R.id.textViewEmail)
+    TextView textViewEmail;
+    @ViewById(R.id.googleButton)
+    SignInButton loginGoogle;
+    @ViewById(R.id.buttonLogout)
+    Button buttonLogaut;
+    @ViewById(R.id.buttonGoogleLogout)
+    Button buttonGoogleLogout;
+    @ViewById(R.id.facebookButton)
+    LoginButton loginFacebook;
+    @ViewById(R.id.email)
+    EditText inputEmail;
+    @ViewById(R.id.password)
+    EditText inputPassword;
+    @ViewById(R.id.progressBar)
+    ProgressBar progressBar;
+    @ViewById(R.id.emailLoginButton)
+    Button emailLoginButton;
+    @ViewById(R.id.inputEmailLayout)
+    TextInputLayout inputEmailLayout;
+    @ViewById(R.id.inputPasswordLayout)
+    TextInputLayout inputPasswordLayout;
+    @ViewById(R.id.buttonResetPassword)
+    Button buttonResetPassword;
+    @ViewById(R.id.buttonCreateNewAccount)
+    Button buttonCreateNewAccount;
+    @ViewById(R.id.buttonFavoritesPlaces)
+    Button buttonFavoritesPlaces;
+    @ViewById(R.id.buttonFavoritesRouts)
+    Button buttonFavoritesRouts;
+    @ViewById(R.id.buttonCreatedPlaces)
+    Button buttonCreatedPlaces;
+    @ViewById(R.id.buttonCreatedRouts)
+    Button buttonCreatedRouts;
+    @ViewById(R.id.listViewPlace)
+    RecyclerView listOfPlaces;
+    @ViewById(R.id.listViewRout)
+    RecyclerView listOfRouts;
+    @ViewById(R.id.listViewTrack)
+    RecyclerView listOfTrack;
     private boolean connected = false;
-    private static final String TAG = "StartActivity";
-    public static final String PREFS_NAME = "MyPrefsFile";
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Context context = StartActivity.this;
-    private SharedPreferences  mSharedPreferences;
+    private SharedPreferences mSharedPreferences;
     private DrawerLayout mDrawerLayout;
-    private ListView mListIthemView;
-    private  FirebaseUser mFirebaseUser;
+    private FirebaseUser mFirebaseUser;
     private CallbackManager mCallbackManager;
     private FirebaseUser user;
-    private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
-
-
-
-    @ViewById(R.id.userAcountImage)
-    public ImageView userAccountImage;
-
-    @ViewById(R.id.facebokLoginButton)
-    public Button facebookLoginButton;
-
-    @ViewById(R.id.googleLoginButton)
-    public Button googleLoginButton;
-
-    @ViewById(R.id.googleButton)
-    SignInButton loginGoogle;
-
-    @ViewById(R.id.buttonLogout)
-    Button buttonLogaut;
-
-    @ViewById(R.id.buttonGoogleLogout)
-    Button buttonGoogleLogout;
-   // @ViewById(R.id.greeting)
-    TextView greeting;
-
-    @ViewById(R.id.facebookButton)
-    LoginButton loginFacebook;
-
-    @ViewById(R.id.email)
-    EditText inputEmail;
-
-    @ViewById(R.id.password)
-    EditText inputPassword;
-
-    @ViewById(R.id.progressBar)
-    ProgressBar progressBar;
-
-    @ViewById( R.id.emailLoginButton)
-    Button emailLoginButton;
-
-    @ViewById(R.id.inputEmailLayout)
-    TextInputLayout inputEmailLayout;
-
-   @ViewById(R.id.inputPasswordLayout)
-    TextInputLayout inputPasswordLayout;
-
-    @ViewById(R.id.buttonResetPassword)
-    Button buttonResetPassword;
-
-    @ViewById(R.id.buttonCreateNewAccount)
-    Button buttonCreateNewAccount;
     private GoogleApiClient mGoogleApiClient;
 
 
@@ -187,8 +189,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start);
         auth = FirebaseAuth.getInstance();
-        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        mListIthemView = (ListView)findViewById(R.id.lst_menu_items);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -198,22 +199,28 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
             @Override
             public void onDrawerOpened(View drawerView) {
                 user = auth.getCurrentUser();
-                if (user == null){
+                if (user == null) {
                     showableLogInGroup(true);
-                }else if(user.isAnonymous()) {
+                } else if (user.isAnonymous()) {
+                    updateUI("Anonymous", null);
 
                     //Todo mast by code from anonymous user
                     showInterfaceForAnonymous();
-                }else {
-                    if (user.getProviders().get(0).equals("google.com")){
+                } else {
+                    if (user.getProviders().get(0).equals("google.com")) {
                         loginGoogle();
-                       user.getProviderData().get(0).getPhotoUrl();
 
+                        updateUI(user.getProviderData().get(0).getDisplayName(),
+                                String.valueOf(user.getProviderData().get(0).getPhotoUrl()));
                         buttonGoogleLogout.setVisibility(View.VISIBLE);
-                    }else if (user.getProviders().get(0).equals("facebook.com")){
+                    } else if (user.getProviders().get(0).equals("facebook.com")) {
                         loginFacebook();
-                    }else if (user.getProviders().get(0).equals("password")) {
+                        updateUI(user.getProviderData().get(0).getDisplayName(),
+                                String.valueOf(user.getProviderData().get(0).getPhotoUrl()));
+                    } else if (user.getProviders().get(0).equals("password")) {
+                        updateUI(user.getProviderData().get(0).getEmail(), null);
                         buttonLogaut.setVisibility(View.VISIBLE);
+                        buttonLogaut.setText("LOG OUT");
                     }
                 }
             }
@@ -228,16 +235,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
 
             }
         });
-        mListIthemView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int pos, long id){
 
-
-            }
-        });
-        final String[] data ={"one","two","three"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data);
-        mListIthemView.setAdapter(adapter);
         mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -261,11 +259,12 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         myPlace.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                    Place university = postSnapshot.getValue(Place.class);
-                    places.add(university);
-                }
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Place place = postSnapshot.getValue(Place.class);
+                    places.add(place);
 
+                }
+                downloadPhoto(places);
             }
 
             @Override
@@ -278,7 +277,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         myRouts.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Rout rout = postSnapshot.getValue(Rout.class);
                     if (isOnline()) {
                         downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
@@ -298,11 +297,13 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
 
     private void showInterfaceForAnonymous() {
         buttonLogaut.setVisibility(View.VISIBLE);
+        buttonLogaut.setText("authentication");
         showableLogInGroup(false);
     }
 
     private void signOut() {
         mAuth.signOut();
+        updateUI(null, null);
         showableLogInGroup(true);
 
     }
@@ -310,66 +311,149 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
 
     /**
      * This method is download and save routs track to SD card in package "Rout"
+     *
      * @param urlRoutsTrack is a file address in database Storage from downloading
-     * @param nameRout is the file name that is written to SD card
+     * @param nameRout      is the file name that is written to SD card
      */
     @Background
-    public void downloadRoutToStorage(String urlRoutsTrack,  final String nameRout) {
+    public void downloadRoutToStorage(String urlRoutsTrack, final String nameRout) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference httpsReference = storage.getReferenceFromUrl(urlRoutsTrack);
-        String nameFileInStorage =  httpsReference.getName();
+        String nameFileInStorage = httpsReference.getName();
         File rootPath = new File(context.getExternalFilesDir(
                 Environment.DIRECTORY_DOWNLOADS), "Routs");
-        if(!rootPath.exists()) {
+        if (!rootPath.exists()) {
             rootPath.mkdirs();
         }
 
-        final File localFile = new File(rootPath, nameFileInStorage );
+        final File localFile = new File(rootPath, nameFileInStorage);
         if (!localFile.exists()) {
 
-        final URI fileUri = localFile.toURI();
+            final URI fileUri = localFile.toURI();
 
-        httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                mSharedPreferences.edit().putString(nameRout, fileUri.toString()).apply();
+            httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    mSharedPreferences.edit().putString(nameRout, fileUri.toString()).apply();
 
-                Log.e("firebase ",";local tem file created  created " +localFile.toString());
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
+                    Log.e("firebase ", ";local tem file created  created " + localFile.toString());
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
 
-                Log.e("firebase ",";local tem file not created  created " +exception.toString());
-            }
-        });
+                    Log.e("firebase ", ";local tem file not created  created " + exception.toString());
+                }
+            });
         }
     }
 
+    @Background
+    public void downloadPhoto(List<Place> placeList) {
+        for (int i = 0; i < placeList.size(); i++) {
+            try {
+                URL url = new URL(placeList.get(i).getUrlPlace());
+
+                File rootPath = new File(context.getExternalFilesDir(
+                        Environment.DIRECTORY_DOWNLOADS), "Photos");
+                if (!rootPath.exists()) {
+                    rootPath.mkdirs();
+                }
+
+
+                File file = new File(rootPath, placeList.get(i).getNamePlace());
+                if (!file.exists()) {
+                    file.toURI();
+                             /* Open a connection */
+                    URLConnection urlConnection = url.openConnection();
+                    InputStream inputStream = null;
+                    HttpURLConnection httpConn = (HttpURLConnection) urlConnection;
+                    httpConn.setRequestMethod("GET");
+                    httpConn.connect();
+
+                    if (httpConn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        inputStream = httpConn.getInputStream();
+                    }
+
+                    FileOutputStream fos = new FileOutputStream(file);
+                    int totalSize = httpConn.getContentLength();
+                    int downloadedSize = 0;
+                    byte[] buffer = new byte[1024];
+                    int bufferLength = 0;
+                    while ((bufferLength = inputStream.read(buffer)) > 0) {
+                        fos.write(buffer, 0, bufferLength);
+                        downloadedSize += bufferLength;
+                        Log.i("Progress:", "downloadedSize:" + downloadedSize + "totalSize:" + totalSize);
+                    }
+
+                    fos.close();
+                    Log.d("test", "Image Saved in sdcard..");
+                }
+            } catch (IOException io) {
+                io.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Click(R.id.buttonPlace)
-    void buttonPlaceWasClicked(){
-
-        fragmentManager = getSupportFragmentManager();
-        placesListFragment = new PlacesListFragment_();
-        android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
-                .beginTransaction();
-        fragmentTransaction.add(R.id.drawer_layout, placesListFragment);
-        fragmentTransaction.commit();
-        if(places != null) {
+    void buttonPlaceWasClicked() {
+        if (places.size() != 0 & routs.size() != 0) {
+            fragmentManager = getSupportFragmentManager();
+            placesListFragment = new PlacesListFragment_();
+            android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
+                    .beginTransaction();
+            fragmentTransaction.add(R.id.drawer_layout, placesListFragment);
+            fragmentTransaction.commit();
             placesListFragment.setList(places, routs);
+        } else if (places.size() == 0 & !isOnline()) {
+            builder = new AlertDialog.Builder(this);
+            builder.setTitle("Мережа Інтернет");
+            builder.setMessage("Ви жодного разу після встановлення програми не підключались до мережі " +
+                    "Потрібно хочаб раз завантажити дані з інтернету.  " + "Завантаження відбувається автоматично");
+
+            builder.setPositiveButton("Так", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int arg1) {
+
+                }
+            });
+
+            builder.setCancelable(true);
+
+
+            AlertDialog alert = builder.create();
+            alert.show();
         }
     }
+
     @Click(R.id.buttonRoutes)
-    void buttonRoutesWasClicked(){
-        fragmentManager = getSupportFragmentManager();
-        routsListFragment = new RoutsListFragment_();
-        android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
-                .beginTransaction();
-        fragmentTransaction.add(R.id.drawer_layout, routsListFragment);
-        fragmentTransaction.commit();
-        if(routs != null) {
+    void buttonRoutesWasClicked() {
+        if (routs.size() != 0 & routs.size() != 0) {
+            fragmentManager = getSupportFragmentManager();
+            routsListFragment = new RoutsListFragment_();
+            android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
+                    .beginTransaction();
+            fragmentTransaction.add(R.id.drawer_layout, routsListFragment);
+            fragmentTransaction.commit();
             routsListFragment.setList(routs, places);
+        } else if (routs.size() == 0 & !isOnline()) {
+            builder = new AlertDialog.Builder(this);
+            builder.setTitle("Мережа Інтернет");
+            builder.setMessage("Ви жодного разу після встановлення програми не підключались до мережі " +
+                    "Потрібно хочаб раз завантажити дані з інтернету.  " + "Завантаження відбувається автоматично");
+
+            builder.setPositiveButton("Так", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int arg1) {
+
+                }
+            });
+
+            builder.setCancelable(true);
+
+
+            AlertDialog alert = builder.create();
+            alert.show();
         }
     }
 
@@ -382,16 +466,13 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
 
     @Override
     public void onBackPressed() {
-        if ( placesListFragment != null){
+        if (placesListFragment != null) {
             fragmentManager.beginTransaction().remove(placesListFragment).commit();
             placesListFragment = null;
-        }else if (routsListFragment != null) {
+        } else if (routsListFragment != null) {
             fragmentManager.beginTransaction().remove(routsListFragment).commit();
             routsListFragment = null;
-        }else if(myFavoritesFragment != null ){
-            fragmentManager.beginTransaction().remove(myFavoritesFragment).commit();
-            myFavoritesFragment = null;
-        }else {
+        } else {
             super.onBackPressed();
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -399,8 +480,6 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
             drawer.closeDrawer(GravityCompat.START);
         }
     }
-
-
 
 
     @Override
@@ -411,39 +490,55 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         }
     }
 
-    @Click(R.id.buttonSettings)
-    public void buttonSettingsWasClicked(){
-        startActivity(new Intent(StartActivity.this, SettingsActivity_.class));
+
+    void showLoginDialog() {
+        if (isOnline()) {
+            builder = new AlertDialog.Builder(this);
+            builder.setTitle("Для того щоб отримати доступ до всіх функцій програми потрібно зареєструватися");
+            builder.setMessage("Виберіть спосіб реєстраці");
+
+            builder.setPositiveButton("Зареєструватися", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int arg1) {
+
+                    mDrawerLayout.openDrawer(Gravity.START);
+                }
+            });
+            builder.setNegativeButton("Анонімний вхід", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int arg1) {
+                    signInAnonymously();
+                    mDrawerLayout.closeDrawer(Gravity.START);
+
+                }
+            });
+            builder.setCancelable(true);
+            builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                public void onCancel(DialogInterface dialog) {
+                    signInAnonymously();
+                }
+            });
+
+            AlertDialog alert = builder.create();
+            alert.show();
+        } else {
+            builder = new AlertDialog.Builder(this);
+            builder.setTitle("Мережа Інтернет");
+            builder.setMessage("Нажаль ви зараз ви не підключені до мережі інтернет!" +
+                    " Керування автентифікацією недоступне! ");
+
+            builder.setPositiveButton("Так", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int arg1) {
+
+                }
+            });
+
+            builder.setCancelable(true);
+
+
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
-    void showLoginDialog(){
-        builder = new AlertDialog.Builder(this);
-        builder.setTitle("Раді вітати вас у нашому додатку для людей які полюбляють активний відпочинок");
-        builder.setMessage("Виберіть спосіб реєстраці");
-
-        builder.setPositiveButton("Зареєструватися", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int arg1) {
-
-                mDrawerLayout.openDrawer(Gravity.LEFT);
-            }
-        });
-        builder.setNegativeButton("Анонімний вхід", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int arg1) {
-                signInAnonymously();
-                mDrawerLayout.closeDrawer(Gravity.LEFT);
-
-            }
-        });
-        builder.setCancelable(true);
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            public void onCancel(DialogInterface dialog) {
-                signInAnonymously();
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
     private void signInAnonymously() {
         mAuth.signInAnonymously()
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -463,6 +558,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
                     }
                 });
     }
+
     public boolean isOnline() {
         try {
             ConnectivityManager connectivityManager = (ConnectivityManager) StartActivity.this
@@ -480,68 +576,57 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         }
         return connected;
     }
-    @Click(R.id.buttonMyFavorites)
-    void buttonMyFavoritesWasClicked(){
-        mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        Set<String> favoritesPlacesList =  mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, null);
-        Set<String> favoritesRoutsList =  mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, null);
-        Set<String> createdByUserTrackList =  mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST, null);
-        myFavoritesFragment = new MyFavoritesFragment();
-        fragmentManager = getSupportFragmentManager();
-        android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
-                .beginTransaction();
-        fragmentTransaction.add(R.id.drawer_layout, myFavoritesFragment);
-        fragmentTransaction.commit();
-        if (favoritesPlacesList != null ) {
-            myFavoritesFragment.setList(favoritesPlacesList, FAVORITES_PLACE_LIST);
+
+    @Override
+    public void putStringNameRout(String name, int type) {
+        if (type == MY_ROUT){
+            for (int i = 0; i < routs.size(); i++) {
+                if (routs.get(i).getNameRout().equals(name)) {
+                    Intent intentActionActivity = new Intent(context, ActionActivity_.class);
+                    intentActionActivity.putExtra(PUT_EXTRA_ROUT, routs.get(i));
+                    intentActionActivity.putExtra(MANUFACTURER_MODE, true);
+                    startActivity(intentActionActivity);
+                    }
+                }
+        }else{
+            Intent intentActionActivity = new Intent(context, ActionActivity_.class);
+            //Todo need create new Rout
+            intentActionActivity.putExtra(PUT_EXTRA_ROUT, new Rout());
+            startActivity(intentActionActivity);
         }
-        if( favoritesRoutsList != null ){
-            myFavoritesFragment.setList(favoritesRoutsList, FAVORITES_ROUTS_LIST);
-        }
-        if(createdByUserTrackList != null ){
-            myFavoritesFragment.setList(createdByUserTrackList, CREATED_BY_USER_TRACK_LIST);
-        }
+
     }
 
     @Override
-    public void putStringNameRout(String name) {
-        for (int i = 0; i < routs.size(); i++){
-            if (routs.get(i).getNameRout().equals(name)){
-                Intent intentActionActivity = new Intent(context, ActionActivity_.class);
-                intentActionActivity.putExtra(PUT_EXTRA_ROUT, routs.get(i));
-                startActivity(intentActionActivity);
-            }
-        }
-    }
-
-    @Override
-    public void putStringNamePlace(String name) {
-        for (int i = 0; i < places.size(); i++){
-            if (places.get(i).getNamePlace().equals(name)){
+    public void putStringNamePlace(String name, int type) {
+        for (int i = 0; i < places.size(); i++) {
+            if (places.get(i).getNamePlace().equals(name)) {
                 Intent intentActionActivity = new Intent(context, ActionActivity_.class);
                 intentActionActivity.putExtra(PUT_EXTRA_PLACE, places.get(i));
                 startActivity(intentActionActivity);
             }
         }
     }
+
     @Click(R.id.buttonFastRec)
-    void buttonFastRecWasClicked(){
+    void buttonFastRecWasClicked() {
         Intent intentMapActivity = new Intent(context, MapsActivity_.class);
         intentMapActivity.putExtra(ACTION_MODE, REC_MODE);
         startActivity(intentMapActivity);
     }
 
     @Click(R.id.buttonResetPassword)
-    public void buttonResetPasswordWasClicked(){
+    public void buttonResetPasswordWasClicked() {
         startActivity(new Intent(StartActivity.this, ResetPasswordActivity_.class));
     }
 
     @Click(R.id.buttonCreateNewAccount)
-    public void buttonCreateNewAccount(){
+    public void buttonCreateNewAccount() {
         startActivity(new Intent(StartActivity.this, SignupActivity_.class));
     }
+
     @Click(R.id.emailLoginButton)
-    public void emailLoginButtonWasClicked(){
+    public void emailLoginButtonWasClicked() {
         String email = inputEmail.getText().toString();
         final String password = inputPassword.getText().toString();
 
@@ -555,7 +640,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
             return;
         }
 
-     //   progressBar.setVisibility(View.VISIBLE);
+        //   progressBar.setVisibility(View.VISIBLE);
 
         //authenticate user
         mAuth.signInWithEmailAndPassword(email, password)
@@ -583,7 +668,6 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
     }
 
     private void loginFacebook() {
-        updateUI(null);
         loginFacebook.setVisibility(View.VISIBLE);
         // If using in a fragment
         AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
@@ -591,13 +675,11 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
             protected void onCurrentAccessTokenChanged(AccessToken accessToken, AccessToken accessToken2) {
                 Log.d(TAG, "onCurrentAccessTokenChanged()");
                 if (accessToken == null) {
-                updateUI(null);
                     showableLogInGroup(false);
                     loginFacebook.setVisibility(View.VISIBLE);
                 } else if (accessToken2 == null) {
                     LoginManager.getInstance().logOut();
                     auth.signOut();
-                    updateUI(null);
                     showableLogInGroup(true);
                 }
             }
@@ -612,18 +694,16 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
                 Toast toast = Toast.makeText(StartActivity.this, "Logged In", Toast.LENGTH_SHORT);
                 handleFacebookAccessToken(loginResult.getAccessToken());
                 toast.show();
-                updateUI(null);
             }
 
             @Override
             public void onCancel() {
                 // App code
-                updateUI(null);
             }
 
             @Override
             public void onError(FacebookException exception) {
-                updateUI(null);
+                updateUI(null, null);
             }
 
         });
@@ -632,7 +712,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
     }
 
     private void showableLogInGroup(boolean b) {
-        if(b){
+        if (b) {
             inputPasswordLayout.setVisibility(View.VISIBLE);
             inputEmailLayout.setVisibility(View.VISIBLE);
             emailLoginButton.setVisibility(View.VISIBLE);
@@ -644,7 +724,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
             loginGoogle.setVisibility(View.GONE);
             buttonLogaut.setVisibility(View.GONE);
             buttonGoogleLogout.setVisibility(View.GONE);
-        }else {
+        } else {
             inputPasswordLayout.setVisibility(View.GONE);
             inputEmailLayout.setVisibility(View.GONE);
             emailLoginButton.setVisibility(View.GONE);
@@ -663,7 +743,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
                 .requestEmail()
                 .build();
         // [END config_signin]
-        if (mGoogleApiClient== null) {
+        if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                     .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -676,7 +756,7 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         super.onActivityResult(requestCode, resultCode, data);
 
         // Pass the activity result back to the Facebook SDK
-        if(mCallbackManager != null) {
+        if (mCallbackManager != null) {
             mCallbackManager.onActivityResult(requestCode, resultCode, data);
         }
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
@@ -689,36 +769,25 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
             } else {
                 // Google Sign In failed, update UI appropriately
                 // [START_EXCLUDE]
-                updateUI(null);
+                updateUI(null, null);
                 // [END_EXCLUDE]
             }
         }
     }
 
-    private void updateUI(GoogleSignInAccount account) {
-        if (account !=null ){
+    private void updateUI(String email, String photoUrl) {
+        if (photoUrl != null) {
             Glide
                     .with(this)
-                    .load(account.getPhotoUrl().toString())
+                    .load(photoUrl)
                     .into(userAccountImage);
-        }
-
-
-
-
-        boolean enableButtons = AccessToken.getCurrentAccessToken() != null;
-
-        Profile profile = Profile.getCurrentProfile();
-
-        if (enableButtons && profile != null) {
-            Glide
-                    .with(this)
-                    .load(profile.getProfilePictureUri(200, 200).toString())
-                    .into(userAccountImage);
-           // greeting.setText(getString(R.string.hello_user, profile.getFirstName()));
         } else {
             userAccountImage.setImageResource(R.drawable.user_default);
-          //  greeting.setText(null);
+        }
+        if (email != null) {
+            textViewEmail.setText(email);
+        } else {
+            textViewEmail.setText("");
         }
     }
 
@@ -736,12 +805,14 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
+
                             //Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(StartActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
 
-                        }else{
-                            updateUI(null);
+                        } else {
+                            Profile profile = Profile.getCurrentProfile();
+                            updateUI(profile.getFirstName(), profile.getProfilePictureUri(200, 200).toString());
                         }
                     }
                 });
@@ -766,25 +837,27 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
                             Log.d(TAG, "signInWithCredential:success");
                             loginGoogle.setVisibility(View.GONE);
                             buttonGoogleLogout.setVisibility(View.VISIBLE);
-                            updateUI(acct);
+                            updateUI(acct.getEmail(), String.valueOf(acct.getPhotoUrl()));
+
 
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(StartActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                            updateUI(null);
+                            updateUI(null, null);
                         }
                     }
                 });
     }
 
+
     private void googleSignOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
                     @Override
-                    public void onResult(Status status) {
-                        if (status.isSuccess()){
+                    public void onResult(@NonNull Status status) {
+                        if (status.isSuccess()) {
                             signOut();
                         }
                         // ...
@@ -793,9 +866,8 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
     }
 
 
-
     @Click(R.id.googleButton)
-   public void buttonGoogleLoginWasClicked(){
+    public void buttonGoogleLoginWasClicked() {
         signIn();
     }
 
@@ -805,28 +877,88 @@ public class StartActivity extends AppCompatActivity implements Comunicator,
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
     }
 
-   @Click(R.id.facebokLoginButton)
-    void facebookLoginButtonWasClicked(){
-       showableLogInGroup(false);
-       loginFacebook.setVisibility(View.VISIBLE);
-       loginFacebook();
+    @Click(R.id.facebokLoginButton)
+    void facebookLoginButtonWasClicked() {
+        showableLogInGroup(false);
+        loginFacebook.setVisibility(View.VISIBLE);
+        loginFacebook();
     }
 
     @Click(R.id.googleLoginButton)
-    void googleLoginButtonWasClicked(){
+    void googleLoginButtonWasClicked() {
         showableLogInGroup(false);
         loginGoogle();
         loginGoogle.setVisibility(View.VISIBLE);
     }
 
     @Click(R.id.buttonLogout)
-    void buttonLogoutWasClicked(){
+    void buttonLogoutWasClicked() {
         signOut();
         showableLogInGroup(true);
     }
 
     @Click(R.id.buttonGoogleLogout)
-    void buttonGoogleLogout(){
+    void buttonGoogleLogout() {
         googleSignOut();
     }
+
+    @Click(R.id.buttonFavoritesPlaces)
+    void buttonFavoritesPlaces() {
+        if (listOfPlaces.getVisibility() == View.GONE) {
+            mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            Set<String> favoritesPlacesList = mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, null);
+            if (favoritesPlacesList != null) {
+                ArrayList<String> listPlaces = new ArrayList<>(favoritesPlacesList);
+                listOfPlaces.setVisibility(View.VISIBLE);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
+                Log.d("debugMode", "The application stopped after this");
+                listOfPlaces.setLayoutManager(mLayoutManager);
+                FavoritesRecyclerAdapter recyclerAdapter = new FavoritesRecyclerAdapter(StartActivity.this, listPlaces, PLACE);
+                listOfPlaces.setAdapter(recyclerAdapter);
+            }
+        }else { listOfPlaces.setVisibility(View.GONE);}
+    }
+
+    @Click(R.id.buttonFavoritesRouts)
+    void buttonFavoritesRouts() {
+        if (listOfRouts.getVisibility() == View.GONE) {
+            mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            Set<String> favoritesRoutsList = mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, null);
+            if (favoritesRoutsList != null) {
+                ArrayList<String> listRouts = new ArrayList<>(favoritesRoutsList);
+                listOfRouts.setVisibility(View.VISIBLE);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
+                Log.d("debugMode", "The application stopped after this");
+                listOfRouts.setLayoutManager(mLayoutManager);
+                FavoritesRecyclerAdapter recyclerAdapter = new FavoritesRecyclerAdapter(StartActivity.this, listRouts, ROUT);
+                listOfRouts.setAdapter(recyclerAdapter);
+            }
+        }else{listOfRouts.setVisibility(View.GONE);}
+    }
+
+    @Click(R.id.buttonCreatedPlaces)
+    void buttonCreatedPlaces() {
+
+    }
+
+    @Click(R.id.buttonCreatedRouts)
+    void buttonCreatedRouts() {
+        if (listOfTrack.getVisibility() == View.GONE) {
+            mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            Set<String> createdByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST, null);
+
+            if (createdByUserTrackList != null) {
+                listOfTrack.setVisibility(View.VISIBLE);
+
+                ArrayList<String> listTrack = new ArrayList<>(createdByUserTrackList);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
+                Log.d("debugMode", "The application stopped after this");
+                listOfTrack.setLayoutManager(mLayoutManager);
+                FavoritesRecyclerAdapter recyclerAdapter = new FavoritesRecyclerAdapter( StartActivity.this, listTrack, MY_ROUT);
+                listOfTrack.setAdapter(recyclerAdapter);
+
+            }
+        }else{listOfTrack.setVisibility(View.GONE);}
+    }
+
 }

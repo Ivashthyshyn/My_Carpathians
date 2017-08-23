@@ -5,6 +5,7 @@ package com.example.key.my_carpathians.interfaces;
  */
 
 public interface Comunicator {
-    void putStringNameRout(String name);
-    void putStringNamePlace(String name);
+    void putStringNameRout(String name, int type);
+    void putStringNamePlace(String name, int type);
+
 }

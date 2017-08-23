@@ -8,7 +8,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +52,7 @@ import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_S
 import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LONGITUDE;
 import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_PLACE_LIST;
 import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_ROUTS_LIST;
+import static com.example.key.my_carpathians.activities.StartActivity.MANUFACTURER_MODE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_PLACE_LIST;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_ROUTS_LIST;
@@ -75,6 +77,7 @@ public class ActionActivity extends AppCompatActivity {
     public ArrayList<String> selectedUserPlacesStringList = new ArrayList<>();
     private SharedPreferences sharedPreferences;
     private ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
+	private boolean mTypeMode = false;
 
     AlertDialog alertDialog;
     @ViewById(R.id.imageView)
@@ -85,7 +88,20 @@ public class ActionActivity extends AppCompatActivity {
     TextView titleText;
     @ViewById(graph)
     GraphView graphView;
-
+	@ViewById(R.id.buttonShowOnMap)
+	Button buttonShowOnMap;
+	@ViewById(R.id.buttonRoutsAround)
+	Button buttonRoutsAround;
+	@ViewById(R.id.buttonPlacesAround)
+	Button buttonPlacesAround;
+	@ViewById(R.id.buttonAddToFavorites)
+	Button buttonAddToFavorites;
+	@ViewById(R.id.buttonAddPhoto)
+    ImageButton buttonAddPhoto;
+	@ViewById (R.id.buttonEdit)
+	Button buttonEdit;
+	@ViewById(R.id.buttonPublish)
+	Button buttonPublish;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,27 +112,43 @@ public class ActionActivity extends AppCompatActivity {
         pointsRout = (List<Position>)getIntent().getSerializableExtra(PUT_EXTRA_POINTS);
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
-        if (myPlace != null) {
-            textName.setText(myPlace.getNamePlace());
-            titleText.setText(myPlace.getTitlePlace());
-            graphView.setVisibility(View.GONE);
-            Glide
-                    .with(ActionActivity.this)
-                    .load(myPlace.getUrlPlace())
-                    .into(imageView);
-            myPosition = myPlace.getPositionPlace();
-            myName = myPlace.getNamePlace();
-        } else if (myRout != null) {
-            textName.setText(myRout.getNameRout());
-            titleText.setText(myRout.getTitleRout());
-            imageView.setVisibility(View.GONE);
-            createDataPoint(myRout.getNameRout());
-            myPosition = myRout.getPositionRout();
-            myName = myRout.getNameRout();
-        }
+	    mTypeMode = getIntent().getBooleanExtra(MANUFACTURER_MODE, false);
+	    if (mTypeMode){
+		    buttonRoutsAround.setVisibility(View.GONE);
+		    buttonPlacesAround.setVisibility(View.GONE);
+		    buttonAddToFavorites.setVisibility(View.GONE);
+		    setBaseInformation();
 
+	    }else {
+		    buttonAddPhoto.setVisibility(View.GONE);
+		    buttonEdit.setVisibility(View.GONE);
+		    buttonPublish.setVisibility(View.GONE);
+		    setBaseInformation();
+	    }
     }
-//Todo need optimise code
+
+	private void setBaseInformation() {
+		if (myPlace != null) {
+			textName.setText(myPlace.getNamePlace());
+			titleText.setText(myPlace.getTitlePlace());
+			graphView.setVisibility(View.GONE);
+			Glide
+					.with(ActionActivity.this)
+					.load("file:/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/" + myPlace.getNamePlace())
+					.into(imageView);
+			myPosition = myPlace.getPositionPlace();
+			myName = myPlace.getNamePlace();
+		} else if (myRout != null) {
+			textName.setText(myRout.getNameRout());
+			titleText.setText(myRout.getTitleRout());
+			imageView.setVisibility(View.GONE);
+			createDataPoint(myRout.getNameRout());
+			myPosition = myRout.getPositionRout();
+			myName = myRout.getNameRout();
+		}
+	}
+
+	//Todo need optimise code
     private void createDataPoint(String nameRout) {
         List<Position> points = new ArrayList<>();
         URI mUri = URI.create(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -177,8 +209,8 @@ public class ActionActivity extends AppCompatActivity {
 
     }
 
-    @Click(R.id.buttonShowPlaceOnMap)
-    public void buttonShowPlaceOnMapWasClicked() {
+    @Click(R.id.buttonShowOnMap)
+    public void buttonShowOnMapWasClicked() {
         if (myPlace != null) {
             selectedUserPlacesList.add(myPlace);
         }
@@ -191,8 +223,8 @@ public class ActionActivity extends AppCompatActivity {
         startActivity(mapIntent);
     }
 
-    @Click(R.id.buttonShowAroundRout)
-    public void buttonShowAroundRoutWasClicked() {
+    @Click(R.id.buttonRoutsAround)
+    public void buttonRoutsAroundWasClicked() {
         List<Rout> routsAround = new ArrayList<>();
         List<String> routsAroundName = new ArrayList<>();
         for (int i = 0; i < routList.size(); i++) {
@@ -215,7 +247,7 @@ public class ActionActivity extends AppCompatActivity {
         }
     }
 
-    @Click(R.id.buttonPlacesAruond)
+    @Click(R.id.buttonPlacesAround)
     void buttonPlacesAroundWasClicked() {
         List<Place> placesAround = new ArrayList<>();
         List<String> placesAroundName = new ArrayList<>();

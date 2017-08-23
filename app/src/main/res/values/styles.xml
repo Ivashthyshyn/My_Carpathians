@@ -3,9 +3,10 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/lbl_name</item>
+        <item name="colorPrimaryDark">@color/input_register_bg</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorBackground">@color/background_material_light</item>
     </style>
 
     <style name="FullscreenTheme" parent="AppTheme">

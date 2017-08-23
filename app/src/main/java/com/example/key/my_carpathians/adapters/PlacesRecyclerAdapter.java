@@ -72,7 +72,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
     @Override
     public PlacesRecyclerAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View mView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item, parent, false);
+                .inflate(R.layout.list_item_for_place, parent, false);
         context = mView.getContext();
 
         ViewHolder mHolder = new ViewHolder(mView, new ViewHolder.ClickListener() {
@@ -101,7 +101,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
             holder.textName.setText(holder.mPlace.getNamePlace());
             Glide
                     .with(context)
-                    .load(holder.mPlace.getUrlPlace())
+                    .load("file:/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/" + holder.mPlace.getNamePlace())
                     .into(holder.placeImage);
 
     }
