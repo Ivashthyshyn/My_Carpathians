@@ -1,19 +1,14 @@
 apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
-apply plugin: 'io.fabric'
 
-repositories {
-    maven { url 'https://maven.fabric.io/public' }
-}
+
 def AAVersion = '3.2'
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 
@@ -62,28 +57,18 @@ dependencies {
     apt "org.androidannotations:androidannotations:$AAVersion"
     compile "org.androidannotations:androidannotations-api:$AAVersion"
 
-    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.1.3@aar') {
+    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.0.2@aar') {
         transitive = true
     }
 
 
     compile 'com.google.code.gson:gson:2.7'
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
-        transitive = true;
-    }
-    compile('com.crashlytics.sdk.android:crashlytics-ndk:1.1.6@aar') {
-        transitive = true;
-    }
-    compile('io.fabric.sdk.android:fabric:1.3.10@aar') {
-        transitive = true;
-    }
 
 
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:multidex:1.0.0'
     compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.3.0'
     compile 'com.mapbox.mapboxsdk:mapbox-android-services:2.1.1'
     compile 'com.google.firebase:firebase-core:10.0.1'
@@ -103,8 +88,4 @@ dependencies {
 }
 
 apply plugin: 'com.google.gms.google-services'
-crashlytics {
-    enableNdk true
-    androidNdkOut 'src/main/obj'
-    androidNdkLibsOut 'src/main/libs'
-}
+

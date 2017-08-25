@@ -28,7 +28,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.crashlytics.android.Crashlytics;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter;
 import com.example.key.my_carpathians.fragments.PlacesListFragment;
@@ -97,7 +96,6 @@ import java.util.List;
 import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.fabric.sdk.android.Fabric;
 
 import static com.example.key.my_carpathians.activities.MapsActivity.REC_MODE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_ROUT;
@@ -190,7 +188,6 @@ public class StartActivity extends AppCompatActivity implements
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_start);
         auth = FirebaseAuth.getInstance();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
