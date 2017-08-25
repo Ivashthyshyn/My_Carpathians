@@ -82,9 +82,12 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -181,9 +184,10 @@ public class StartActivity extends AppCompatActivity implements
     private FirebaseUser user;
     private FirebaseAuth auth;
     private GoogleApiClient mGoogleApiClient;
+	private String mUserUID;
 
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
@@ -203,21 +207,24 @@ public class StartActivity extends AppCompatActivity implements
                     showableLogInGroup(true);
                 } else if (user.isAnonymous()) {
                     updateUI("Anonymous", null);
+	                mUserUID = user.getUid();
 
                     //Todo mast by code from anonymous user
                     showInterfaceForAnonymous();
                 } else {
                     if (user.getProviders().get(0).equals("google.com")) {
                         loginGoogle();
-
+	                    mUserUID = user.getUid();
                         updateUI(user.getProviderData().get(0).getDisplayName(),
                                 String.valueOf(user.getProviderData().get(0).getPhotoUrl()));
                         buttonGoogleLogout.setVisibility(View.VISIBLE);
                     } else if (user.getProviders().get(0).equals("facebook.com")) {
+	                    mUserUID = user.getUid();
                         loginFacebook();
                         updateUI(user.getProviderData().get(0).getDisplayName(),
                                 String.valueOf(user.getProviderData().get(0).getPhotoUrl()));
                     } else if (user.getProviders().get(0).equals("password")) {
+	                    mUserUID = user.getUid();
                         updateUI(user.getProviderData().get(0).getEmail(), null);
                         buttonLogaut.setVisibility(View.VISIBLE);
                         buttonLogaut.setText("LOG OUT");
@@ -580,21 +587,53 @@ public class StartActivity extends AppCompatActivity implements
     @Override
     public void putStringNameRout(String name, int type) {
         if (type == MY_ROUT){
-            for (int i = 0; i < routs.size(); i++) {
-                if (routs.get(i).getNameRout().equals(name)) {
-                    Intent intentActionActivity = new Intent(context, ActionActivity_.class);
-                    intentActionActivity.putExtra(PUT_EXTRA_ROUT, routs.get(i));
-                    intentActionActivity.putExtra(MANUFACTURER_MODE, true);
-                    startActivity(intentActionActivity);
-                    }
-                }
+	        Rout mCreatedRout = new Rout();
+	        mCreatedRout.setNameRout(name);
+	        mCreatedRout.setUrlRoutsTrack(mSharedPreferences.getString(name, null));
+	        File rootPath = new File(context.getExternalFilesDir(
+			        Environment.DIRECTORY_DOWNLOADS), "Created");
+	        if (!rootPath.exists()) {
+		        rootPath.mkdirs();
+	        }
+
+		        File file = new File(rootPath, name);
+		        if (!file.exists()) {
+			        file.toURI();
+			        try {
+				        FileOutputStream fileOutputStream = new FileOutputStream(file);
+				        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+				        objectOutputStream.writeObject(this);
+				        objectOutputStream.close();
+				        fileOutputStream.close();
+			        } catch (IOException e) {
+				        e.printStackTrace();
+			        }
+		        } else {
+			        try {
+				        FileInputStream fileIn = new FileInputStream(file);
+				        ObjectInputStream objectInputStream = new ObjectInputStream(fileIn);
+				        Rout  rout = (Rout) objectInputStream.readObject();
+				        objectInputStream.close();
+				        Intent intentActionActivity = new Intent(context, ActionActivity_.class);
+				        intentActionActivity.putExtra(PUT_EXTRA_ROUT, rout);
+				        intentActionActivity.putExtra(MANUFACTURER_MODE, true);
+				        startActivity(intentActionActivity);
+
+			        } catch (Exception e) {
+				        e.printStackTrace();
+			        }
+		        }
         }else{
-            Intent intentActionActivity = new Intent(context, ActionActivity_.class);
-            //Todo need create new Rout
-            intentActionActivity.putExtra(PUT_EXTRA_ROUT, new Rout());
-            startActivity(intentActionActivity);
+        for (int i = 0; i < routs.size(); i++) {
+	        if (routs.get(i).getNameRout().equals(name)) {
+		        Intent intentActionActivity = new Intent(context, ActionActivity_.class);
+		        intentActionActivity.putExtra(PUT_EXTRA_ROUT, routs.get(i));
+		        intentActionActivity.putExtra(MANUFACTURER_MODE, true);
+		        startActivity(intentActionActivity);
+            }
         }
 
+        }
     }
 
     @Override
@@ -813,6 +852,7 @@ public class StartActivity extends AppCompatActivity implements
                         } else {
                             Profile profile = Profile.getCurrentProfile();
                             updateUI(profile.getFirstName(), profile.getProfilePictureUri(200, 200).toString());
+	                        mUserUID = mAuth.getCurrentUser().getUid();
                         }
                     }
                 });
@@ -838,7 +878,7 @@ public class StartActivity extends AppCompatActivity implements
                             loginGoogle.setVisibility(View.GONE);
                             buttonGoogleLogout.setVisibility(View.VISIBLE);
                             updateUI(acct.getEmail(), String.valueOf(acct.getPhotoUrl()));
-
+							mUserUID = mAuth.getCurrentUser().getUid();
 
                         } else {
                             // If sign in fails, display a message to the user.
