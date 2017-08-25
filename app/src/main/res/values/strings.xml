@@ -5,7 +5,7 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="access_token">pk.eyJ1IjoiaXZhc2h0aHlzaHluIiwiYSI6ImNqNnE5bnZtejA3aXQycW82dmRhNG1xb2kifQ.tvCFGnpBYkVaIFgD8ZnI3g</string>
+    <string name="access_token">pk.eyJ1IjoiaXZhc2h0aHlzaHluIiwiYSI6ImNqNnJqZ2w4bjA3czgzM3FvMXlncmFqZzAifQ.FC4QLcgoTP87XBj_Jnc93A</string>
     <string name="facebook_app_id">1535201253190515</string>
     <string name="fb_login_protocol_scheme">fb1535201253190515</string>
     <string name="places">PLACE</string>
