@@ -7,7 +7,7 @@ import android.location.Location;
  */
 
 public interface ILocation {
-    void update(Location location);
+    void update(Location location, int type);
     void connectionState(int state);
-
+    void messageForActivity(int type, String name);
 }

@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,6 +17,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.fragments.EditModeFragment;
+import com.example.key.my_carpathians.fragments.EditModeFragment_;
+import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.jjoe64.graphview.GraphView;
@@ -52,16 +56,16 @@ import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_S
 import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LONGITUDE;
 import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_PLACE_LIST;
 import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_ROUTS_LIST;
-import static com.example.key.my_carpathians.activities.StartActivity.MANUFACTURER_MODE;
+import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_PLACE_LIST;
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_ROUTS_LIST;
+import static com.example.key.my_carpathians.activities.StartActivity.PUT_EXTRA_PLACE_LIST;
+import static com.example.key.my_carpathians.activities.StartActivity.PUT_EXTRA_ROUTS_LIST;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.PUT_EXTRA_POINTS;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 
 @EActivity
-public class ActionActivity extends AppCompatActivity {
+public class ActionActivity extends AppCompatActivity implements CommunicatorActionActivity {
 
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
     public static final String SELECTED_USER_PLACES = "selected_user_places";
@@ -79,6 +83,7 @@ public class ActionActivity extends AppCompatActivity {
     private ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
 	private boolean mTypeMode = false;
 
+
     AlertDialog alertDialog;
     @ViewById(R.id.imageView)
     ImageView imageView;
@@ -92,16 +97,18 @@ public class ActionActivity extends AppCompatActivity {
 	Button buttonShowOnMap;
 	@ViewById(R.id.buttonRoutsAround)
 	Button buttonRoutsAround;
-	@ViewById(R.id.buttonPlacesAround)
+	@ViewById(R.id.buttonPlacesAruond)
 	Button buttonPlacesAround;
 	@ViewById(R.id.buttonAddToFavorites)
 	Button buttonAddToFavorites;
-	@ViewById(R.id.buttonAddPhoto)
-    ImageButton buttonAddPhoto;
+	@ViewById(R.id.buttonShowPhoto)
+    ImageButton buttonShowPhoto;
 	@ViewById (R.id.buttonEdit)
 	Button buttonEdit;
 	@ViewById(R.id.buttonPublish)
 	Button buttonPublish;
+    private boolean flagButtonShoePhoto = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,23 +119,24 @@ public class ActionActivity extends AppCompatActivity {
         pointsRout = (List<Position>)getIntent().getSerializableExtra(PUT_EXTRA_POINTS);
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
-	    mTypeMode = getIntent().getBooleanExtra(MANUFACTURER_MODE, false);
+	    mTypeMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
 	    if (mTypeMode){
 		    buttonRoutsAround.setVisibility(View.GONE);
 		    buttonPlacesAround.setVisibility(View.GONE);
 		    buttonAddToFavorites.setVisibility(View.GONE);
-		    setBaseInformation();
+            buttonPublish.setVisibility(View.VISIBLE);
+		    setBaseInformation(myPlace, myRout);
 
 	    }else {
-		    buttonAddPhoto.setVisibility(View.GONE);
+		    buttonShowPhoto.setVisibility(View.GONE);
 		    buttonEdit.setVisibility(View.GONE);
 		    buttonPublish.setVisibility(View.GONE);
-		    setBaseInformation();
+		    setBaseInformation(myPlace, myRout);
 	    }
     }
 
-	private void setBaseInformation() {
-		if (myPlace != null) {
+	private void setBaseInformation(Place place, Rout rout) {
+		if (place != null) {
 			textName.setText(myPlace.getNamePlace());
 			titleText.setText(myPlace.getTitlePlace());
 			graphView.setVisibility(View.GONE);
@@ -138,24 +146,33 @@ public class ActionActivity extends AppCompatActivity {
 					.into(imageView);
 			myPosition = myPlace.getPositionPlace();
 			myName = myPlace.getNamePlace();
-		} else if (myRout != null) {
+		} else if (rout != null) {
 			textName.setText(myRout.getNameRout());
 			titleText.setText(myRout.getTitleRout());
-			imageView.setVisibility(View.GONE);
-			createDataPoint(myRout.getNameRout());
+            imageView.setVisibility(View.GONE);
+            if (myRout.getUrlRout() == null){
+                buttonShowPhoto.setAlpha((float)0.5);
+            }
+            Glide
+                    .with(ActionActivity.this)
+                    .load(rout.getUrlRout())
+                    .into(imageView);
+            if (mTypeMode) {
+                createDataPoint(URI.create(myRout.getUrlRoutsTrack()));
+            }else
+                createDataPoint(URI.create(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                        .getString(myRout.getNameRout(), null)));
 			myPosition = myRout.getPositionRout();
 			myName = myRout.getNameRout();
 		}
 	}
 
 	//Todo need optimise code
-    private void createDataPoint(String nameRout) {
+    private void createDataPoint(URI uriRoutTrack) {
         List<Position> points = new ArrayList<>();
-        URI mUri = URI.create(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                .getString(nameRout, null));
         try {
             // Load GeoJSON file
-            File file = new File(mUri);
+            File file = new File(uriRoutTrack);
             InputStream fileInputStream = new FileInputStream(file);
             BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
             StringBuilder sb = new StringBuilder();
@@ -198,7 +215,7 @@ public class ActionActivity extends AppCompatActivity {
             DataPoint v = new DataPoint(xi, yi);
             values[i] = v;
         }
-        values[0] = new DataPoint((int)points.get(0).getAltitude(),0);
+        values[0] = new DataPoint(0,(int)points.get(0).getAltitude());
         LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
         series.setThickness(8);
         graphView.addSeries(series);
@@ -211,16 +228,30 @@ public class ActionActivity extends AppCompatActivity {
 
     @Click(R.id.buttonShowOnMap)
     public void buttonShowOnMapWasClicked() {
-        if (myPlace != null) {
-            selectedUserPlacesList.add(myPlace);
+        if(mTypeMode) {
+            if (myPlace != null) {
+                selectedUserPlacesList.add(myPlace);
+            }
+            if (myRout != null) {
+                selectedUserRouts.add(myRout.getNameRout());
+            }
+            Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
+            mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
+            mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
+            mapIntent.putExtra(PRODUCE_MODE, mTypeMode);
+            startActivity(mapIntent);
+        }else{
+            if (myPlace != null) {
+                selectedUserPlacesList.add(myPlace);
+            }
+            if (myRout != null) {
+                selectedUserRouts.add(myRout.getNameRout());
+            }
+            Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
+            mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
+            mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
+            startActivity(mapIntent);
         }
-        if (myRout != null) {
-            selectedUserRouts.add(myRout.getNameRout());
-        }
-        Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
-        mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
-        mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
-        startActivity(mapIntent);
     }
 
     @Click(R.id.buttonRoutsAround)
@@ -247,7 +278,7 @@ public class ActionActivity extends AppCompatActivity {
         }
     }
 
-    @Click(R.id.buttonPlacesAround)
+    @Click(R.id.buttonPlacesAruond)
     void buttonPlacesAroundWasClicked() {
         List<Place> placesAround = new ArrayList<>();
         List<String> placesAroundName = new ArrayList<>();
@@ -417,4 +448,31 @@ public class ActionActivity extends AppCompatActivity {
 
     }
 
+    @Click(R.id.buttonEdit)
+    void buttonEditWasClicked(){
+        FragmentManager fm = getSupportFragmentManager();
+        EditModeFragment editFragment = new EditModeFragment_();
+        editFragment.show(fm, "fragment_edit");
+        editFragment.setData(myRout, myPlace);
+
+    }
+    @Click(R.id.buttonShowPhoto)
+    public void buttonShowPhotoWasClicked(){
+        if (flagButtonShoePhoto) {
+            graphView.setVisibility(View.GONE);
+            imageView.setVisibility(View.VISIBLE);
+            buttonShowPhoto.setImageResource(android.R.drawable.ic_menu_slideshow);
+            flagButtonShoePhoto = false;
+        }else{
+            imageView.setVisibility(View.GONE);
+            graphView.setVisibility(View.VISIBLE);
+            buttonShowPhoto.setImageResource(android.R.drawable.ic_menu_report_image);
+            flagButtonShoePhoto = true;
+        }
+    }
+
+    @Override
+    public void saveChanges(Rout rout, Place place) {
+        setBaseInformation(place, rout);
+    }
 }

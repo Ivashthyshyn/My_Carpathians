@@ -14,30 +14,37 @@ import com.cocoahero.android.geojson.Feature;
 import com.cocoahero.android.geojson.LineString;
 import com.cocoahero.android.geojson.Position;
 import com.example.key.my_carpathians.interfaces.ILocation;
+import com.example.key.my_carpathians.models.Place;
+import com.example.key.my_carpathians.models.Rout;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-
 import org.json.JSONArray;
-
 import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Writer;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_NO_SAVE;
+import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_PLACE;
+import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_ROUT;
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_COMMANDS;
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_TRACK_NAME;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
 
 
 public class LocationService extends Service implements
@@ -50,16 +57,20 @@ public class LocationService extends Service implements
     private static final long FASTEST_INTERVAL_ACTIVE = 1000 * 20;
     private static final long UPDATE_INTERVAL_PASSIVE = 1000 * 90;
     private static final long FASTEST_INTERVAL_PASSIVE = 1000 * 60;
-    public static final String CREATED_BY_USER_TRACK_LIST = "created_track_list";
+    public static final String CREATED_BY_USER_ROUT_LIST = "created_rout_list";
+    public static final int DEFINED_LOCATION = 1;
+    public static final String CREATED_BY_USER_PLACE_LIST ="created_place_list" ;
 
     private final IBinder myBinder = new MyLocalBinder();
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private ILocation owner;
-    private int mIntCommand;
+    private int mIntCommand = 0;
     private List<Position> mPositionList = new ArrayList<>();
     private String mNameTrack;
+    private Location mLocation;
+
     @Override
     public void onCreate() {
         if (isGooglePlayServicesAvailable()) {
@@ -122,44 +133,121 @@ public class LocationService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         mIntCommand = intent.getIntExtra(TO_SERVICE_COMMANDS, 0);
         mNameTrack = intent.getStringExtra(TO_SERVICE_TRACK_NAME);
-        if (mNameTrack != null){
-            saveTrackToSDCard(mNameTrack);
+        if (mIntCommand == ROUT){
+            saveRoutToSDCard(mNameTrack);
+        }else if(mIntCommand == PLACE){
+            savePlaceToSDCard(mNameTrack);
+        }else if (mIntCommand == COMMAND_NO_SAVE){
+            mPositionList.clear();
+            mLocation = null;
         }
         return START_STICKY;
     }
 
-    private void saveTrackToSDCard(String mNameTrack) {
+    private void savePlaceToSDCard(String mNamePlace) {
+        Place mPlace = new Place();
+        mPlace.setNamePlace(mNamePlace);
+        com.example.key.my_carpathians.models.Position position = new com.example.key.my_carpathians.models.Position();
+        position.setLatitude(mLocation.getLatitude());
+        position.setLongitude(mLocation.getLongitude());
+        mPlace.setPositionPlace(position);
+
+        File rootPath = new File(getApplicationContext().getExternalFilesDir(
+                Environment.DIRECTORY_DOWNLOADS), "Created");
+        if (!rootPath.exists()) {
+            rootPath.mkdirs();
+        }
+
+        File file = new File(rootPath, mNamePlace);
+        String fileUri = String.valueOf(file.toURI());
+        if (file.exists()) {
+            owner.messageForActivity(PLACE, mNamePlace);
+        }
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(mPlace);
+                objectOutputStream.close();
+                fileOutputStream.close();
+                SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST,new HashSet<String>()));
+                createdByUserTrackList.add(mNamePlace);
+                mSharedPreferences.edit().putString(mNamePlace, fileUri).apply();
+                mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserTrackList).apply();
+                Toast.makeText(getApplicationContext(), "Place saved", Toast.LENGTH_LONG).show();
+                mLocation = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+    }
+
+    private void saveRoutToSDCard(String mNameRout) {
+
         LineString lineString = new LineString();
         lineString.setPositions( mPositionList);
-
         Feature feature = new Feature();
-
-
         try {
             JSONObject geoJSON = new JSONObject();
             feature.setProperties(new JSONObject());
             feature.setGeometry(lineString);
             feature.setIdentifier("key.my_carpathians");
             geoJSON.put("features", new JSONArray().put(feature.toJSON()));
-            geoJSON.put("type","FeatureCollection");
+            geoJSON.put("type", "FeatureCollection");
 
             File rootPath = new File(getApplicationContext().getExternalFilesDir(
                     Environment.DIRECTORY_DOWNLOADS), "Routs");
-            final File localFile = new File(rootPath, mNameTrack +".geojson" );
-            final URI fileUri = localFile.toURI();
-            Writer output = new BufferedWriter(new FileWriter(localFile));
-            output.write(geoJSON.toString());
-            output.close();
-            SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST,new HashSet<String>()));
-            createdByUserTrackList.add(mNameTrack);
-            mSharedPreferences.edit().putString(mNameTrack, fileUri.toString()).apply();
-            mSharedPreferences.edit().putStringSet(CREATED_BY_USER_TRACK_LIST, createdByUserTrackList).apply();
-            Toast.makeText(getApplicationContext(), "Track saved", Toast.LENGTH_LONG).show();
+            if (!rootPath.exists()) {
+                rootPath.mkdirs();
+            }
+            File localFile = new File(rootPath, mNameRout + ".geojson");
+            if (localFile.exists()) {
+                owner.messageForActivity(ROUT, mNameRout);
+            }else {
+                String fileUri = String.valueOf(localFile.toURI());
+                Writer output = new BufferedWriter(new FileWriter(localFile));
+                output.write(geoJSON.toString());
+                output.close();
+                SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                mSharedPreferences.edit().putString(mNameRout, fileUri).apply();
+                Rout mRout = new Rout();
+                mRout.setNameRout(mNameRout);
+                mRout.setUrlRoutsTrack(fileUri);
+
+                File rootPath2 = new File(getApplicationContext().getExternalFilesDir(
+                        Environment.DIRECTORY_DOWNLOADS), "Created");
+                if (!rootPath2.exists()) {
+                    rootPath2.mkdirs();
+                }
+
+                File file = new File(rootPath2, mNameRout + "_");
+                String fileUri2 = String.valueOf(file.toURI());
+                if (file.exists()) {
+                    owner.messageForActivity(ROUT, mNameRout);
+                }else {
+                    try {
+                        FileOutputStream fileOutputStream = new FileOutputStream(file);
+                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                        objectOutputStream.writeObject(mRout);
+                        objectOutputStream.close();
+                        fileOutputStream.close();
+                        Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
+                        createdByUserTrackList.add(mNameRout + "_");
+                        mSharedPreferences.edit().putString(mNameRout + "_", fileUri2).apply();
+                        mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
+                        Toast.makeText(getApplicationContext(), "Rout saved", Toast.LENGTH_LONG).show();
+                        mPositionList.clear();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
 
         } catch (Exception e) {
             Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
+
     }
 
     /**
@@ -174,18 +262,25 @@ public class LocationService extends Service implements
                 mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
                 mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
             }
-
-            owner.update(location);
+            if (mIntCommand == COMMAND_REC_PLACE){
+                mLocation = location;
+                mIntCommand = 0;
+                owner.update(location, DEFINED_LOCATION);
+            }else
+            owner.update(location, 0);
         }else {
             if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_ACTIVE)
             mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
             mLocationRequest.setFastestInterval(FASTEST_INTERVAL_PASSIVE);
         }
-        if (mIntCommand == 1)
-            saveLocationDate(location);
+        if (mIntCommand == COMMAND_REC_ROUT) {
+            saveRoutLocationList(location);
+        }
     }
 
-    private void saveLocationDate(Location location) {
+
+
+    private void saveRoutLocationList(Location location) {
         Position position = new Position(location);
         mPositionList.add(position);
     }

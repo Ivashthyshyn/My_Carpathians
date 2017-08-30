@@ -34,7 +34,7 @@ import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
 import com.example.key.my_carpathians.fragments.RoutsListFragment;
 import com.example.key.my_carpathians.fragments.RoutsListFragment_;
-import com.example.key.my_carpathians.interfaces.Comunicator;
+import com.example.key.my_carpathians.interfaces.Communicator;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.facebook.AccessToken;
@@ -86,7 +86,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -98,12 +97,14 @@ import java.util.Set;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.example.key.my_carpathians.activities.MapsActivity.REC_MODE;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_ROUT;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
-import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_TRACK_LIST;
+import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
+import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -111,26 +112,30 @@ import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_US
  */
 @EActivity
 public class StartActivity extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener,Comunicator {
+        GoogleApiClient.OnConnectionFailedListener,Communicator {
+    public static final String PUT_EXTRA_PLACE_LIST = "place_list";
+    public static final String PUT_EXTRA_ROUTS_LIST = "routs_list";
     public static final String FAVORITES_ROUTS_LIST = "favorites_user_routs";
     public static final String FAVORITES_PLACE_LIST = "favorites_user_places";
     public static final String ACTION_MODE = "action_mode";
     public static final String PREFS_NAME = "MyPrefsFile";
     private static final int RC_SIGN_IN = 9001;
     private static final String TAG = "StartActivity";
-    public static final String MANUFACTURER_MODE = "manufacturer_mode";
+    public static final String PRODUCE_MODE = "manufacturer_mode";
     public FragmentManager fragmentManager;
     public PlacesListFragment placesListFragment;
     public RoutsListFragment routsListFragment;
     public ArrayList<Place> places = new ArrayList<>();
     public ArrayList<Rout> routs = new ArrayList<>();
     public AlertDialog.Builder builder;
+    @ViewById(R.id.buttonFastRec)
+    Button buttonFastRec;
     @ViewById(R.id.userAcountImage)
-    public CircleImageView userAccountImage;
+    CircleImageView userAccountImage;
     @ViewById(R.id.facebokLoginButton)
-    public Button facebookLoginButton;
+    Button facebookLoginButton;
     @ViewById(R.id.googleLoginButton)
-    public Button googleLoginButton;
+    Button googleLoginButton;
     @ViewById(R.id.textViewEmail)
     TextView textViewEmail;
     @ViewById(R.id.googleButton)
@@ -169,27 +174,31 @@ public class StartActivity extends AppCompatActivity implements
     RecyclerView listOfPlaces;
     @ViewById(R.id.listViewRout)
     RecyclerView listOfRouts;
-    @ViewById(R.id.listViewTrack)
-    RecyclerView listOfTrack;
+    @ViewById(R.id.listViewCreatedRouts)
+    RecyclerView listCreatedRouts;
+    @ViewById(R.id.listViewCreatedPlaces)
+    RecyclerView listCreatedPlaces;
+    @ViewById(R.id.textViewCreated)
+    TextView textViewCreated;
     private boolean connected = false;
-    private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Context context = StartActivity.this;
     private SharedPreferences mSharedPreferences;
     private DrawerLayout mDrawerLayout;
     private FirebaseUser mFirebaseUser;
     private CallbackManager mCallbackManager;
-    private FirebaseUser user;
-    private FirebaseAuth auth;
+    private FirebaseUser mUser;
+    private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
 	private String mUserUID;
+    private boolean mTypeMode = false;
 
 
-	@Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
-        auth = FirebaseAuth.getInstance();
+        mAuth = FirebaseAuth.getInstance();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -199,34 +208,42 @@ public class StartActivity extends AppCompatActivity implements
 
             @Override
             public void onDrawerOpened(View drawerView) {
-                user = auth.getCurrentUser();
-                if (user == null) {
+                mUser = mAuth.getCurrentUser();
+                if (mUser == null) {
                     showableLogInGroup(true);
-                } else if (user.isAnonymous()) {
+                    mTypeMode = false;
+                } else if (mUser.isAnonymous()) {
                     updateUI("Anonymous", null);
-	                mUserUID = user.getUid();
-
-                    //Todo mast by code from anonymous user
+	                mUserUID = mUser.getUid();
+                    mTypeMode = false;
                     showInterfaceForAnonymous();
+                    produceToolsVisibility(mTypeMode);
                 } else {
-                    if (user.getProviders().get(0).equals("google.com")) {
+                    if (mUser.getProviders().get(0).equals("google.com")) {
+                        produceToolsVisibility(mTypeMode);
+                        mTypeMode = true;
                         loginGoogle();
-	                    mUserUID = user.getUid();
-                        updateUI(user.getProviderData().get(0).getDisplayName(),
-                                String.valueOf(user.getProviderData().get(0).getPhotoUrl()));
+	                    mUserUID = mUser.getUid();
+                        updateUI(mUser.getProviderData().get(0).getDisplayName(),
+                                String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
                         buttonGoogleLogout.setVisibility(View.VISIBLE);
-                    } else if (user.getProviders().get(0).equals("facebook.com")) {
-	                    mUserUID = user.getUid();
+                    } else if (mUser.getProviders().get(0).equals("facebook.com")) {
+                        produceToolsVisibility(mTypeMode);
+                        mTypeMode = true;
+	                    mUserUID = mUser.getUid();
                         loginFacebook();
-                        updateUI(user.getProviderData().get(0).getDisplayName(),
-                                String.valueOf(user.getProviderData().get(0).getPhotoUrl()));
-                    } else if (user.getProviders().get(0).equals("password")) {
-	                    mUserUID = user.getUid();
-                        updateUI(user.getProviderData().get(0).getEmail(), null);
+                        updateUI(mUser.getProviderData().get(0).getDisplayName(),
+                                String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
+                    } else if (mUser.getProviders().get(0).equals("password")) {
+                        produceToolsVisibility(mTypeMode);
+                        mTypeMode = true;
+	                    mUserUID = mUser.getUid();
+                        updateUI(mUser.getProviderData().get(0).getEmail(), null);
                         buttonLogaut.setVisibility(View.VISIBLE);
                         buttonLogaut.setText("LOG OUT");
                     }
                 }
+                produceToolsVisibility(mTypeMode);
             }
 
             @Override
@@ -241,7 +258,6 @@ public class StartActivity extends AppCompatActivity implements
         });
 
         mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -249,10 +265,9 @@ public class StartActivity extends AppCompatActivity implements
                 if (mFirebaseUser != null) {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + mFirebaseUser.getUid());
                 } else {
-
                     showLoginDialog();
                 }
-                // ...
+
             }
         };
 
@@ -299,9 +314,23 @@ public class StartActivity extends AppCompatActivity implements
 
     }
 
+    private void produceToolsVisibility(boolean mTypeMode) {
+        if(mTypeMode){
+            buttonCreatedPlaces.setVisibility(View.VISIBLE);
+            buttonCreatedRouts.setVisibility(View.VISIBLE);
+            textViewCreated.setVisibility(View.VISIBLE);
+            buttonFastRec.setAlpha((float) 1);
+        }else{
+            buttonCreatedPlaces.setVisibility(View.GONE);
+            buttonCreatedRouts.setVisibility(View.GONE);
+            textViewCreated.setVisibility(View.GONE);
+            buttonFastRec.setAlpha((float) 0.5);
+        }
+    }
+
     private void showInterfaceForAnonymous() {
         buttonLogaut.setVisibility(View.VISIBLE);
-        buttonLogaut.setText("authentication");
+        buttonLogaut.setText("Authentication");
         showableLogInGroup(false);
     }
 
@@ -367,8 +396,6 @@ public class StartActivity extends AppCompatActivity implements
 
                 File file = new File(rootPath, placeList.get(i).getNamePlace());
                 if (!file.exists()) {
-                    file.toURI();
-                             /* Open a connection */
                     URLConnection urlConnection = url.openConnection();
                     InputStream inputStream = null;
                     HttpURLConnection httpConn = (HttpURLConnection) urlConnection;
@@ -410,7 +437,7 @@ public class StartActivity extends AppCompatActivity implements
                     .beginTransaction();
             fragmentTransaction.add(R.id.drawer_layout, placesListFragment);
             fragmentTransaction.commit();
-            placesListFragment.setList(places, routs);
+            placesListFragment.setList(places);
         } else if (places.size() == 0 & !isOnline()) {
             builder = new AlertDialog.Builder(this);
             builder.setTitle("Мережа Інтернет");
@@ -440,7 +467,7 @@ public class StartActivity extends AppCompatActivity implements
                     .beginTransaction();
             fragmentTransaction.add(R.id.drawer_layout, routsListFragment);
             fragmentTransaction.commit();
-            routsListFragment.setList(routs, places);
+            routsListFragment.setList(routs);
         } else if (routs.size() == 0 & !isOnline()) {
             builder = new AlertDialog.Builder(this);
             builder.setTitle("Мережа Інтернет");
@@ -584,9 +611,6 @@ public class StartActivity extends AppCompatActivity implements
     @Override
     public void putStringNameRout(String name, int type) {
         if (type == MY_ROUT){
-	        Rout mCreatedRout = new Rout();
-	        mCreatedRout.setNameRout(name);
-	        mCreatedRout.setUrlRoutsTrack(mSharedPreferences.getString(name, null));
 	        File rootPath = new File(context.getExternalFilesDir(
 			        Environment.DIRECTORY_DOWNLOADS), "Created");
 	        if (!rootPath.exists()) {
@@ -594,26 +618,16 @@ public class StartActivity extends AppCompatActivity implements
 	        }
 
 		        File file = new File(rootPath, name);
-		        if (!file.exists()) {
-			        file.toURI();
-			        try {
-				        FileOutputStream fileOutputStream = new FileOutputStream(file);
-				        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-				        objectOutputStream.writeObject(this);
-				        objectOutputStream.close();
-				        fileOutputStream.close();
-			        } catch (IOException e) {
-				        e.printStackTrace();
-			        }
-		        } else {
+		        if (file.exists()) {
 			        try {
 				        FileInputStream fileIn = new FileInputStream(file);
 				        ObjectInputStream objectInputStream = new ObjectInputStream(fileIn);
-				        Rout  rout = (Rout) objectInputStream.readObject();
+                        Rout rout = (Rout)objectInputStream.readObject();
 				        objectInputStream.close();
+                        fileIn.close();
 				        Intent intentActionActivity = new Intent(context, ActionActivity_.class);
 				        intentActionActivity.putExtra(PUT_EXTRA_ROUT, rout);
-				        intentActionActivity.putExtra(MANUFACTURER_MODE, true);
+				        intentActionActivity.putExtra(PRODUCE_MODE, mTypeMode);
 				        startActivity(intentActionActivity);
 
 			        } catch (Exception e) {
@@ -624,8 +638,13 @@ public class StartActivity extends AppCompatActivity implements
         for (int i = 0; i < routs.size(); i++) {
 	        if (routs.get(i).getNameRout().equals(name)) {
 		        Intent intentActionActivity = new Intent(context, ActionActivity_.class);
-		        intentActionActivity.putExtra(PUT_EXTRA_ROUT, routs.get(i));
-		        intentActionActivity.putExtra(MANUFACTURER_MODE, true);
+
+                ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
+                ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
+                intentActionActivity.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
+                intentActionActivity.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
+                intentActionActivity.putExtra(PUT_EXTRA_ROUT, routs.get(i));
+                intentActionActivity.putExtra(PRODUCE_MODE, mTypeMode);
 		        startActivity(intentActionActivity);
             }
         }
@@ -635,20 +654,57 @@ public class StartActivity extends AppCompatActivity implements
 
     @Override
     public void putStringNamePlace(String name, int type) {
+        if (type == MY_PLACE){
+            File rootPath = new File(context.getExternalFilesDir(
+                    Environment.DIRECTORY_DOWNLOADS), "Created");
+            if (!rootPath.exists()) {
+                rootPath.mkdirs();
+            }
+
+            File file = new File(rootPath, name);
+            if (file.exists()) {
+                try {
+                    FileInputStream fileIn = new FileInputStream(file);
+                    ObjectInputStream objectInputStream = new ObjectInputStream(fileIn);
+                    Place place = (Place) objectInputStream.readObject();
+                    objectInputStream.close();
+                    fileIn.close();
+                    Intent intentActionActivity = new Intent(context, ActionActivity_.class);
+                    intentActionActivity.putExtra(PUT_EXTRA_PLACE, place);
+                    intentActionActivity.putExtra(PRODUCE_MODE, mTypeMode);
+                    startActivity(intentActionActivity);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }else if (type == PLACE){
         for (int i = 0; i < places.size(); i++) {
             if (places.get(i).getNamePlace().equals(name)) {
                 Intent intentActionActivity = new Intent(context, ActionActivity_.class);
                 intentActionActivity.putExtra(PUT_EXTRA_PLACE, places.get(i));
+                ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
+                ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
+                intentActionActivity.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
+                intentActionActivity.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
+                intentActionActivity.putExtra(PRODUCE_MODE, mTypeMode);
                 startActivity(intentActionActivity);
+                }
             }
+
         }
     }
 
     @Click(R.id.buttonFastRec)
     void buttonFastRecWasClicked() {
-        Intent intentMapActivity = new Intent(context, MapsActivity_.class);
-        intentMapActivity.putExtra(ACTION_MODE, REC_MODE);
-        startActivity(intentMapActivity);
+        if (mTypeMode) {
+            Intent intentMapActivity = new Intent(context, MapsActivity_.class);
+            intentMapActivity.putExtra(ACTION_MODE, REC_MODE);
+            intentMapActivity.putExtra(PRODUCE_MODE, mTypeMode);
+            startActivity(intentMapActivity);
+        }else {
+            showLoginDialog();
+        }
     }
 
     @Click(R.id.buttonResetPassword)
@@ -678,14 +734,14 @@ public class StartActivity extends AppCompatActivity implements
 
         //   progressBar.setVisibility(View.VISIBLE);
 
-        //authenticate user
+        //authenticate mUser
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(StartActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // If sign in fails, display a message to the mUser. If sign in succeeds
                         // the mAuth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
+                        // signed in mUser can be handled in the listener.
                         progressBar.setVisibility(View.GONE);
                         if (!task.isSuccessful()) {
                             // there was an error
@@ -715,7 +771,7 @@ public class StartActivity extends AppCompatActivity implements
                     loginFacebook.setVisibility(View.VISIBLE);
                 } else if (accessToken2 == null) {
                     LoginManager.getInstance().logOut();
-                    auth.signOut();
+                    mAuth.signOut();
                     showableLogInGroup(true);
                 }
             }
@@ -837,9 +893,9 @@ public class StartActivity extends AppCompatActivity implements
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         //Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
+                        // If sign in fails, display a message to the mUser. If sign in succeeds
+                        // the mAuth state listener will be notified and logic to handle the
+                        // signed in mUser can be handled in the listener.
                         if (!task.isSuccessful()) {
 
                             //Log.w(TAG, "signInWithCredential", task.getException());
@@ -850,6 +906,8 @@ public class StartActivity extends AppCompatActivity implements
                             Profile profile = Profile.getCurrentProfile();
                             updateUI(profile.getFirstName(), profile.getProfilePictureUri(200, 200).toString());
 	                        mUserUID = mAuth.getCurrentUser().getUid();
+                            mTypeMode = true;
+                            produceToolsVisibility(mTypeMode);
                         }
                     }
                 });
@@ -870,15 +928,16 @@ public class StartActivity extends AppCompatActivity implements
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
+                            // Sign in success, update UI with the signed-in mUser's information
                             Log.d(TAG, "signInWithCredential:success");
                             loginGoogle.setVisibility(View.GONE);
                             buttonGoogleLogout.setVisibility(View.VISIBLE);
                             updateUI(acct.getEmail(), String.valueOf(acct.getPhotoUrl()));
 							mUserUID = mAuth.getCurrentUser().getUid();
+                            produceToolsVisibility(mTypeMode = true);
 
                         } else {
-                            // If sign in fails, display a message to the user.
+                            // If sign in fails, display a message to the mUser.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(StartActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
@@ -975,27 +1034,44 @@ public class StartActivity extends AppCompatActivity implements
 
     @Click(R.id.buttonCreatedPlaces)
     void buttonCreatedPlaces() {
+        if (listCreatedPlaces.getVisibility() == View.GONE) {
+            mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            Set<String> createdByUserPlaceList = mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, null);
 
+            if (createdByUserPlaceList != null) {
+                listCreatedPlaces.setVisibility(View.VISIBLE);
+
+                ArrayList<String> listPlaces = new ArrayList<>(createdByUserPlaceList);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
+                Log.d("debugMode", "The application stopped after this");
+                listCreatedPlaces.setLayoutManager(mLayoutManager);
+                FavoritesRecyclerAdapter recyclerAdapter = new FavoritesRecyclerAdapter( StartActivity.this, listPlaces, MY_PLACE);
+                listCreatedPlaces.setAdapter(recyclerAdapter);
+
+            }
+        }else{
+            listCreatedPlaces.setVisibility(View.GONE);}
     }
 
     @Click(R.id.buttonCreatedRouts)
     void buttonCreatedRouts() {
-        if (listOfTrack.getVisibility() == View.GONE) {
+        if (listCreatedRouts.getVisibility() == View.GONE) {
             mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> createdByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_TRACK_LIST, null);
+            Set<String> createdByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, null);
 
             if (createdByUserTrackList != null) {
-                listOfTrack.setVisibility(View.VISIBLE);
+                listCreatedRouts.setVisibility(View.VISIBLE);
 
                 ArrayList<String> listTrack = new ArrayList<>(createdByUserTrackList);
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
                 Log.d("debugMode", "The application stopped after this");
-                listOfTrack.setLayoutManager(mLayoutManager);
+                listCreatedRouts.setLayoutManager(mLayoutManager);
                 FavoritesRecyclerAdapter recyclerAdapter = new FavoritesRecyclerAdapter( StartActivity.this, listTrack, MY_ROUT);
-                listOfTrack.setAdapter(recyclerAdapter);
+                listCreatedRouts.setAdapter(recyclerAdapter);
 
             }
-        }else{listOfTrack.setVisibility(View.GONE);}
+        }else{
+            listCreatedRouts.setVisibility(View.GONE);}
     }
 
 }

@@ -2,7 +2,6 @@ package com.example.key.my_carpathians.adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,21 +9,18 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.activities.MapsActivity_;
-import com.example.key.my_carpathians.interfaces.Comunicator;
+import com.example.key.my_carpathians.interfaces.Communicator;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
 
 
 public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecyclerAdapter.FavoritesViewHolder>{
-	public Comunicator comunicator;
+	public Communicator comunicator;
 	public Activity activity;
 	public static final int PLACE = 1;
 	public static final int ROUT = 2;
 	public static final int MY_ROUT = 3;
+	public static final int MY_PLACE = 4;
 	public Context context;
 	public int type;
 	private List<String> stringList;
@@ -46,18 +42,15 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
 		FavoritesViewHolder mHolder = new FavoritesViewHolder(mView, new FavoritesViewHolder.ClickListener() {
 			@Override
 			public void onPressed(String name) {
-				comunicator = (Comunicator)context;
+				comunicator = (Communicator)context;
 				if (type == PLACE) {
+					comunicator.putStringNamePlace(name, type);
+				}else if(type == MY_PLACE){
 					comunicator.putStringNamePlace(name, type);
 				}else if (type == ROUT){
 					comunicator.putStringNameRout(name, type);
 				}else if (type == MY_ROUT){
-
-					ArrayList<String> selectedUserTrack = new ArrayList<>();
-					selectedUserTrack.add(name);
-					Intent mapsActivityIntent = new Intent(context, MapsActivity_.class);
-					mapsActivityIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserTrack);
-					context.startActivity(mapsActivityIntent);
+					comunicator.putStringNameRout(name, type);
 				}
 			}
 

@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter;
 import com.example.key.my_carpathians.models.Place;
-import com.example.key.my_carpathians.models.Rout;
 
 import org.androidannotations.annotations.EFragment;
 
@@ -28,7 +27,6 @@ public class PlacesListFragment extends Fragment {
     RecyclerView recyclerView;
     LinearLayoutManager mLayoutManager;
     List<Place> mPlacesQuery;
-    List<Rout> mRoutsQuery;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -37,14 +35,12 @@ public class PlacesListFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         Log.d("debugMode", "The application stopped after this");
         recyclerView.setLayoutManager(mLayoutManager);
-        PlacesRecyclerAdapter recyclerAdapter = new PlacesRecyclerAdapter(mPlacesQuery, mRoutsQuery);
+        PlacesRecyclerAdapter recyclerAdapter = new PlacesRecyclerAdapter(mPlacesQuery);
         recyclerView.setAdapter(recyclerAdapter);
         return fragment;
     }
-    public void setList(List<Place> placeList, List<Rout> routList ){
+    public void setList(List<Place> placeList){
        this.mPlacesQuery = placeList;
-        this.mRoutsQuery = routList;
-
     }
 
 }

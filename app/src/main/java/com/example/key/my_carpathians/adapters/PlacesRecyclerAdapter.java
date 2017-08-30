@@ -1,7 +1,6 @@
 package com.example.key.my_carpathians.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,14 +10,12 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.activities.ActionActivity_;
+import com.example.key.my_carpathians.interfaces.Communicator;
 import com.example.key.my_carpathians.models.Place;
-import com.example.key.my_carpathians.models.Rout;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
 
 
 /**
@@ -26,10 +23,8 @@ import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.View
  */
 
 public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAdapter.ViewHolder> {
-    public static final String PUT_EXTRA_PLACE_LIST = "place_list";
-    public static final String PUT_EXTRA_ROUTS_LIST = "routs_list";
     private List<Place> places;
-    private List<Rout> routs;
+
     /**
      * use context to intent Url
      */
@@ -38,9 +33,8 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 
 
 
-    public PlacesRecyclerAdapter(List<Place> placeList, List<Rout> routList ) {
+    public PlacesRecyclerAdapter(List<Place> placeList) {
             this.places = placeList;
-            this.routs = routList;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -79,13 +73,9 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
             @Override
             public void onPressed(Place placeName) {
                 if (placeName != null){
-                    Intent intent = new Intent(context, ActionActivity_.class);
-                    intent.putExtra(PUT_EXTRA_PLACE, placeName);
-                    ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
-                    ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
-                    intent.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
-                    intent.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
-                    context.startActivity(intent);
+                    Communicator communicator = (Communicator)context;
+                    communicator.putStringNamePlace(placeName.getNamePlace(), PLACE);
+
                 }
             }
 

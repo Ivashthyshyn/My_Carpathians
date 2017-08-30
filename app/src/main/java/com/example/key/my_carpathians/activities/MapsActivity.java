@@ -19,6 +19,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -53,7 +54,6 @@ import com.mapbox.mapboxsdk.offline.OfflineRegion;
 import com.mapbox.mapboxsdk.offline.OfflineRegionError;
 import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
-import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.services.commons.utils.TextUtils;
 
 import org.androidannotations.annotations.Click;
@@ -77,7 +77,10 @@ import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
 import static com.example.key.my_carpathians.activities.StartActivity.ACTION_MODE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
+import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
+import static com.example.key.my_carpathians.utils.LocationService.DEFINED_LOCATION;
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -85,8 +88,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final double PERIMETER_SIZE_TO_LATITUDE = 0.3;
     public static final double PERIMETER_SIZE_TO_LONGITUDE = 0.4;
     public static final String TO_SERVICE_COMMANDS = "service_commands";
-    public static final int COMMAND_REC_TRACK = 1;
-    public static final int COMMAND_NO_SAVE_TRACK = 2;
+    public static final int COMMAND_REC_ROUT = 4;
+    public static final int COMMAND_REC_PLACE = 5;
+    public static final int COMMAND_NO_SAVE = 3;
     public static final String TO_SERVICE_TRACK_NAME = "track_name";
     public MapsActivity permissionsManager;
     public ILocation iCapture;
@@ -97,6 +101,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public PolylineOptions polylineOption = new PolylineOptions();
     public Polyline recLine;
     public Marker startMarker;
+    public AlertDialog alert;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -111,6 +116,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean switchCheck = false;
     private LocationService locationService;
     boolean checkForRecButton = true;
+    private boolean mTypeMode;
 
     @ViewById(R.id.fabRecTrack)
     ImageButton fabRecTrack;
@@ -141,15 +147,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         iCapture = new ILocation() {
             @Override
-            public void update(Location location) {
-                myLocationChangeListener.onMyLocationChange(location);
-                mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
-                        new CameraPosition.Builder()
-                                .target(new LatLng(location.getLatitude(), location.getLongitude()))  // set the camera's center position
-                                .build()));
+            public void update(Location location, int type) {
+                if (type == DEFINED_LOCATION) {
+                    showCreateNameDialog(PLACE, null);
+                }
+                if(location != null) {
+                    myLocationChangeListener.onMyLocationChange(location);
+                    mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                            new CameraPosition.Builder()
+                                    .target(new LatLng(location.getLatitude(), location.getLongitude()))  // set the camera's center position
+                                    .build()));
+                }
                 if (!checkForRecButton) {
                     showRecLine(new LatLng(location.getLatitude(), location.getLongitude()));
                 }
@@ -165,11 +175,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .show();
                 }
             }
+
+            @Override
+            public void messageForActivity(int type, String name) {
+                showCreateNameDialog(type, name);
+            }
         };
 
         selectUserRouts = getIntent().getStringArrayListExtra(SELECTED_USER_ROUTS);
         selectUserPlacesList = (List<Place>) getIntent().getSerializableExtra(SELECTED_USER_PLACES);
-
+        mTypeMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
         // Mapbox access token is configured here. This needs to be called either in your application
         // object or in the same activity which contains the mapview.
         Mapbox.getInstance(this, getString(R.string.access_token));
@@ -194,16 +209,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             checkGPSEnabled();
             toggleGps();
             floatingActionButton.setImageResource(R.drawable.ic_location_disabled_24dp);
-
-            // fabRecTrack.setLayoutParams(new LinearLayout.LayoutParams(50,50));
-            // floatingActionButton.setLayoutParams(new LinearLayout.LayoutParams(50,50));
-            fabRecTrack.setVisibility(View.VISIBLE);
+            if (mTypeMode) {
+                fabRecTrack.setVisibility(View.VISIBLE);
+            }
             switchCheck = true;
         } else if (switchCheck) {
             mapboxMap.setMyLocationEnabled(false);
             stopService(new Intent(MapsActivity.this, LocationService.class));
             floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
-            //floatingActionButton.setLayoutParams(new LinearLayout.LayoutParams(60,60));
             fabRecTrack.setVisibility(View.GONE);
             switchCheck = false;
         }
@@ -251,9 +264,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
-        Layer mapText = mapboxMap.getLayer("country-label-lg");
-        mapText.setProperties(textField("{name_ua}"));
-
         if (selectUserRouts != null && selectUserRouts.size() > 0) {
             for (int i = 0; i < selectUserRouts.size(); i++) {
                 String mUriString = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -270,7 +280,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (lat != 0 && lng != 0) {
                     IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
                     Icon icon = iconFactory.fromResource(R.drawable.marcer);
-
                     mapboxMap.addMarker(new MarkerViewOptions().icon(icon).position(new LatLng(lat, lng)));
 
                 }
@@ -600,15 +609,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapboxMap.getMyLocationViewSettings().setPadding(0, 200, 0, 0);
         mapboxMap.getMyLocationViewSettings().setForegroundTintColor(Color.parseColor("#56B881"));
         mapboxMap.getMyLocationViewSettings().setAccuracyTintColor(Color.parseColor("#FBB03B"));
-
-        mapboxMap.setMyLocationEnabled(true);
         mapboxMap.setOnMyLocationChangeListener(myLocationChangeListener);
-        mapboxMap.setOnMyLocationChangeListener(new MapboxMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(@Nullable Location location) {
-
-            }
-        });
+        mapboxMap.setMyLocationEnabled(true);
     }
 
 
@@ -756,46 +758,85 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Click(R.id.fabRecTrack)
     void fabRecTrackWasClicked() {
-
         if (checkForRecButton) {
-            Intent serviceIntent = new Intent(this, LocationService.class);
-            serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_TRACK);
-            this.startService(serviceIntent);
-
-            autoOrientationOff(true);
-            flashingColorAnimation(true);
-            checkForRecButton = false;
-        } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
-            final EditText nameTrackInput = new EditText(this);
-            nameTrackInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-            builder.setTitle("Збереження маршруту");
-            builder.setView(nameTrackInput);
-            builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                    serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameTrackInput.getText().toString());
-                    MapsActivity.this.startService(serviceIntent);
-                    checkForRecButton = true;
-                    autoOrientationOff(false);
-                    flashingColorAnimation(false);
-                    dialog.cancel();
-                }
-            });
-            builder.setNegativeButton("Не зберігати", new DialogInterface.OnClickListener() {
+            LayoutInflater inflater = this.getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.alert_write_choose, null);
+            builder.setView(dialogView);
+            ImageButton imageButtonRout = (ImageButton)dialogView.findViewById(R.id.imageButtonRout);
+            imageButtonRout.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
+                public void onClick(View view) {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE_TRACK);
+                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_ROUT);
                     MapsActivity.this.startService(serviceIntent);
-                    autoOrientationOff(false);
-                    checkForRecButton = true;
-                    flashingColorAnimation(false);
+                    autoOrientationOff(true);
+                    flashingColorAnimation(true);
+                    checkForRecButton = false;
+                    alert.dismiss();
                 }
             });
-            AlertDialog alert = builder.create();
+            ImageButton imageButtonPlace = (ImageButton)dialogView.findViewById(R.id.imageButtonPlace);
+            imageButtonPlace.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
+                    MapsActivity.this.startService(serviceIntent);
+                    autoOrientationOff(true);
+                    flashingColorAnimation(true);
+                    checkForRecButton = false;
+                    alert.dismiss();
+                }
+            });
+            alert = builder.create();
             alert.show();
+          
+        } else {
+            showCreateNameDialog(ROUT, null);
+
         }
+    }
+
+    private void showCreateNameDialog(final int model, String name) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+        final EditText nameInput = new EditText(this);
+        builder.setView(nameInput);
+        nameInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        if (name != null) {
+            builder.setTitle("Вибачте але це імя вже використовується");
+            nameInput.setText(name);
+        }else if(model == ROUT && name == null){
+            builder.setTitle("Введіть назву вашого маршруту");
+        }else if(model == PLACE && name == null){
+            builder.setTitle("Введіть назву вашого місця");
+        }
+
+        builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameInput.getText().toString());
+                serviceIntent.putExtra(TO_SERVICE_COMMANDS, model);
+                MapsActivity.this.startService(serviceIntent);
+                checkForRecButton = true;
+                autoOrientationOff(false);
+                flashingColorAnimation(false);
+                dialog.cancel();
+            }
+        });
+        builder.setNegativeButton("Не зберігати", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE);
+                MapsActivity.this.startService(serviceIntent);
+                autoOrientationOff(false);
+                checkForRecButton = true;
+                flashingColorAnimation(false);
+            }
+        });
+        alert = builder.create();
+        alert.show();
     }
 
     /**

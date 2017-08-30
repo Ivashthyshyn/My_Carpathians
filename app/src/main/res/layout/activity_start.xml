@@ -36,7 +36,10 @@
                 android:id="@+id/buttonFastRec"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
-                android:text="Button" />
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="false"
+                android:layout_alignParentRight="true"
+                android:text="Button"/>
 
             <LinearLayout
                 android:id="@+id/linearLayout"
@@ -313,12 +316,12 @@
                             android:visibility="gone" />
 
                         <TextView
-                            android:id="@+id/textView8"
+                            android:id="@+id/textViewCreated"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:paddingStart="10dp"
                             android:text="I created"
-                            android:textColor="@color/colorAccent" />
+                            android:textColor="@color/colorAccent"/>
 
                         <Button
                             android:id="@+id/buttonCreatedRouts"
@@ -331,10 +334,10 @@
                             android:textColor="@color/white" />
 
                         <android.support.v7.widget.RecyclerView
-                            android:id="@+id/listViewTrack"
+                            android:id="@+id/listViewCreatedRouts"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:visibility="gone" />
+                            android:visibility="gone"/>
 
                         <Button
                             android:id="@+id/buttonCreatedPlaces"
@@ -345,6 +348,12 @@
                             android:paddingStart="15dp"
                             android:text="My Places"
                             android:textColor="@color/white" />
+
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/listViewCreatedPlaces"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:visibility="gone"/>
 
                     </LinearLayout>
                 </android.support.v4.widget.NestedScrollView>

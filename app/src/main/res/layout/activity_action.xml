@@ -38,7 +38,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/buttonPlacesAround"
             android:layout_gravity="bottom|right"
             android:layout_margin="20dp"
             android:text="Маршрути"/>
@@ -58,12 +57,12 @@
             android:textStyle="bold"/>
 
         <ImageButton
-            android:id="@+id/buttonAddPhoto"
+            android:id="@+id/buttonShowPhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
             android:layout_marginRight="20dp"
-            app:srcCompat="@drawable/ic_menu_camera"/>
+            app:srcCompat="@drawable/ic_menu_gallery"/>
 
         <Button
             android:id="@+id/buttonPlacesAruond"

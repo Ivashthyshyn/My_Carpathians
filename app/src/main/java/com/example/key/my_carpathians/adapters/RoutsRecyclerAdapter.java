@@ -1,7 +1,6 @@
 package com.example.key.my_carpathians.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,8 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.activities.ActionActivity_;
-import com.example.key.my_carpathians.models.Place;
+import com.example.key.my_carpathians.interfaces.Communicator;
 import com.example.key.my_carpathians.models.Rout;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
@@ -38,9 +36,7 @@ import java.util.List;
 import static android.content.Context.MODE_PRIVATE;
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_PLACE_LIST;
-import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.PUT_EXTRA_ROUTS_LIST;
-import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
+import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
 
 /**
  *
@@ -50,12 +46,10 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
     public static final String PUT_EXTRA_POINTS = "put_extra_point_list";
     public Context context;
     private List<Rout> routs;
-    private List<Place> places;
 
 
-    public RoutsRecyclerAdapter(List<Rout> routList, List<Place> placeList) {
+    public RoutsRecyclerAdapter(List<Rout> routList) {
         this.routs = routList;
-        this.places = placeList;
     }
 
     @Override
@@ -68,13 +62,8 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             @Override
             public void onPressed(Rout routObject) {
                 if (routObject != null) {
-                    Intent intent = new Intent(context, ActionActivity_.class);
-                    intent.putExtra(PUT_EXTRA_ROUT, routObject);
-                    ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
-                    ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
-                    intent.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
-                    intent.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
-                    context.startActivity(intent);
+                    Communicator communicator = (Communicator)context;
+                    communicator.putStringNameRout(routObject.getNameRout(), ROUT);
                 }
             }
 
@@ -108,32 +97,35 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         try {
             // Load GeoJSON file
             File file = new File(mUri);
-            InputStream fileInputStream = new FileInputStream(file);
-            BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
-            StringBuilder sb = new StringBuilder();
-            int cp;
-            while ((cp = rd.read()) != -1) {
-                sb.append((char) cp);
-            }
+            if (file.exists()) {
 
-            fileInputStream.close();
-            // Parse JSON
-            JSONObject json = new JSONObject(sb.toString());
-            JSONArray features = json.getJSONArray("features");
-            JSONObject feature = features.getJSONObject(0);
-            JSONObject geometry = feature.getJSONObject("geometry");
-            if (geometry != null) {
-                String type = geometry.getString("type");
+                InputStream fileInputStream = new FileInputStream(file);
+                BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
+                StringBuilder sb = new StringBuilder();
+                int cp;
+                while ((cp = rd.read()) != -1) {
+                    sb.append((char) cp);
+                }
 
-                // Our GeoJSON only has one feature: a line string
-                if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
+                fileInputStream.close();
+                // Parse JSON
+                JSONObject json = new JSONObject(sb.toString());
+                JSONArray features = json.getJSONArray("features");
+                JSONObject feature = features.getJSONObject(0);
+                JSONObject geometry = feature.getJSONObject("geometry");
+                if (geometry != null) {
+                    String type = geometry.getString("type");
 
-                    // Get the Coordinates
-                    JSONArray coordinates = geometry.getJSONArray("coordinates");
-                    for (int lc = 0; lc < coordinates.length(); lc++) {
-                        JSONArray coordinate = coordinates.getJSONArray(lc);
-                        Position position = Position.fromCoordinates(coordinate.getDouble(1), coordinate.getDouble(0), coordinate.getDouble(2));
-                        points.add(position);
+                    // Our GeoJSON only has one feature: a line string
+                    if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
+
+                        // Get the Coordinates
+                        JSONArray coordinates = geometry.getJSONArray("coordinates");
+                        for (int lc = 0; lc < coordinates.length(); lc++) {
+                            JSONArray coordinate = coordinates.getJSONArray(lc);
+                            Position position = Position.fromCoordinates(coordinate.getDouble(1), coordinate.getDouble(0), coordinate.getDouble(2));
+                            points.add(position);
+                        }
                     }
                 }
             }
@@ -144,15 +136,19 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
     }
 
     private String lengthRout(List<Position> positionList) {
-
-        LineString lineString = LineString.fromCoordinates(positionList);
-        double dis = 0;
         if (positionList.size() > 0) {
-            dis = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_KILOMETERS);
+
+            LineString lineString = LineString.fromCoordinates(positionList);
+            double dis = 0;
+            if (positionList.size() > 0) {
+                dis = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_KILOMETERS);
+            }
+            DecimalFormat df = new DecimalFormat("#.#");
+            df.setRoundingMode(RoundingMode.CEILING);
+            return df.format(dis) + "km";
+        }else {
+            return "";
         }
-        DecimalFormat df = new DecimalFormat("#.#");
-        df.setRoundingMode(RoundingMode.CEILING);
-        return df.format(dis) + "km";
     }
 
     @Override
