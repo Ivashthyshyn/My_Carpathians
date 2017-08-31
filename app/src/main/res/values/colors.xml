@@ -22,4 +22,7 @@
     <color name="lbl_name">#1f7a1d</color>
     <color name="btn_logut_bg">#ff6861</color>
     <color name="background_material_light">#7b7878</color>
+    <color name="colorGreenPrimary">#117608</color>
+    <color name="colorYellowPrimary">#c6c24b</color>
+    <color name="colorRedPrimary">#ef5350</color>
 </resources>

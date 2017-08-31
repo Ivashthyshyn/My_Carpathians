@@ -80,13 +80,13 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
                 getRoutPointsList(holder.mRout.getNameRout())));
         switch (holder.mRout.getRoutsLevel()) {
             case 1:
-                holder.buttonTypeAndLevel.setBackgroundResource(R.drawable.green_shape);
+                holder.buttonTypeAndLevel.setBackgroundResource(R.color.colorGreenPrimary);
                 return;
             case 2:
-                holder.buttonTypeAndLevel.setBackgroundResource(R.drawable.yellow_shape);
+                holder.buttonTypeAndLevel.setBackgroundResource(R.color.colorYellowPrimary);
                 return;
             case 3:
-                holder.buttonTypeAndLevel.setBackgroundResource(R.drawable.red_shape);
+                holder.buttonTypeAndLevel.setBackgroundResource(R.color.colorRedPrimary);
         }
     }
 

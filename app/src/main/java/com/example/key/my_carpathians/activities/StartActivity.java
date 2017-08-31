@@ -709,54 +709,66 @@ public class StartActivity extends AppCompatActivity implements
 
     @Click(R.id.buttonResetPassword)
     public void buttonResetPasswordWasClicked() {
-        startActivity(new Intent(StartActivity.this, ResetPasswordActivity_.class));
+	    if (isOnline()) {
+		    startActivity(new Intent(StartActivity.this, ResetPasswordActivity_.class));
+	    }else{
+		    showLoginDialog();
+	    }
     }
 
     @Click(R.id.buttonCreateNewAccount)
     public void buttonCreateNewAccount() {
-        startActivity(new Intent(StartActivity.this, SignupActivity_.class));
+	    if (isOnline()) {
+		    startActivity(new Intent(StartActivity.this, SignupActivity_.class));
+	    }else{
+		    showLoginDialog();
+	    }
     }
 
     @Click(R.id.emailLoginButton)
     public void emailLoginButtonWasClicked() {
-        String email = inputEmail.getText().toString();
-        final String password = inputPassword.getText().toString();
+	    if (isOnline()) {
+		    String email = inputEmail.getText().toString();
+		    final String password = inputPassword.getText().toString();
 
-        if (TextUtils.isEmpty(email)) {
-            Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
-            return;
-        }
+		    if (TextUtils.isEmpty(email)) {
+			    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
+			    return;
+		    }
 
-        if (TextUtils.isEmpty(password)) {
-            Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
-            return;
-        }
+		    if (TextUtils.isEmpty(password)) {
+			    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
+			    return;
+		    }
 
-        //   progressBar.setVisibility(View.VISIBLE);
+		    //   progressBar.setVisibility(View.VISIBLE);
 
-        //authenticate mUser
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(StartActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        // If sign in fails, display a message to the mUser. If sign in succeeds
-                        // the mAuth state listener will be notified and logic to handle the
-                        // signed in mUser can be handled in the listener.
-                        progressBar.setVisibility(View.GONE);
-                        if (!task.isSuccessful()) {
-                            // there was an error
-                            if (password.length() < 6) {
-                                inputPassword.setError(getString(R.string.minimum_password));
-                            } else {
-                                Toast.makeText(StartActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            Intent intent = new Intent(StartActivity.this, StartActivity_.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    }
-                });
+		    //authenticate mUser
+		    mAuth.signInWithEmailAndPassword(email, password)
+				    .addOnCompleteListener(StartActivity.this, new OnCompleteListener<AuthResult>() {
+					    @Override
+					    public void onComplete(@NonNull Task<AuthResult> task) {
+						    // If sign in fails, display a message to the mUser. If sign in succeeds
+						    // the mAuth state listener will be notified and logic to handle the
+						    // signed in mUser can be handled in the listener.
+						    progressBar.setVisibility(View.GONE);
+						    if (!task.isSuccessful()) {
+							    // there was an error
+							    if (password.length() < 6) {
+								    inputPassword.setError(getString(R.string.minimum_password));
+							    } else {
+								    Toast.makeText(StartActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
+							    }
+						    } else {
+							    Intent intent = new Intent(StartActivity.this, StartActivity_.class);
+							    startActivity(intent);
+							    finish();
+						    }
+					    }
+				    });
+	    }else{
+		    showLoginDialog();
+	    }
     }
 
     private void loginFacebook() {
@@ -975,27 +987,43 @@ public class StartActivity extends AppCompatActivity implements
 
     @Click(R.id.facebokLoginButton)
     void facebookLoginButtonWasClicked() {
-        showableLogInGroup(false);
-        loginFacebook.setVisibility(View.VISIBLE);
-        loginFacebook();
+	    if (isOnline()) {
+		    showableLogInGroup(false);
+		    loginFacebook.setVisibility(View.VISIBLE);
+		    loginFacebook();
+	    }else{
+		    showLoginDialog();
+	    }
     }
 
     @Click(R.id.googleLoginButton)
     void googleLoginButtonWasClicked() {
-        showableLogInGroup(false);
-        loginGoogle();
-        loginGoogle.setVisibility(View.VISIBLE);
+	    if (isOnline()) {
+		    showableLogInGroup(false);
+		    loginGoogle();
+		    loginGoogle.setVisibility(View.VISIBLE);
+	    }else{
+		    showLoginDialog();
+	    }
     }
 
     @Click(R.id.buttonLogout)
     void buttonLogoutWasClicked() {
-        signOut();
-        showableLogInGroup(true);
+	    if (isOnline()) {
+		    signOut();
+		    showableLogInGroup(true);
+	    }else{
+		    showLoginDialog();
+	    }
     }
 
     @Click(R.id.buttonGoogleLogout)
     void buttonGoogleLogout() {
-        googleSignOut();
+	    if(isOnline()) {
+		    googleSignOut();
+	    }else{
+		    showLoginDialog();
+	    }
     }
 
     @Click(R.id.buttonFavoritesPlaces)
