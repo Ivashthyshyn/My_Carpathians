@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.example.key.my_carpathians.activities.MapsActivity.BREAK_UP_CONNECTION;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_NO_SAVE;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_PLACE;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_ROUT;
@@ -57,6 +58,9 @@ public class LocationService extends Service implements
     private static final long FASTEST_INTERVAL_ACTIVE = 1000 * 20;
     private static final long UPDATE_INTERVAL_PASSIVE = 1000 * 90;
     private static final long FASTEST_INTERVAL_PASSIVE = 1000 * 60;
+    private static final long UPDATE_INTERVAL_REC = 1000 * 20;
+    private static final long FASTEST_INTERVAL_REC = 1000 * 10;
+
     public static final String CREATED_BY_USER_ROUT_LIST = "created_rout_list";
     public static final int DEFINED_LOCATION = 1;
     public static final String CREATED_BY_USER_PLACE_LIST ="created_place_list" ;
@@ -135,11 +139,20 @@ public class LocationService extends Service implements
         mNameTrack = intent.getStringExtra(TO_SERVICE_TRACK_NAME);
         if (mIntCommand == ROUT){
             saveRoutToSDCard(mNameTrack);
+            mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
+            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
         }else if(mIntCommand == PLACE){
             savePlaceToSDCard(mNameTrack);
+            mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
+            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
         }else if (mIntCommand == COMMAND_NO_SAVE){
             mPositionList.clear();
             mLocation = null;
+            mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
+            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
+        }else if(mIntCommand == BREAK_UP_CONNECTION){
+            mGoogleApiClient.disconnect();
+            super.onDestroy();
         }
         return START_STICKY;
     }
@@ -257,7 +270,7 @@ public class LocationService extends Service implements
      */
     @Override
     public void onLocationChanged(Location location) {
-        if (owner != null) {
+       if (owner != null && mIntCommand != COMMAND_REC_ROUT) {
             if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_PASSIVE){
                 mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
                 mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
@@ -266,23 +279,39 @@ public class LocationService extends Service implements
                 mLocation = location;
                 mIntCommand = 0;
                 owner.update(location, DEFINED_LOCATION);
-            }else
+            }
             owner.update(location, 0);
-        }else {
+        }else if(owner == null && mIntCommand != COMMAND_REC_ROUT){
             if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_ACTIVE)
             mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
             mLocationRequest.setFastestInterval(FASTEST_INTERVAL_PASSIVE);
-        }
-        if (mIntCommand == COMMAND_REC_ROUT) {
+        }else if (mIntCommand == COMMAND_REC_ROUT) {
+            mLocationRequest.setInterval(UPDATE_INTERVAL_REC);
+            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_REC);
             saveRoutLocationList(location);
+            owner.update(location, 0);
         }
     }
 
 
 
+
     private void saveRoutLocationList(Location location) {
+
         Position position = new Position(location);
-        mPositionList.add(position);
+        if(position.getAltitude() != 0 && mPositionList.size() != 0){
+            for(int i = 0; i < mPositionList.size(); i++ ){
+                if (position == mPositionList.get(i)){
+                    break;
+                }else if (i == mPositionList.size() -1){
+                    mPositionList.add(position);
+
+                }
+            }
+
+        }else if(mPositionList.size() == 0 && position.getAltitude() != 0){
+            mPositionList.add(position);
+        }
     }
 
     private boolean isGooglePlayServicesAvailable() {

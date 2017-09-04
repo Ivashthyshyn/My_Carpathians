@@ -1,15 +1,17 @@
 package com.example.key.my_carpathians.activities;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.util.ArraySet;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,8 +19,15 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.adapters.ViewPagerAdapter;
 import com.example.key.my_carpathians.fragments.EditModeFragment;
 import com.example.key.my_carpathians.fragments.EditModeFragment_;
+import com.example.key.my_carpathians.fragments.InfoFragment;
+import com.example.key.my_carpathians.fragments.InfoFragment_;
+import com.example.key.my_carpathians.fragments.PlaceAroundFragment;
+import com.example.key.my_carpathians.fragments.PlaceAroundFragment_;
+import com.example.key.my_carpathians.fragments.RoutsAroundFragment;
+import com.example.key.my_carpathians.fragments.RoutsAroundFragment_;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
@@ -52,12 +61,10 @@ import java.util.Set;
 import static android.widget.Toast.LENGTH_LONG;
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 import static com.example.key.my_carpathians.R.id.graph;
-import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LATITUDE;
-import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LONGITUDE;
 import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_PLACE_LIST;
 import static com.example.key.my_carpathians.activities.StartActivity.FAVORITES_ROUTS_LIST;
-import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
 import static com.example.key.my_carpathians.activities.StartActivity.PUT_EXTRA_PLACE_LIST;
 import static com.example.key.my_carpathians.activities.StartActivity.PUT_EXTRA_ROUTS_LIST;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
@@ -76,43 +83,47 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     public Rout myRout;
     public com.example.key.my_carpathians.models.Position myPosition;
     public String myName;
-    public boolean inAlertDialogCheckedSomething = false;
     public ArrayList<String> selectedUserRouts = new ArrayList<>();
-    public ArrayList<String> selectedUserPlacesStringList = new ArrayList<>();
+    public Set<String> selectedUserPlacesStringList = new ArraySet<>();
     private SharedPreferences sharedPreferences;
     private ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
 	private boolean mTypeMode = false;
-
-
-    AlertDialog alertDialog;
+    public  Toolbar toolbar;
+    public ViewPager viewPager;
     @ViewById(R.id.imageView)
     ImageView imageView;
     @ViewById(R.id.textName)
     TextView textName;
-    @ViewById(R.id.titleText)
-    TextView titleText;
+
     @ViewById(graph)
     GraphView graphView;
 	@ViewById(R.id.buttonShowOnMap)
-	Button buttonShowOnMap;
-	@ViewById(R.id.buttonRoutsAround)
-	Button buttonRoutsAround;
-	@ViewById(R.id.buttonPlacesAruond)
-	Button buttonPlacesAround;
+    FloatingActionButton buttonShowOnMap;
 	@ViewById(R.id.buttonAddToFavorites)
-	Button buttonAddToFavorites;
+	FloatingActionButton buttonAddToFavorites;
 	@ViewById(R.id.buttonShowPhoto)
     ImageButton buttonShowPhoto;
 	@ViewById (R.id.buttonEdit)
-	Button buttonEdit;
+	FloatingActionButton buttonEdit;
 	@ViewById(R.id.buttonPublish)
-	Button buttonPublish;
+	FloatingActionButton buttonPublish;
     private boolean flagButtonShoePhoto = true;
+    private TabLayout tabLayout;
+    private ViewPagerAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        tabLayout.setupWithViewPager(viewPager);
+        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+
         sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         routList = (List<Rout>) getIntent().getSerializableExtra(PUT_EXTRA_ROUTS_LIST);
         placeList = (List<Place>) getIntent().getSerializableExtra(PUT_EXTRA_PLACE_LIST);
@@ -121,24 +132,41 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
 	    mTypeMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
 	    if (mTypeMode){
-		    buttonRoutsAround.setVisibility(View.GONE);
-		    buttonPlacesAround.setVisibility(View.GONE);
+            setBaseInformation(myPlace, myRout);
+            InfoFragment infoFragment = new InfoFragment_();
+            adapter.addFragment(infoFragment, "Info");
+            infoFragment.setData(myPlace, myRout);
+            viewPager.setAdapter(adapter);
 		    buttonAddToFavorites.setVisibility(View.GONE);
             buttonPublish.setVisibility(View.VISIBLE);
-		    setBaseInformation(myPlace, myRout);
+            viewPager.setCurrentItem(0);
+
 
 	    }else {
+            setBaseInformation(myPlace, myRout);
+            PlaceAroundFragment placeAroundFragment = new PlaceAroundFragment_();
+            adapter.addFragment(placeAroundFragment, "PLACE AROUND");
+            placeAroundFragment.setData(myPlace, placeList, myPosition);
+            InfoFragment infoFragment = new InfoFragment_();
+            adapter.addFragment(infoFragment, "INFO");
+            infoFragment.setData(myPlace, myRout);
+            RoutsAroundFragment routsAroundFragment = new RoutsAroundFragment_();
+            adapter.addFragment(routsAroundFragment, "ROUT AROUND");
+            routsAroundFragment.setData(myRout, routList, myPosition);
+            viewPager.setAdapter(adapter);
 		    buttonShowPhoto.setVisibility(View.GONE);
 		    buttonEdit.setVisibility(View.GONE);
 		    buttonPublish.setVisibility(View.GONE);
-		    setBaseInformation(myPlace, myRout);
+            viewPager.setCurrentItem(1);
+            viewPager.setOffscreenPageLimit(2);
+
 	    }
     }
 
 	private void setBaseInformation(Place place, Rout rout) {
 		if (place != null) {
 			textName.setText(myPlace.getNamePlace());
-			titleText.setText(myPlace.getTitlePlace());
+
 			graphView.setVisibility(View.GONE);
 			Glide
 					.with(ActionActivity.this)
@@ -148,7 +176,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			myName = myPlace.getNamePlace();
 		} else if (rout != null) {
 			textName.setText(myRout.getNameRout());
-			titleText.setText(myRout.getTitleRout());
+
             imageView.setVisibility(View.GONE);
             if (myRout.getUrlRout() == null){
                 buttonShowPhoto.setAlpha((float)0.5);
@@ -254,170 +282,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         }
     }
 
-    @Click(R.id.buttonRoutsAround)
-    public void buttonRoutsAroundWasClicked() {
-        List<Rout> routsAround = new ArrayList<>();
-        List<String> routsAroundName = new ArrayList<>();
-        for (int i = 0; i < routList.size(); i++) {
-            Rout mRout = routList.get(i);
-            double lat = mRout.getPositionRout().getLatitude();
-            double lng = mRout.getPositionRout().getLongitude();
-            if (myPosition.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE > lng
-                    && myPosition.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE < lng
-                    && myPosition.getLatitude() + PERIMETER_SIZE_TO_LATITUDE > lat
-                    && myPosition.getLatitude() - PERIMETER_SIZE_TO_LATITUDE < lat
-                    && !myName.equals(mRout.getNameRout())) {
-                routsAround.add(mRout);
-                routsAroundName.add(mRout.getNameRout());
-            }
-        }
-        if (routsAround.size() != 0) {
-            showListDialogForRouts(routsAroundName, routsAround);
-        } else {
-            Toast.makeText(ActionActivity.this, "No place around ", Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    @Click(R.id.buttonPlacesAruond)
-    void buttonPlacesAroundWasClicked() {
-        List<Place> placesAround = new ArrayList<>();
-        List<String> placesAroundName = new ArrayList<>();
-        for (int i = 0; i < placeList.size(); i++) {
-            Place mPlace = placeList.get(i);
-            double lat = mPlace.getPositionPlace().getLatitude();
-            double lng = mPlace.getPositionPlace().getLongitude();
-            if (myPosition.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE > lng
-                    && myPosition.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE < lng
-                    && myPosition.getLatitude() + PERIMETER_SIZE_TO_LATITUDE > lat
-                    && myPosition.getLatitude() - PERIMETER_SIZE_TO_LATITUDE < lat
-                    && !myName.equals(mPlace.getNamePlace())) {
-                placesAround.add(mPlace);
-                placesAroundName.add(mPlace.getNamePlace());
-            }
-        }
-        if (placesAround.size() != 0) {
-            showListDialogForPlaces(placesAroundName, placesAround);
-        } else {
-            Toast.makeText(ActionActivity.this, "No place around ", Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    private void showListDialogForPlaces(final List<String> stringList, final List<Place> objectList) {
-        final boolean[] mCheckedItems = new boolean[stringList.size()];
-        final CharSequence[] items = stringList.toArray(new CharSequence[stringList.size()]);
-        AlertDialog.Builder dialog = new AlertDialog.Builder(ActionActivity.this)
-                .setTitle(getString(R.string.navigate_title))
-                .setMultiChoiceItems(items, mCheckedItems, new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog,
-                                        int which, boolean isChecked) {
-                        if (isChecked) {
-                            inAlertDialogCheckedSomething = true;
-                        }
-                        mCheckedItems[which] = isChecked;
-                    }
-                })
-                .setPositiveButton("Додати до карти", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                })
-
-                .setNegativeButton("Ні", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-        alertDialog = dialog.create();
-        alertDialog.show();
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (inAlertDialogCheckedSomething) {
-                    for (int i = 0; i < items.length; i++) {
-                        if (!mCheckedItems[i]) {
-                            objectList.remove(i);
-                            stringList.remove(i);
-                        }
-                    }
-                    selectedUserPlacesList = (ArrayList<Place>) objectList;
-                    selectedUserPlacesStringList = (ArrayList<String>) stringList;
-
-                    inAlertDialogCheckedSomething = false;
-                    alertDialog.dismiss();
-                } else {
-                    Toast.makeText(ActionActivity.this, "Please selected something",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-    }
-
-    private void showListDialogForRouts(final List<String> stringList, final List<Rout> objectList) {
-        final boolean[] mCheckedItems = new boolean[stringList.size()];
-        final CharSequence[] items = stringList.toArray(new CharSequence[stringList.size()]);
-
-        AlertDialog.Builder dialog = new AlertDialog.Builder(ActionActivity.this)
-                .setTitle(getString(R.string.navigate_title))
-                .setMultiChoiceItems(items, mCheckedItems, new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog,
-                                        int which, boolean isChecked) {
-                        if (isChecked) {
-                            inAlertDialogCheckedSomething = true;
-                        }
-                        mCheckedItems[which] = isChecked;
-                    }
-                })
-                .setPositiveButton("Додати до карти", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                })
-
-                .setNegativeButton("Детальніше", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-        alertDialog = dialog.create();
-        alertDialog.show();
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (inAlertDialogCheckedSomething) {
-                    for (int i = 0; i < items.length; i++) {
-                        if (mCheckedItems[i]) {
-                            selectedUserRouts.add(stringList.get(i));
-                        }
-                        inAlertDialogCheckedSomething = false;
-                        alertDialog.dismiss();
-                    }
-                } else {
-                    Toast.makeText(ActionActivity.this, "Please selected something",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (inAlertDialogCheckedSomething) {
-                    for (int i = 0; i < items.length; i++) {
-                        if (mCheckedItems[i]) {
-                            selectedUserRouts.add(stringList.get(i));
-                        }
-                        inAlertDialogCheckedSomething = false;
-                        alertDialog.dismiss();
-                    }
-                } else {
-                    Toast.makeText(ActionActivity.this, "Please selected something",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
 
     @Override
     protected void onStart() {
@@ -474,5 +340,26 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     @Override
     public void saveChanges(Rout rout, Place place) {
         setBaseInformation(place, rout);
+    }
+
+    @Override
+    public void addToMap(Rout rout, Place place) {
+        if (rout != null) {
+            if (selectedUserRouts.contains(rout.getNameRout())) {
+                selectedUserRouts.remove(rout.getNameRout());
+            }else{
+                selectedUserRouts.add(rout.getNameRout());
+            }
+        }
+        if (place != null) {
+            if (selectedUserPlacesList.contains(place)){
+                selectedUserPlacesList.remove(place);
+            }else {
+                selectedUserPlacesList.add(place);
+            }
+            if (!selectedUserPlacesStringList.add(place.getNamePlace())){
+                selectedUserPlacesStringList.remove(place.getNamePlace());
+            }
+        }
     }
 }

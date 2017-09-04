@@ -261,11 +261,11 @@ public class StartActivity extends AppCompatActivity implements
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                mFirebaseUser = firebaseAuth.getCurrentUser();
-                if (mFirebaseUser != null) {
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + mFirebaseUser.getUid());
+                mUser = firebaseAuth.getCurrentUser();
+                if (mUser != null && !mUser.isAnonymous()) {
+                    mTypeMode = true;
                 } else {
-                    showLoginDialog();
+                    mTypeMode = false;
                 }
 
             }
@@ -313,6 +313,8 @@ public class StartActivity extends AppCompatActivity implements
         });
 
     }
+
+
 
     private void produceToolsVisibility(boolean mTypeMode) {
         if(mTypeMode){
@@ -627,7 +629,7 @@ public class StartActivity extends AppCompatActivity implements
                         fileIn.close();
 				        Intent intentActionActivity = new Intent(context, ActionActivity_.class);
 				        intentActionActivity.putExtra(PUT_EXTRA_ROUT, rout);
-				        intentActionActivity.putExtra(PRODUCE_MODE, mTypeMode);
+				        intentActionActivity.putExtra(PRODUCE_MODE, true);
 				        startActivity(intentActionActivity);
 
 			        } catch (Exception e) {
@@ -644,7 +646,7 @@ public class StartActivity extends AppCompatActivity implements
                 intentActionActivity.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
                 intentActionActivity.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
                 intentActionActivity.putExtra(PUT_EXTRA_ROUT, routs.get(i));
-                intentActionActivity.putExtra(PRODUCE_MODE, mTypeMode);
+                intentActionActivity.putExtra(PRODUCE_MODE, false);
 		        startActivity(intentActionActivity);
             }
         }
@@ -671,7 +673,7 @@ public class StartActivity extends AppCompatActivity implements
                     fileIn.close();
                     Intent intentActionActivity = new Intent(context, ActionActivity_.class);
                     intentActionActivity.putExtra(PUT_EXTRA_PLACE, place);
-                    intentActionActivity.putExtra(PRODUCE_MODE, mTypeMode);
+                    intentActionActivity.putExtra(PRODUCE_MODE, true);
                     startActivity(intentActionActivity);
 
                 } catch (Exception e) {
@@ -687,7 +689,7 @@ public class StartActivity extends AppCompatActivity implements
                 ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
                 intentActionActivity.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
                 intentActionActivity.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
-                intentActionActivity.putExtra(PRODUCE_MODE, mTypeMode);
+                intentActionActivity.putExtra(PRODUCE_MODE, false);
                 startActivity(intentActionActivity);
                 }
             }

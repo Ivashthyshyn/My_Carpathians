@@ -92,6 +92,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final int COMMAND_REC_PLACE = 5;
     public static final int COMMAND_NO_SAVE = 3;
     public static final String TO_SERVICE_TRACK_NAME = "track_name";
+    public static final int BREAK_UP_CONNECTION = 6;
     public MapsActivity permissionsManager;
     public ILocation iCapture;
     public static final String JSON_CHARSET = "UTF-8";
@@ -105,7 +106,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private MapView mapView;
     private MapboxMap mapboxMap;
-    private ImageButton floatingActionButton;
     private static final String TAG = "MapsActivity";
     private boolean isEndNotified;
     private ProgressBar progressBar;
@@ -118,12 +118,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     boolean checkForRecButton = true;
     private boolean mTypeMode;
 
-    @ViewById(R.id.fabRecTrack)
-    ImageButton fabRecTrack;
+    @ViewById(R.id.buttonRecTrack)
+    ImageButton buttonRecTrack;
 
     @ViewById(R.id.toolsContainer)
     LinearLayout toolsContainer;
 
+    @ViewById(R.id.buttonShowMyLocation)
+    ImageButton buttonShowMyLocation;
 
     private ServiceConnection captureServiceConnection = new ServiceConnection() {
 
@@ -195,29 +197,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
-        floatingActionButton = (ImageButton) findViewById(R.id.location_toggle_fab);
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startGPS();
-            }
-        });
     }
 
     private void startGPS() {
+
         if (mapboxMap != null && !switchCheck) {
             checkGPSEnabled();
-            toggleGps();
-            floatingActionButton.setImageResource(R.drawable.ic_location_disabled_24dp);
+            toggleGps(true);
+            buttonShowMyLocation.setImageResource(R.drawable.ic_location_disabled_24dp);
             if (mTypeMode) {
-                fabRecTrack.setVisibility(View.VISIBLE);
+                buttonRecTrack.setVisibility(View.VISIBLE);
             }
             switchCheck = true;
         } else if (switchCheck) {
-            mapboxMap.setMyLocationEnabled(false);
-            stopService(new Intent(MapsActivity.this, LocationService.class));
-            floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
-            fabRecTrack.setVisibility(View.GONE);
+            toggleGps(false);
+            buttonShowMyLocation.setImageResource(R.drawable.ic_my_location_24dp);
+            buttonRecTrack.setVisibility(View.GONE);
             switchCheck = false;
         }
     }
@@ -602,15 +597,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // This method monitors the position of the user on the map
-    private void toggleGps() {
-        Intent intent = new Intent(this, LocationService.class);
-        startService(intent);
-        bindService(intent, captureServiceConnection, Context.BIND_AUTO_CREATE);
-        mapboxMap.getMyLocationViewSettings().setPadding(0, 200, 0, 0);
-        mapboxMap.getMyLocationViewSettings().setForegroundTintColor(Color.parseColor("#56B881"));
-        mapboxMap.getMyLocationViewSettings().setAccuracyTintColor(Color.parseColor("#FBB03B"));
-        mapboxMap.setOnMyLocationChangeListener(myLocationChangeListener);
-        mapboxMap.setMyLocationEnabled(true);
+    private void toggleGps(boolean checker) {
+        if (checker) {
+            Intent intent = new Intent(this, LocationService.class);
+            startService(intent);
+            bindService(intent, captureServiceConnection, Context.BIND_AUTO_CREATE);
+            mapboxMap.getMyLocationViewSettings().setPadding(0, 200, 0, 0);
+            mapboxMap.getMyLocationViewSettings().setForegroundTintColor(Color.parseColor("#56B881"));
+            mapboxMap.getMyLocationViewSettings().setAccuracyTintColor(Color.parseColor("#FBB03B"));
+            mapboxMap.setOnMyLocationChangeListener(myLocationChangeListener);
+            mapboxMap.setMyLocationEnabled(true);
+        }else{
+            Intent intent = new Intent(this, LocationService.class);
+            intent.putExtra(TO_SERVICE_COMMANDS, BREAK_UP_CONNECTION);
+            MapsActivity.this.startService(intent);
+            mapboxMap.setMyLocationEnabled(false);
+        }
     }
 
 
@@ -756,8 +758,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         downloadedRegionList();
     }
 
-    @Click(R.id.fabRecTrack)
-    void fabRecTrackWasClicked() {
+    @Click(R.id.buttonRecTrack)
+    void buttonRecTrackWasClicked() {
         if (checkForRecButton) {
             AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
             LayoutInflater inflater = this.getLayoutInflater();
@@ -821,6 +823,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 checkForRecButton = true;
                 autoOrientationOff(false);
                 flashingColorAnimation(false);
+                MapsActivity.this.startService(serviceIntent);
                 dialog.cancel();
             }
         });
@@ -840,20 +843,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     /**
-     * This method turns on and turns off flashing animation for button fabRecTrack.
+     * This method turns on and turns off flashing animation for button buttonRecTrack.
      */
     private void flashingColorAnimation(boolean b) {
-        fabRecTrack.setImageResource(android.R.drawable.ic_notification_overlay);
+        buttonRecTrack.setImageResource(android.R.drawable.ic_notification_overlay);
         if(b) {
             Animation mAnimation = new AlphaAnimation(1, 0);
             mAnimation.setDuration(300);
             mAnimation.setInterpolator(new LinearInterpolator());
             mAnimation.setRepeatCount(Animation.INFINITE);
             mAnimation.setRepeatMode(Animation.REVERSE);
-            fabRecTrack.startAnimation(mAnimation);
+            buttonRecTrack.startAnimation(mAnimation);
         }else {
-            fabRecTrack.clearAnimation();
-            fabRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
+            buttonRecTrack.clearAnimation();
+            buttonRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
             mapboxMap.removePolyline(recLine);
             mapboxMap.removeMarker(startMarker);
         }
@@ -889,6 +892,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onRestoreInstanceState(savedInstanceState);
         switchCheck =  savedInstanceState.getBoolean("switchCheck");
         checkForRecButton = savedInstanceState.getBoolean("checkForRecButton");
+    }
+    @Click(R.id.buttonShowMyLocation)
+    void buttonShowMyLocationWasClicked(){
+        if (!checkForRecButton){
+            showCreateNameDialog(ROUT, null);
+        }else {
+            startGPS();
+        }
     }
 }
 

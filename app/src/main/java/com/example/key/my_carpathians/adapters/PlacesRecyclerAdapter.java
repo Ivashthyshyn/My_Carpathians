@@ -30,9 +30,6 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
      */
     public Context context;
 
-
-
-
     public PlacesRecyclerAdapter(List<Place> placeList) {
             this.places = placeList;
     }
