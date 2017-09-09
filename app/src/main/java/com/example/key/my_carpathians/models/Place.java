@@ -63,4 +63,6 @@ public class Place implements Serializable {
     public String getUrlPlace(){
         return urlPlace;
     }
+
+
 }

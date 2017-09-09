@@ -21,7 +21,7 @@ import org.androidannotations.annotations.ViewById;
 public class InfoFragment extends Fragment {
 	Place place;
 	Rout rout;
-
+	View view;
 	@ViewById(R.id.titleText)
 	TextView titleText;
 
@@ -39,8 +39,8 @@ public class InfoFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
-		return inflater.inflate(R.layout.fragment_info, container, false);
+	view = inflater.inflate(R.layout.fragment_info, container, false);
+		return  view;
 	}
 	@AfterViews
 	void afterViews(){
@@ -54,5 +54,8 @@ public class InfoFragment extends Fragment {
 	public void setData(Place place, Rout rout){
 		this.place = place;
 		this.rout = rout;
+		if (view != null){
+			afterViews();
+		}
 	}
 }

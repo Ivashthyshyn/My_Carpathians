@@ -58,6 +58,9 @@
             android:name=".activities.ResetPasswordActivity_"
             android:label="@string/title_activity_reset_password"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity
+            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat"/>
 
         <service
             android:name=".utils.LocationService"

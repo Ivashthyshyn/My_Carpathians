@@ -774,7 +774,9 @@ public class StartActivity extends AppCompatActivity implements
     }
 
     private void loginFacebook() {
-        loginFacebook.setVisibility(View.VISIBLE);
+	    if(isOnline()) {
+		    loginFacebook.setVisibility(View.VISIBLE);
+	    }
         // If using in a fragment
         AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
             @Override

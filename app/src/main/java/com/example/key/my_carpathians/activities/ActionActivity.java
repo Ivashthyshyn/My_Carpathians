@@ -1,23 +1,29 @@
 package com.example.key.my_carpathians.activities;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.ArraySet;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.ViewPagerAdapter;
 import com.example.key.my_carpathians.fragments.EditModeFragment;
@@ -31,6 +37,13 @@ import com.example.key.my_carpathians.fragments.RoutsAroundFragment_;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
@@ -76,52 +89,70 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
     public static final String SELECTED_USER_PLACES = "selected_user_places";
-    public List<Rout> routList;
+	public static final String STORAGE_CONSTANT = "file:/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/";
+	public List<Rout> routList;
     public List<Place> placeList;
     public List<Position> pointsRout;
     public Place myPlace;
     public Rout myRout;
+	public  InfoFragment infoFragment;
+	public  EditModeFragment editFragment;
     public com.example.key.my_carpathians.models.Position myPosition;
     public String myName;
     public ArrayList<String> selectedUserRouts = new ArrayList<>();
     public Set<String> selectedUserPlacesStringList = new ArraySet<>();
-    private SharedPreferences sharedPreferences;
-    private ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
+	public SharedPreferences sharedPreferences;
+	public ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
 	private boolean mTypeMode = false;
-    public  Toolbar toolbar;
-    public ViewPager viewPager;
+	public List<String> photoUrlList = new ArrayList<>();
+	private int mItemUrlList = 0;
+
+
+   @ViewById(R.id.toolbar)
+    Toolbar toolbar;
+
     @ViewById(R.id.imageView)
     ImageView imageView;
     @ViewById(R.id.textName)
     TextView textName;
-
+	@ViewById(R.id.ratingBar)
+	RatingBar ratingBar;
+	@ViewById(R.id.buttonRatingBar)
+	FloatingActionButton buttonRatingBar;
     @ViewById(graph)
     GraphView graphView;
 	@ViewById(R.id.buttonShowOnMap)
     FloatingActionButton buttonShowOnMap;
 	@ViewById(R.id.buttonAddToFavorites)
 	FloatingActionButton buttonAddToFavorites;
-	@ViewById(R.id.buttonShowPhoto)
-    ImageButton buttonShowPhoto;
+
+	@ViewById(R.id.fabChangePhotoLeft)
+	FloatingActionButton fabChangePhotoLeft;
+
+	@ViewById(R.id.fabChangePhotoRight)
+	FloatingActionButton fabChangePhotoRight;
+
 	@ViewById (R.id.buttonEdit)
 	FloatingActionButton buttonEdit;
 	@ViewById(R.id.buttonPublish)
 	FloatingActionButton buttonPublish;
-    private boolean flagButtonShoePhoto = true;
-    private TabLayout tabLayout;
+	@ViewById(R.id.tabLayout)
+	TabLayout tabLayout;
+	@ViewById(R.id.viewpager)
+	ViewPager viewPager;
     private ViewPagerAdapter adapter;
+	private boolean connected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
+
         tabLayout.setupWithViewPager(viewPager);
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
+
 
 
         sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -132,18 +163,21 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
 	    mTypeMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
 	    if (mTypeMode){
-            setBaseInformation(myPlace, myRout);
-            InfoFragment infoFragment = new InfoFragment_();
-            adapter.addFragment(infoFragment, "Info");
+
+            infoFragment = new InfoFragment_();
+            adapter.addFragment(infoFragment, "INFO");
             infoFragment.setData(myPlace, myRout);
             viewPager.setAdapter(adapter);
 		    buttonAddToFavorites.setVisibility(View.GONE);
             buttonPublish.setVisibility(View.VISIBLE);
             viewPager.setCurrentItem(0);
-
+		    buttonEdit.setVisibility(View.VISIBLE);
+		    ratingBar.setVisibility(View.GONE);
+		    buttonRatingBar.setVisibility(View.GONE);
+		    setBaseInformation(myPlace, myRout);
 
 	    }else {
-            setBaseInformation(myPlace, myRout);
+
             PlaceAroundFragment placeAroundFragment = new PlaceAroundFragment_();
             adapter.addFragment(placeAroundFragment, "PLACE AROUND");
             placeAroundFragment.setData(myPlace, placeList, myPosition);
@@ -154,45 +188,118 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
             adapter.addFragment(routsAroundFragment, "ROUT AROUND");
             routsAroundFragment.setData(myRout, routList, myPosition);
             viewPager.setAdapter(adapter);
-		    buttonShowPhoto.setVisibility(View.GONE);
 		    buttonEdit.setVisibility(View.GONE);
 		    buttonPublish.setVisibility(View.GONE);
             viewPager.setCurrentItem(1);
             viewPager.setOffscreenPageLimit(2);
-
+		    setBaseInformation(myPlace, myRout);
 	    }
     }
 
 	private void setBaseInformation(Place place, Rout rout) {
-		if (place != null) {
-			textName.setText(myPlace.getNamePlace());
+		if (place != null  ) {
+			if (isOnline()){
+				morePhotos(place.getNamePlace());
+			}
 
+			textName.setText(place.getNamePlace());
+			if (infoFragment != null) {
+				infoFragment.setData(place, rout);
+				adapter.notifyDataSetChanged();
+			}
+			getRating(place.getNamePlace());
 			graphView.setVisibility(View.GONE);
+			fabChangePhotoLeft.setVisibility(View.GONE);
+			fabChangePhotoRight.setVisibility(View.GONE);
 			Glide
 					.with(ActionActivity.this)
-					.load("file:/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/" + myPlace.getNamePlace())
+					.load(STORAGE_CONSTANT + place.getNamePlace())
+					.diskCacheStrategy(DiskCacheStrategy.NONE)
+					.skipMemoryCache(true)
 					.into(imageView);
-			myPosition = myPlace.getPositionPlace();
-			myName = myPlace.getNamePlace();
+			myPosition = place.getPositionPlace();
+			myName = place.getNamePlace();
 		} else if (rout != null) {
-			textName.setText(myRout.getNameRout());
+			textName.setText(rout.getNameRout());
+			photoUrlList.add("graph");
 
-            imageView.setVisibility(View.GONE);
-            if (myRout.getUrlRout() == null){
-                buttonShowPhoto.setAlpha((float)0.5);
+            if (rout.getUrlRout() != null && isOnline()){
+	            photoUrlList.add(rout.getUrlRout());
+		        morePhotos(rout.getNameRout());
+	            imageView.setVisibility(View.GONE);
+	            fabChangePhotoLeft.setVisibility(View.GONE);
+
+            }else{
+	            fabChangePhotoLeft.setVisibility(View.GONE);
+	            fabChangePhotoRight.setVisibility(View.GONE);
+	            imageView.setVisibility(View.GONE);
             }
-            Glide
-                    .with(ActionActivity.this)
-                    .load(rout.getUrlRout())
-                    .into(imageView);
+
             if (mTypeMode) {
-                createDataPoint(URI.create(myRout.getUrlRoutsTrack()));
-            }else
-                createDataPoint(URI.create(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                        .getString(myRout.getNameRout(), null)));
-			myPosition = myRout.getPositionRout();
-			myName = myRout.getNameRout();
+                createDataPoint(URI.create(rout.getUrlRoutsTrack()));
+            }else {
+	            createDataPoint(URI.create(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+			            .getString(rout.getNameRout(), null)));
+            }
+			myPosition = rout.getPositionRout();
+			myName = rout.getNameRout();
 		}
+	}
+
+	private void morePhotos(String name) {
+		FirebaseDatabase database = FirebaseDatabase.getInstance();
+		DatabaseReference myRef = database.getReference();
+		Query myPlace = myRef.child("Photos").child(name);
+
+		myPlace.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(DataSnapshot dataSnapshot) {
+				for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+					String value = postSnapshot.getValue(String.class);
+					photoUrlList.add(value);
+				}
+			}
+
+			@Override
+			public void onCancelled(DatabaseError databaseError) {
+			}
+		});
+	}
+
+	private void getRating(String namePlace) {
+		FirebaseDatabase database = FirebaseDatabase.getInstance();
+		DatabaseReference myRef = database.getReference();
+		Query myPlace = myRef.child("Rating").child(namePlace);
+
+		myPlace.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(DataSnapshot dataSnapshot) {
+				int counter = 0;
+				float sum = 0;
+				for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+					counter++;
+					float value = postSnapshot.getValue(float.class);
+					sum = sum + value;
+
+				}
+				float averageValue = sum/counter;
+				ratingBar.setRating(averageValue);
+			}
+
+			@Override
+			public void onCancelled(DatabaseError databaseError) {
+				ratingBar.setRating(0);
+			}
+		});
+
+
+	}
+	public void setRating(float rating) {
+		FirebaseDatabase database = FirebaseDatabase.getInstance();
+		DatabaseReference myRef = database.getReference();
+		FirebaseAuth mAuth = FirebaseAuth.getInstance();
+		myRef.child("Rating").child(myName).child(mAuth.getCurrentUser().getUid()).setValue(rating);
+
 	}
 
 	//Todo need optimise code
@@ -317,29 +424,59 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     @Click(R.id.buttonEdit)
     void buttonEditWasClicked(){
         FragmentManager fm = getSupportFragmentManager();
-        EditModeFragment editFragment = new EditModeFragment_();
-        editFragment.show(fm, "fragment_edit");
+	    android.support.v4.app.FragmentTransaction fragmentTransaction = fm
+			    .beginTransaction();
+        editFragment = new EditModeFragment_();
+	    fragmentTransaction.add(R.id.actionActivityContainer, editFragment);
         editFragment.setData(myRout, myPlace);
+	    fragmentTransaction.commit();
 
     }
-    @Click(R.id.buttonShowPhoto)
-    public void buttonShowPhotoWasClicked(){
-        if (flagButtonShoePhoto) {
-            graphView.setVisibility(View.GONE);
-            imageView.setVisibility(View.VISIBLE);
-            buttonShowPhoto.setImageResource(android.R.drawable.ic_menu_slideshow);
-            flagButtonShoePhoto = false;
-        }else{
-            imageView.setVisibility(View.GONE);
-            graphView.setVisibility(View.VISIBLE);
-            buttonShowPhoto.setImageResource(android.R.drawable.ic_menu_report_image);
-            flagButtonShoePhoto = true;
-        }
+    @Click(R.id.fabChangePhotoRight)
+    public void fabChangePhotoRightWasClicked(){
+	    mItemUrlList++;
+	    if (mItemUrlList < photoUrlList.size()) {
+		    fabChangePhotoRight.setVisibility(View.VISIBLE);
+		    fabChangePhotoLeft.setVisibility(View.VISIBLE);
+		    imageView.setVisibility(View.VISIBLE);
+		    graphView.setVisibility(View.GONE);
+		    Glide
+				    .with(ActionActivity.this)
+				    .load(photoUrlList.get(mItemUrlList))
+				    .into(imageView);
+		    if (mItemUrlList == photoUrlList.size() - 1) {
+			    fabChangePhotoRight.setVisibility(View.GONE);
+		    }
+	    }
     }
 
+	@Click(R.id.fabChangePhotoLeft)
+	public void fabChangePhotoLeftWasClicked(){
+
+		mItemUrlList--;
+		if (mItemUrlList != 0){
+			fabChangePhotoRight.setVisibility(View.VISIBLE);
+			fabChangePhotoLeft.setVisibility(View.VISIBLE);
+			imageView.setVisibility(View.VISIBLE);
+			Glide
+					.with(ActionActivity.this)
+					.load(photoUrlList.get(mItemUrlList))
+					.into(imageView);
+
+
+		}else {
+			fabChangePhotoRight.setVisibility(View.VISIBLE);
+			fabChangePhotoLeft.setVisibility(View.GONE);
+			imageView.setVisibility(View.GONE);
+			graphView.setVisibility(View.VISIBLE);
+		}
+	}
     @Override
     public void saveChanges(Rout rout, Place place) {
         setBaseInformation(place, rout);
+	    if(editFragment !=  null){
+		    editFragment.dismiss();
+	    }
     }
 
     @Override
@@ -362,4 +499,62 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
             }
         }
     }
+	public boolean isOnline() {
+		try {
+			ConnectivityManager connectivityManager = (ConnectivityManager) ActionActivity.this
+					.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+			NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+			connected = networkInfo != null && networkInfo.isAvailable() &&
+					networkInfo.isConnected();
+			return connected;
+
+
+		} catch (Exception e) {
+			System.out.println("CheckConnectivity Exception: " + e.getMessage());
+			Log.v("connectivity", e.toString());
+		}
+		return connected;
+	}
+	@Click(R.id.buttonRatingBar)
+	public void  ratingBarDialog(){
+		final AlertDialog.Builder ratingDialog = new AlertDialog.Builder(this);
+
+		ratingDialog.setIcon(android.R.drawable.btn_star_big_on);
+		ratingDialog.setTitle("Проголосувати за місце");
+
+		View linearLayout = getLayoutInflater().inflate(R.layout.ratingdialog, null);
+		ratingDialog.setView(linearLayout);
+
+		final RatingBar rating = (RatingBar)linearLayout.findViewById(R.id.ratingbar);
+
+		ratingDialog.setPositiveButton("ОК",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						setRating(rating.getRating());
+						dialog.dismiss();
+					}
+				})
+
+				.setNegativeButton("Ні",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+
+		ratingDialog.create();
+		ratingDialog.show();
+	}
+
+	@Override
+	public void onBackPressed() {
+
+		if(editFragment != null){
+			editFragment.dismiss();
+			editFragment = null;
+		}else {
+			super.onBackPressed();
+		}
+	}
 }

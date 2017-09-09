@@ -158,24 +158,25 @@ public class LocationService extends Service implements
     }
 
     private void savePlaceToSDCard(String mNamePlace) {
-        Place mPlace = new Place();
-        mPlace.setNamePlace(mNamePlace);
-        com.example.key.my_carpathians.models.Position position = new com.example.key.my_carpathians.models.Position();
-        position.setLatitude(mLocation.getLatitude());
-        position.setLongitude(mLocation.getLongitude());
-        mPlace.setPositionPlace(position);
+        if (mLocation != null) {
+            Place mPlace = new Place();
+            mPlace.setNamePlace(mNamePlace);
+            com.example.key.my_carpathians.models.Position position = new com.example.key.my_carpathians.models.Position();
+            position.setLatitude(mLocation.getLatitude());
+            position.setLongitude(mLocation.getLongitude());
+            mPlace.setPositionPlace(position);
 
-        File rootPath = new File(getApplicationContext().getExternalFilesDir(
-                Environment.DIRECTORY_DOWNLOADS), "Created");
-        if (!rootPath.exists()) {
-            rootPath.mkdirs();
-        }
+            File rootPath = new File(getApplicationContext().getExternalFilesDir(
+                    Environment.DIRECTORY_DOWNLOADS), "Created");
+            if (!rootPath.exists()) {
+                rootPath.mkdirs();
+            }
 
-        File file = new File(rootPath, mNamePlace);
-        String fileUri = String.valueOf(file.toURI());
-        if (file.exists()) {
-            owner.messageForActivity(PLACE, mNamePlace);
-        }
+            File file = new File(rootPath, mNamePlace);
+            String fileUri = String.valueOf(file.toURI());
+            if (file.exists()) {
+                owner.messageForActivity(PLACE, mNamePlace);
+            }
             try {
                 FileOutputStream fileOutputStream = new FileOutputStream(file);
                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
@@ -183,7 +184,7 @@ public class LocationService extends Service implements
                 objectOutputStream.close();
                 fileOutputStream.close();
                 SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST,new HashSet<String>()));
+                Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
                 createdByUserTrackList.add(mNamePlace);
                 mSharedPreferences.edit().putString(mNamePlace, fileUri).apply();
                 mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserTrackList).apply();
@@ -192,7 +193,7 @@ public class LocationService extends Service implements
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+        }
     }
 
     private void saveRoutToSDCard(String mNameRout) {

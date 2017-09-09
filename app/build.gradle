@@ -97,6 +97,7 @@ dependencies {
     compile 'com.cocoahero.android:geojson:1.0.1@jar'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.jjoe64:graphview:4.2.1'
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.5.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
 }

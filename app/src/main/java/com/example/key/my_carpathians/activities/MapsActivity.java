@@ -823,7 +823,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 checkForRecButton = true;
                 autoOrientationOff(false);
                 flashingColorAnimation(false);
-                MapsActivity.this.startService(serviceIntent);
                 dialog.cancel();
             }
         });
