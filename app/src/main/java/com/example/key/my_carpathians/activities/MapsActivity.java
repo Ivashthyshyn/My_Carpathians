@@ -856,8 +856,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }else {
             buttonRecTrack.clearAnimation();
             buttonRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
-            mapboxMap.removePolyline(recLine);
-            mapboxMap.removeMarker(startMarker);
+            if (recLine != null) {
+                mapboxMap.removePolyline(recLine);
+                mapboxMap.removeMarker(startMarker);
+            }
         }
     }
 

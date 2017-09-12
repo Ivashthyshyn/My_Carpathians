@@ -53,6 +53,7 @@ import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.commons.models.Position;
 import com.mapbox.services.commons.utils.TextUtils;
 
+import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
@@ -89,7 +90,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
     public static final String SELECTED_USER_PLACES = "selected_user_places";
-	public static final String STORAGE_CONSTANT = "file:/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/";
+	public static final String STORAGE_CONSTANT = "/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/";
 	public List<Rout> routList;
     public List<Place> placeList;
     public List<Position> pointsRout;
@@ -103,10 +104,11 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     public Set<String> selectedUserPlacesStringList = new ArraySet<>();
 	public SharedPreferences sharedPreferences;
 	public ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
-	private boolean mTypeMode = false;
+	private boolean mProdusedMode = false;
 	public List<String> photoUrlList = new ArrayList<>();
 	private int mItemUrlList = 0;
-
+	private ViewPagerAdapter adapter;
+	private boolean connected = false;
 
    @ViewById(R.id.toolbar)
     Toolbar toolbar;
@@ -140,8 +142,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	TabLayout tabLayout;
 	@ViewById(R.id.viewpager)
 	ViewPager viewPager;
-    private ViewPagerAdapter adapter;
-	private boolean connected = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,8 +162,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         pointsRout = (List<Position>)getIntent().getSerializableExtra(PUT_EXTRA_POINTS);
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
-	    mTypeMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
-	    if (mTypeMode){
+	    mProdusedMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
+	    if (mProdusedMode){
 
             infoFragment = new InfoFragment_();
             adapter.addFragment(infoFragment, "INFO");
@@ -180,25 +181,27 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
             PlaceAroundFragment placeAroundFragment = new PlaceAroundFragment_();
             adapter.addFragment(placeAroundFragment, "PLACE AROUND");
-            placeAroundFragment.setData(myPlace, placeList, myPosition);
+
             InfoFragment infoFragment = new InfoFragment_();
             adapter.addFragment(infoFragment, "INFO");
             infoFragment.setData(myPlace, myRout);
             RoutsAroundFragment routsAroundFragment = new RoutsAroundFragment_();
             adapter.addFragment(routsAroundFragment, "ROUT AROUND");
-            routsAroundFragment.setData(myRout, routList, myPosition);
+
             viewPager.setAdapter(adapter);
 		    buttonEdit.setVisibility(View.GONE);
 		    buttonPublish.setVisibility(View.GONE);
             viewPager.setCurrentItem(1);
             viewPager.setOffscreenPageLimit(2);
 		    setBaseInformation(myPlace, myRout);
+		    routsAroundFragment.setData(myRout, routList, myPosition);
+		    placeAroundFragment.setData(myPlace, placeList, myPosition);
 	    }
     }
 
 	private void setBaseInformation(Place place, Rout rout) {
 		if (place != null  ) {
-			if (isOnline()){
+			if (isOnline() | mProdusedMode){
 				morePhotos(place.getNamePlace());
 			}
 
@@ -217,15 +220,20 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
 					.skipMemoryCache(true)
 					.into(imageView);
+
 			myPosition = place.getPositionPlace();
 			myName = place.getNamePlace();
 		} else if (rout != null) {
 			textName.setText(rout.getNameRout());
 			photoUrlList.add("graph");
-
-            if (rout.getUrlRout() != null && isOnline()){
+			getRating(rout.getNameRout());
+			if (infoFragment != null) {
+				infoFragment.setData(place, rout);
+				adapter.notifyDataSetChanged();
+			}
+            if (rout.getUrlRout() != null && isOnline() | mProdusedMode) {
 	            photoUrlList.add(rout.getUrlRout());
-		        morePhotos(rout.getNameRout());
+	            morePhotos(rout.getNameRout());
 	            imageView.setVisibility(View.GONE);
 	            fabChangePhotoLeft.setVisibility(View.GONE);
 
@@ -235,7 +243,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	            imageView.setVisibility(View.GONE);
             }
 
-            if (mTypeMode) {
+            if (mProdusedMode) {
                 createDataPoint(URI.create(rout.getUrlRoutsTrack()));
             }else {
 	            createDataPoint(URI.create(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -247,23 +255,32 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
 
 	private void morePhotos(String name) {
-		FirebaseDatabase database = FirebaseDatabase.getInstance();
-		DatabaseReference myRef = database.getReference();
-		Query myPlace = myRef.child("Photos").child(name);
-
-		myPlace.addValueEventListener(new ValueEventListener() {
-			@Override
-			public void onDataChange(DataSnapshot dataSnapshot) {
-				for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-					String value = postSnapshot.getValue(String.class);
-					photoUrlList.add(value);
+		if (mProdusedMode){
+			for (int i = 1; i <= 3; i++){
+				File photoFile = new File(STORAGE_CONSTANT + name + String.valueOf(i));
+				if (photoFile.exists()){
+					photoUrlList.add(photoFile.toURI().toString());
 				}
 			}
+		}else {
+			FirebaseDatabase database = FirebaseDatabase.getInstance();
+			DatabaseReference myRef = database.getReference();
+			Query myPlace = myRef.child("Photos").child(name);
 
-			@Override
-			public void onCancelled(DatabaseError databaseError) {
-			}
-		});
+			myPlace.addValueEventListener(new ValueEventListener() {
+				@Override
+				public void onDataChange(DataSnapshot dataSnapshot) {
+					for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+						String value = postSnapshot.getValue(String.class);
+						photoUrlList.add(value);
+					}
+				}
+
+				@Override
+				public void onCancelled(DatabaseError databaseError) {
+				}
+			});
+		}
 	}
 
 	private void getRating(String namePlace) {
@@ -302,8 +319,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 	}
 
-	//Todo need optimise code
-    private void createDataPoint(URI uriRoutTrack) {
+	@Background
+    public void createDataPoint(URI uriRoutTrack) {
         List<Position> points = new ArrayList<>();
         try {
             // Load GeoJSON file
@@ -363,7 +380,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
     @Click(R.id.buttonShowOnMap)
     public void buttonShowOnMapWasClicked() {
-        if(mTypeMode) {
+        if(mProdusedMode) {
             if (myPlace != null) {
                 selectedUserPlacesList.add(myPlace);
             }
@@ -373,7 +390,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
             Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
             mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
             mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
-            mapIntent.putExtra(PRODUCE_MODE, mTypeMode);
+            mapIntent.putExtra(PRODUCE_MODE, mProdusedMode);
             startActivity(mapIntent);
         }else{
             if (myPlace != null) {
@@ -443,6 +460,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		    Glide
 				    .with(ActionActivity.this)
 				    .load(photoUrlList.get(mItemUrlList))
+				    .diskCacheStrategy(DiskCacheStrategy.NONE)
+				    .skipMemoryCache(true)
 				    .into(imageView);
 		    if (mItemUrlList == photoUrlList.size() - 1) {
 			    fabChangePhotoRight.setVisibility(View.GONE);
@@ -473,6 +492,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
     @Override
     public void saveChanges(Rout rout, Place place) {
+	    photoUrlList.clear();
         setBaseInformation(place, rout);
 	    if(editFragment !=  null){
 		    editFragment.dismiss();

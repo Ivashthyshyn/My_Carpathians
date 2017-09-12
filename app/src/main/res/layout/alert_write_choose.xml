@@ -26,7 +26,7 @@
             android:layout_marginRight="20dp"
             android:layout_weight="1"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/androidlogo"/>
+            app:srcCompat="@drawable/ic_exchange"/>
 
         <ImageButton
             android:id="@+id/imageButtonRout"

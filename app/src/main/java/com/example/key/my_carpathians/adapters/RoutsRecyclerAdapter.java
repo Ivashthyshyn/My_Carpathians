@@ -37,6 +37,9 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
+import static com.example.key.my_carpathians.fragments.EditModeFragment.HARD;
+import static com.example.key.my_carpathians.fragments.EditModeFragment.LIGHT;
+import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
 
 /**
  *
@@ -79,13 +82,13 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         holder.textLengthTrack.setText(lengthRout(
                 getRoutPointsList(holder.mRout.getNameRout())));
         switch (holder.mRout.getRoutsLevel()) {
-            case 1:
+            case LIGHT:
                 holder.buttonTypeAndLevel.setBackgroundResource(R.color.colorGreenPrimary);
                 return;
-            case 2:
+            case MEDIUM:
                 holder.buttonTypeAndLevel.setBackgroundResource(R.color.colorYellowPrimary);
                 return;
-            case 3:
+            case HARD:
                 holder.buttonTypeAndLevel.setBackgroundResource(R.color.colorRedPrimary);
         }
     }

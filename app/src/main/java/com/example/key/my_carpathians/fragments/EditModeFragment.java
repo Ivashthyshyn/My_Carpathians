@@ -1,6 +1,7 @@
 package com.example.key.my_carpathians.fragments;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -8,8 +9,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +51,7 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.example.key.my_carpathians.activities.ActionActivity.STORAGE_CONSTANT;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
+import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
 
 /**
  .
@@ -60,17 +62,35 @@ public class EditModeFragment extends DialogFragment {
 	public static final int LIGHT = 1;
 	public static final int MEDIUM = 2;
 	public static final int HARD = 3;
+	public static final String NO_PUBLISH_CONSTANT = "_";
+	private static final int TITLE_PHOTO = 0;
+	private static final int MORE_PHOTO_1 = 1;
+	private static final int MORE_PHOTO_2 = 2;
+	private static final int MORE_PHOTO_3 = 3;
+	private int mPhotoSwicher = 0;
 
 	private Rout mRout = null ;
 	private Place mPlace = null;
 	int routsLevel = 0;
-	Bitmap mBitmap;
+	Bitmap bitmap = null;
+	Bitmap bitmap1 = null;
+	Bitmap bitmap2 = null;
+	Bitmap bitmap3 = null;
+	String uriPhoto1 = null;
+	String uriPhoto2 = null;
+	String uriPhoto3 = null;
 	String name;
 	String uriTitlePhoto = null;
 	View view;
+	@ViewById(R.id.imageAdd1)
+	ImageButton imageAdd1;
+	@ViewById(R.id.imageAdd2)
+	ImageButton imageAdd2;
+	@ViewById(R.id.imageAdd3)
+	ImageButton imageAdd3;
 
 	@ViewById(R.id.buttonAddPhoto)
-	FloatingActionButton buttonAddPhoto;
+	ImageButton buttonAddPhoto;
 
 	@ViewById(R.id.editTextName)
 	EditText editTextName;
@@ -120,6 +140,8 @@ public class EditModeFragment extends DialogFragment {
 	@ViewById(R.id.groupMorePhoto)
 	LinearLayout groupMorePhoto;
 
+
+
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -136,6 +158,9 @@ public class EditModeFragment extends DialogFragment {
 	@AfterViews
 	void afterView(){
 			editTextName.setText(name);
+		if (uriTitlePhoto != null){
+			buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
+		}
 
 			Glide
 				.with(getContext())
@@ -143,6 +168,7 @@ public class EditModeFragment extends DialogFragment {
 				.diskCacheStrategy(DiskCacheStrategy.NONE)
 				.skipMemoryCache(true)
 				.into(imageTitlePhoto);
+			morePhotos(name);
 			if(mPlace != null){
 				radioGroup.setVisibility(View.GONE);
 				editTextTitle.setText(mPlace.getTitlePlace());
@@ -159,6 +185,7 @@ public class EditModeFragment extends DialogFragment {
 						break;
 					case R.id.radioButtonLight:
 						routsLevel = LIGHT;
+
 						break;
 					case R.id.radioButtonMedium:
 						routsLevel = MEDIUM;
@@ -173,13 +200,35 @@ public class EditModeFragment extends DialogFragment {
 		cropImageView.setOnCropImageCompleteListener(new CropImageView.OnCropImageCompleteListener() {
 			@Override
 			public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
+
 				progressView.setVisibility(View.INVISIBLE);
 				croperGroup.setVisibility(View.GONE);
 				cropTools.setVisibility(View.GONE);
 				editGroup.setVisibility(View.VISIBLE);
 				groupMorePhoto.setVisibility(View.VISIBLE);
-				mBitmap = cropImageView.getCroppedImage();
-				imageTitlePhoto.setImageBitmap(mBitmap);
+
+				switch (mPhotoSwicher){
+					case TITLE_PHOTO:
+						uriTitlePhoto = "";
+						bitmap = cropImageView.getCroppedImage();
+						imageTitlePhoto.setImageBitmap(bitmap);
+						buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
+						break;
+					case MORE_PHOTO_1:
+						bitmap1 = cropImageView.getCroppedImage();
+						imageAdd1.setImageBitmap(bitmap1);
+						break;
+					case MORE_PHOTO_2:
+						bitmap2 = cropImageView.getCroppedImage();
+						imageAdd2.setImageBitmap(bitmap2);
+						break;
+					case MORE_PHOTO_3:
+						bitmap3= cropImageView.getCroppedImage();
+						imageAdd3.setImageBitmap(bitmap3);
+						break;
+				}
+
+
 
 
 			}
@@ -192,6 +241,26 @@ public class EditModeFragment extends DialogFragment {
 				progressView.setVisibility(View.INVISIBLE);
 			}
 		});
+	}
+	private void morePhotos(String name) {
+
+			for (int i = 1; i <= 3; i++) {
+				File photoFile = new File(STORAGE_CONSTANT,  name + String.valueOf(i));
+				if (photoFile.exists()) {
+					Uri uri = Uri.fromFile(photoFile);
+					switch (i){
+						case 1: imageAdd1.setImageURI(uri);
+							uriPhoto1 = uri.toString();
+							break;
+						case 2: imageAdd2.setImageURI(uri);
+							uriPhoto2 = uri.toString();
+							break;
+						case 3: imageAdd3.setImageURI(uri);
+							uriPhoto3 = uri.toString();
+					}
+				}
+			}
+
 	}
     public void setData(Rout rout, Place place){
 
@@ -207,10 +276,15 @@ public class EditModeFragment extends DialogFragment {
 	}
 	@Click(R.id.buttonAddPhoto)
 	public void buttonAddPhotoWasClicked(View view){
+		mPhotoSwicher = TITLE_PHOTO;
+		 searchPhotoInGallery();
+		}
+
+	private void searchPhotoInGallery() {
 		Intent intentFromGalery =new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 		intentFromGalery.setType("image/*");
 		startActivityForResult(intentFromGalery, GALLERY_REQUEST);
-		}
+	}
 
 	@Click(R.id.buttonRotationCrop)
 	public void buttonRotationCropWasClicked(){
@@ -233,15 +307,61 @@ public class EditModeFragment extends DialogFragment {
 				mRout.setNameRout(editTextName.getText().toString());
 				mRout.setTitleRout(editTextTitle.getText().toString());
 				mRout.setRoutsLevel(routsLevel);
-				mRout.setUrlRout(uriTitlePhoto);
-				CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity)getContext();
-				communicatorActionActivity.saveChanges(mRout, null);
-				 this.dismiss();
+				mRout.setUrlRout(savePhotoToSDCard(mRout.getNameRout(), bitmap, uriTitlePhoto));
+				 if(bitmap1 != null | bitmap2 != null | bitmap3 != null ){
+					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_1), bitmap1, uriPhoto1);
+					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), bitmap2, uriPhoto2);
+					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), bitmap3, uriPhoto3);
+				 }
+				 File rootPath = new File(getContext().getExternalFilesDir(
+						 Environment.DIRECTORY_DOWNLOADS), "Created");
+				 if (!rootPath.exists()) {
+					 rootPath.mkdirs();
+				 }
+
+				 File file = new File(rootPath, mRout.getNameRout() + NO_PUBLISH_CONSTANT);
+				 String fileUri = String.valueOf(file.toURI());
+				 if (file.exists()) {
+					 file.delete();
+				 } else {
+					 File betterFile = new File(rootPath, name);
+					 if (betterFile.exists()) {
+						 file.delete();
+					 }
+				 }
+				 try {
+					 FileOutputStream fileOutputStream = new FileOutputStream(file);
+					 ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+					 objectOutputStream.writeObject(mRout);
+					 objectOutputStream.close();
+					 fileOutputStream.close();
+					 SharedPreferences mSharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+					 Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
+					 if (createdByUserTrackList.add(mRout.getNameRout())) {
+						 createdByUserTrackList.remove(name);
+						 mSharedPreferences.edit().remove(name).apply();
+					 }
+					 mSharedPreferences.edit().putString(mRout.getNameRout(), fileUri).apply();
+					 mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
+					 Toast.makeText(getContext(), "Rout saved", Toast.LENGTH_LONG).show();
+					 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity)getContext();
+					 communicatorActionActivity.saveChanges(mRout, null);
+				 } catch (IOException e) {
+					 e.printStackTrace();
+				 }
+
+
+
+
 			}else if(mPlace != null) {
 				 mPlace.setNamePlace(editTextName.getText().toString());
 				 mPlace.setTitlePlace(editTextTitle.getText().toString());
-				 savePhotoToSDCard(mPlace.getNamePlace());
-
+				 mPlace.setUrlPlace(savePhotoToSDCard(mPlace.getNamePlace(), bitmap, uriTitlePhoto));
+				 if(bitmap1 != null | bitmap2 != null | bitmap3 != null ){
+					 savePhotoToSDCard(mRout.getNameRout() + MORE_PHOTO_1, bitmap1, uriPhoto1);
+					 savePhotoToSDCard(mRout.getNameRout() + MORE_PHOTO_2, bitmap2, uriPhoto2);
+					 savePhotoToSDCard(mRout.getNameRout() + MORE_PHOTO_3, bitmap3, uriPhoto3);
+				 }
 				 File rootPath = new File(getContext().getExternalFilesDir(
 						 Environment.DIRECTORY_DOWNLOADS), "Created");
 				 if (!rootPath.exists()) {
@@ -265,13 +385,13 @@ public class EditModeFragment extends DialogFragment {
 						 objectOutputStream.close();
 						 fileOutputStream.close();
 						 SharedPreferences mSharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-						 Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
-						 if (createdByUserTrackList.add(mPlace.getNamePlace())) {
-							 createdByUserTrackList.remove(name);
+						 Set<String> createdByUserPlaceList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
+						 if (createdByUserPlaceList.add(mPlace.getNamePlace())) {
+							 createdByUserPlaceList.remove(name);
 							 mSharedPreferences.edit().remove(name).apply();
 						 }
 						 mSharedPreferences.edit().putString(mPlace.getNamePlace(), fileUri).apply();
-						 mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserTrackList).apply();
+						 mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserPlaceList).apply();
 						 Toast.makeText(getContext(), "Place saved", Toast.LENGTH_LONG).show();
 						 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity) getContext();
 						 communicatorActionActivity.saveChanges(null, mPlace);
@@ -282,38 +402,36 @@ public class EditModeFragment extends DialogFragment {
 
 	}
 
-	private void savePhotoToSDCard(String namePlace) {
-		mBitmap = cropImageView.getCroppedImage();
-		imageTitlePhoto.setImageBitmap(mBitmap);
-		if (mBitmap != null) {
-			File rootPath = new File(getContext().getExternalFilesDir(
-					Environment.DIRECTORY_DOWNLOADS), "Photos");
-			if (!rootPath.exists()) {
-				rootPath.mkdirs();
-			}
+	private String savePhotoToSDCard(String namePlace, Bitmap bitmap, String uri) {
+			if (bitmap != null) {
+				File rootPath = new File(getContext().getExternalFilesDir(
+						Environment.DIRECTORY_DOWNLOADS), "Photos");
+				if (!rootPath.exists()) {
+					rootPath.mkdirs();
+				}
 
-			File file = new File(rootPath, namePlace);
-			if (file.exists()) {
-				file.delete();
+				File file = new File(rootPath, namePlace);
+				if (file.exists()) {
+					file.delete();
+				}
+				uri = String.valueOf(file.toURI());
+				try {
+					FileOutputStream fileOutputStream = new FileOutputStream(file);
+					bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fileOutputStream);
+					fileOutputStream.flush();
+					fileOutputStream.close();
+					Toast.makeText(getContext(), "Photo saved", Toast.LENGTH_SHORT).show();
+				} catch (IOException e) {
+					e.printStackTrace();
+					Toast.makeText(getContext(), "Photo do not saved", Toast.LENGTH_SHORT).show();
+				}
+			} else {
+				File file = new File(uri);
+				if (file.exists()) {
+					file.renameTo(new File(STORAGE_CONSTANT + namePlace));
+				}
 			}
-			uriTitlePhoto = String.valueOf(file.toURI());
-			try {
-				FileOutputStream fileOutputStream = new FileOutputStream(file);
-				mBitmap.compress(Bitmap.CompressFormat.JPEG, 50, fileOutputStream);
-				fileOutputStream.flush();
-				fileOutputStream.close();
-				Toast.makeText(getContext(), "Photo saved", Toast.LENGTH_SHORT).show();
-				mPlace.setUrlPlace(uriTitlePhoto);
-			} catch (IOException e) {
-				e.printStackTrace();
-				Toast.makeText(getContext(), "Photo do not saved", Toast.LENGTH_SHORT).show();
-			}
-		}else{
-			File file = new File(uriTitlePhoto);
-			if (file.exists()) {
-				file.renameTo(new File(STORAGE_CONSTANT + namePlace));
-			}
-		}
+		return uri;
 	}
 
 	@Click(R.id.buttonCrop)
@@ -327,7 +445,6 @@ public class EditModeFragment extends DialogFragment {
 				&& resultCode == RESULT_OK) {
 			Uri selectedImage = data.getData();
 			if ( selectedImage!= null) {
-				groupMorePhoto.setVisibility(View.GONE);
 				editGroup.setVisibility(View.GONE);
 				croperGroup.setVisibility(View.VISIBLE);
 				cropTools.setVisibility(View.VISIBLE);
@@ -345,5 +462,47 @@ public class EditModeFragment extends DialogFragment {
 		cropTools.setVisibility(View.GONE);
 		groupMorePhoto.setVisibility(View.VISIBLE);
 		editGroup.setVisibility(View.VISIBLE);
+	}
+	@Click(R.id.imageAdd1)
+	public void imageAdd1WasClicked(View view){
+		if (uriPhoto1 != null){
+			showAlertDialog(uriPhoto1);
+		}
+		mPhotoSwicher = MORE_PHOTO_1;
+		searchPhotoInGallery();
+	}
+
+	private void showAlertDialog(final String uriPhoto1) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+				builder.setTitle("Photo");
+		builder.setPositiveButton("Поміняти", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int i) {
+				searchPhotoInGallery();
+			}
+		});
+		builder.setNegativeButton("Видалити", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int i) {
+
+			}
+		});
+	}
+
+	@Click(R.id.imageAdd2)
+	public void imageAdd2WasClicked(View view){
+		if (uriPhoto2 != null){
+			showAlertDialog(uriPhoto2);
+		}
+		mPhotoSwicher = MORE_PHOTO_2;
+		searchPhotoInGallery();
+	}
+	@Click(R.id.imageAdd3)
+	public void imageAdd3WasClicked(View view){
+		if (uriPhoto3 != null){
+			showAlertDialog(uriPhoto3);
+		}
+		mPhotoSwicher = MORE_PHOTO_3;
+		searchPhotoInGallery();
 	}
 }

@@ -46,6 +46,7 @@ import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
+import static com.example.key.my_carpathians.fragments.EditModeFragment.NO_PUBLISH_CONSTANT;
 
 
 public class LocationService extends Service implements
@@ -234,7 +235,7 @@ public class LocationService extends Service implements
                     rootPath2.mkdirs();
                 }
 
-                File file = new File(rootPath2, mNameRout + "_");
+                File file = new File(rootPath2, mNameRout + NO_PUBLISH_CONSTANT);
                 String fileUri2 = String.valueOf(file.toURI());
                 if (file.exists()) {
                     owner.messageForActivity(ROUT, mNameRout);
@@ -246,8 +247,8 @@ public class LocationService extends Service implements
                         objectOutputStream.close();
                         fileOutputStream.close();
                         Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
-                        createdByUserTrackList.add(mNameRout + "_");
-                        mSharedPreferences.edit().putString(mNameRout + "_", fileUri2).apply();
+                        createdByUserTrackList.add(mNameRout + NO_PUBLISH_CONSTANT);
+                        mSharedPreferences.edit().putString(mNameRout + NO_PUBLISH_CONSTANT, fileUri2).apply();
                         mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
                         Toast.makeText(getApplicationContext(), "Rout saved", Toast.LENGTH_LONG).show();
                         mPositionList.clear();

@@ -48,7 +48,7 @@
                     android:layout_alignParentTop="true"
                     android:elevation="3dp"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@drawable/title"/>
+                    app:srcCompat="@android:color/transparent"/>
 
                 <RatingBar
                     android:id="@+id/ratingBar"
