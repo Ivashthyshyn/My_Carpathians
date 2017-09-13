@@ -36,7 +36,7 @@
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:src="@android:drawable/ic_menu_revert"/>
+                    android:src="@drawable/ic_arrow_back_black_24dp"/>
 
                 <ImageButton
                     android:id="@+id/buttonRotationCrop"
@@ -55,7 +55,7 @@
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:src="@android:drawable/ic_menu_set_as"
+                    android:src="@drawable/ic_done_black_24dp"
                     android:text="обрізати"/>
             </LinearLayout>
 

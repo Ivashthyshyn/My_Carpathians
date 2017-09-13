@@ -6,12 +6,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.interfaces.Communicator;
 import com.example.key.my_carpathians.models.Place;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -38,13 +45,14 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
         public final static String PUT_EXTRA_PLACE = "placeName";
         public ImageView placeImage;
         public TextView textName;
-        public Place mPlace;
+        public RatingBar ratingBar;
         private  ClickListener mClickListener;
-
+        private Place mPlace;
 
         public ViewHolder(View itemView, ClickListener listener) {
             super(itemView);
             mClickListener = listener;
+            ratingBar = (RatingBar)itemView.findViewById(R.id.ratingBarForPlaceList);
             placeImage = (ImageView)itemView.findViewById(R.id.imagePlace);
             textName = (TextView)itemView.findViewById(R.id.textNamePlace);
             mPlace = null;
@@ -86,10 +94,39 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 
             holder.mPlace = places.get(position);
             holder.textName.setText(holder.mPlace.getNamePlace());
+            ratingPlace(holder.mPlace.getNamePlace(), holder.ratingBar);
             Glide
                     .with(context)
                     .load("file:/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/" + holder.mPlace.getNamePlace())
                     .into(holder.placeImage);
+
+    }
+    private void ratingPlace(String namePlace, final RatingBar ratingBar) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference();
+        Query myPlace = myRef.child("Rating").child(namePlace);
+
+        myPlace.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int counter = 0;
+                float sum = 0;
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    counter++;
+                    float value = postSnapshot.getValue(float.class);
+                    sum = sum + value;
+
+                }
+                float averageValue = sum/counter;
+                ratingBar.setRating( averageValue);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                ratingBar.setRating(0);
+            }
+        });
 
     }
 

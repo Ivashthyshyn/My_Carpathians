@@ -26,4 +26,5 @@
     <color name="colorYellowPrimary">#c6c24b</color>
     <color name="colorRedPrimary">#ef5350</color>
     <color name="tabTransparant">#5a3f51b5</color>
+    <color name="background">#726e6e</color>
 </resources>

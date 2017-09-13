@@ -68,8 +68,8 @@
                     android:elevation="5dp"/>
 
                 <RatingBar
-                    android:id="@+id/ratingBar2"
-                    style="?android:attr/ratingBarStyleSmall"
+                    android:id="@+id/ratingBarForPlaceList"
+                    style="@style/Widget.AppCompat.RatingBar.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/textNamePlace"
@@ -78,12 +78,12 @@
                     android:layout_gravity="center"
                     android:layout_marginRight="10dp"
                     android:backgroundTint="@color/bg_login"
+                    android:elevation="5dp"
                     android:isIndicator="true"
                     android:numStars="5"
                     android:rating="1"
                     android:secondaryProgressTint="@color/colorAccent"
-                    android:stepSize="0.5"
-                    android:elevation="5dp"/>
+                    android:stepSize="0.5"/>
 
             </LinearLayout>
 

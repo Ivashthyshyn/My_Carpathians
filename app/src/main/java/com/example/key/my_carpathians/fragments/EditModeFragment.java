@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -174,6 +175,14 @@ public class EditModeFragment extends DialogFragment {
 				editTextTitle.setText(mPlace.getTitlePlace());
 			}else if (mRout != null){
 				radioGroup.setVisibility(View.VISIBLE);
+				int childCount = radioGroup.getChildCount();
+				for (int i = 1; i < radioGroup.getChildCount(); i++) {
+					RadioButton rButton = (RadioButton) radioGroup.getChildAt(i);
+
+					if (rButton.getVisibility() == View.VISIBLE) {
+						rButton.setChecked(true);
+					}
+				}
 				editTextTitle.setText(mRout.getTitleRout());
 			}
 		radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -276,14 +285,18 @@ public class EditModeFragment extends DialogFragment {
 	}
 	@Click(R.id.buttonAddPhoto)
 	public void buttonAddPhotoWasClicked(View view){
-		mPhotoSwicher = TITLE_PHOTO;
-		 searchPhotoInGallery();
+		if(uriTitlePhoto != null){
+			showAlertDialog(uriTitlePhoto, true);
+		}else {
+			mPhotoSwicher = TITLE_PHOTO;
+			searchPhotoInGallery();
+		}
 		}
 
 	private void searchPhotoInGallery() {
-		Intent intentFromGalery =new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		intentFromGalery.setType("image/*");
-		startActivityForResult(intentFromGalery, GALLERY_REQUEST);
+		Intent intentFromGallery =new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		intentFromGallery.setType("image/*");
+		startActivityForResult(intentFromGallery, GALLERY_REQUEST);
 	}
 
 	@Click(R.id.buttonRotationCrop)
@@ -466,43 +479,60 @@ public class EditModeFragment extends DialogFragment {
 	@Click(R.id.imageAdd1)
 	public void imageAdd1WasClicked(View view){
 		if (uriPhoto1 != null){
-			showAlertDialog(uriPhoto1);
+			showAlertDialog(uriPhoto1, false);
+		}else {
+			mPhotoSwicher = MORE_PHOTO_1;
+			searchPhotoInGallery();
 		}
-		mPhotoSwicher = MORE_PHOTO_1;
-		searchPhotoInGallery();
 	}
 
-	private void showAlertDialog(final String uriPhoto1) {
+	private void showAlertDialog(final String uriPhoto, boolean necessarily) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-				builder.setTitle("Photo");
-		builder.setPositiveButton("Поміняти", new DialogInterface.OnClickListener() {
+		builder.setTitle("Photo");
+		if (necessarily){
+			builder.setMessage("Титульна фотографія є обов'язковую якщо ви зашочете зробити свій обєкт публічним");
+		}else{
+			builder.setMessage("Додаткові фотографії не є обовязковими для публікації");
+		}
+
+		builder.setPositiveButton("Вибрати", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
 				searchPhotoInGallery();
+				dialogInterface.dismiss();
 			}
 		});
 		builder.setNegativeButton("Видалити", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
-
+				File file = new File(uriPhoto);
+				if (file.exists()) {
+					file.delete();
+				}
+				morePhotos(name);
+				dialogInterface.dismiss();
 			}
 		});
+		builder.create();
+		builder.show();
 	}
 
 	@Click(R.id.imageAdd2)
 	public void imageAdd2WasClicked(View view){
 		if (uriPhoto2 != null){
-			showAlertDialog(uriPhoto2);
+			showAlertDialog(uriPhoto2, false);
+		}else {
+			mPhotoSwicher = MORE_PHOTO_2;
+			searchPhotoInGallery();
 		}
-		mPhotoSwicher = MORE_PHOTO_2;
-		searchPhotoInGallery();
 	}
 	@Click(R.id.imageAdd3)
 	public void imageAdd3WasClicked(View view){
 		if (uriPhoto3 != null){
-			showAlertDialog(uriPhoto3);
+			showAlertDialog(uriPhoto3, false);
+		}else {
+			mPhotoSwicher = MORE_PHOTO_3;
+			searchPhotoInGallery();
 		}
-		mPhotoSwicher = MORE_PHOTO_3;
-		searchPhotoInGallery();
 	}
 }
