@@ -292,6 +292,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             itemView.setOnClickListener(this);
         }
 
+
         @Override
         public void onClick(View v) {
             mClickListener.onPressed(mRout);
