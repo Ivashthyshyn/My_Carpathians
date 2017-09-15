@@ -437,8 +437,47 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         Toast.makeText(ActionActivity.this, " Add to favorites", LENGTH_LONG).show();
 
     }
+    @Click(R.id.buttonPublish)
+    void buttonPublishWasClicked(){
+	    if (isOnline()) {
+		    saveToFirebase(myPlace, myRout);
+	    }else{
+		    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		    builder.setTitle("Publish");
+		    builder.setMessage("Sorry, \n" +
+				    "no internet access, you will be able to post data later when" +
+				    " there is a good connection to the network ");
+		    builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			    @Override
+			    public void onClick(DialogInterface dialogInterface, int i) {
+				    dialogInterface.dismiss();
+			    }
+		    });
+		    AlertDialog alertDialog = builder.create();
+		    alertDialog.show();
+	    }
 
-    @Click(R.id.buttonEdit)
+    }
+	@Background
+	public void saveToFirebase(Place place, Rout rout) {
+		if (place != null){
+			FirebaseDatabase database = FirebaseDatabase.getInstance();
+			DatabaseReference myRef = database.getReference();
+			FirebaseAuth mAuth = FirebaseAuth.getInstance();
+			place.setPublisher(mAuth.getCurrentUser().getEmail());
+			myRef.child("Places").child(place.getNamePlace()).setValue(place);
+
+
+		}else if (rout != null){
+			FirebaseDatabase database = FirebaseDatabase.getInstance();
+			DatabaseReference myRef = database.getReference();
+			FirebaseAuth mAuth = FirebaseAuth.getInstance();
+			rout.setPublisher(mAuth.getCurrentUser().getEmail());
+			myRef.child("Rout").child(rout.getNameRout()).setValue(rout);
+		}
+	}
+
+	@Click(R.id.buttonEdit)
     void buttonEditWasClicked(){
         FragmentManager fm = getSupportFragmentManager();
 	    android.support.v4.app.FragmentTransaction fragmentTransaction = fm
@@ -492,6 +531,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
     @Override
     public void saveChanges(Rout rout, Place place) {
+	    myRout = rout;
+	    myPlace = place;
 	    photoUrlList.clear();
         setBaseInformation(place, rout);
 	    if(editFragment !=  null){

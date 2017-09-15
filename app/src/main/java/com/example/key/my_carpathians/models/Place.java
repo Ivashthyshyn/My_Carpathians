@@ -14,6 +14,7 @@ public class Place implements Serializable {
     public String titlePlace;
     public String urlPlace;
     public String namePlace;
+    public String publisher;
     public int typePlace;
     public Position positionPlace;
 
@@ -41,7 +42,12 @@ public class Place implements Serializable {
     public String getNamePlace() {
         return namePlace;
     }
-
+    public String getPublisher() {
+        return publisher;
+    }
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
 
     public void setNamePlace(String namePlace) {
         this.namePlace = namePlace;

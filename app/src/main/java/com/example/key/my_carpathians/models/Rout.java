@@ -11,6 +11,7 @@ import java.io.Serializable;
 public class Rout implements Serializable {
     public String nameRout;
     public String titleRout;
+    public String publisher;
     public String urlRout;
     public String urlRoutsTrack;
     public int routsLevel;
@@ -53,7 +54,13 @@ public class Rout implements Serializable {
         return titleRout;
     }
 
+    public String getPublisher() {
+        return publisher;
+    }
 
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
 
     public String getUrlRout() {
         return urlRout;
