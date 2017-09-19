@@ -33,18 +33,36 @@ import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
+import com.mapbox.services.api.utils.turf.TurfConstants;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
+import com.mapbox.services.commons.geojson.LineString;
+import com.mapbox.services.commons.models.Position;
+import com.mapbox.services.commons.utils.TextUtils;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.ViewById;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.math.RoundingMode;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static android.app.Activity.RESULT_OK;
@@ -69,7 +87,8 @@ public class EditModeFragment extends DialogFragment {
 	private static final int MORE_PHOTO_2 = 2;
 	private static final int MORE_PHOTO_3 = 3;
 	private int mPhotoSwicher = 0;
-
+	private String mTrackLength = null;
+	private com.example.key.my_carpathians.models.Position mPositionRout = null;
 	private Rout mRout = null ;
 	private Place mPlace = null;
 	int routsLevel = 0;
@@ -174,6 +193,7 @@ public class EditModeFragment extends DialogFragment {
 				radioGroup.setVisibility(View.GONE);
 				editTextTitle.setText(mPlace.getTitlePlace());
 			}else if (mRout != null){
+				determineLength(URI.create(mRout.getUrlRoutsTrack()));
 				radioGroup.setVisibility(View.VISIBLE);
 				int childCount = radioGroup.getChildCount();
 				for (int i = 1; i < radioGroup.getChildCount(); i++) {
@@ -251,6 +271,70 @@ public class EditModeFragment extends DialogFragment {
 			}
 		});
 	}
+	@Background
+	public void determineLength(URI uri) {
+		List<Position> points = new ArrayList<>();
+
+		try {
+			// Load GeoJSON file
+			File file = new File(uri);
+			if (file.exists()) {
+
+				InputStream fileInputStream = new FileInputStream(file);
+				BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
+				StringBuilder sb = new StringBuilder();
+				int cp;
+				while ((cp = rd.read()) != -1) {
+					sb.append((char) cp);
+				}
+
+				fileInputStream.close();
+				// Parse JSON
+				JSONObject json = new JSONObject(sb.toString());
+				JSONArray features = json.getJSONArray("features");
+				JSONObject feature = features.getJSONObject(0);
+				JSONObject geometry = feature.getJSONObject("geometry");
+				if (geometry != null) {
+					String type = geometry.getString("type");
+
+					// Our GeoJSON only has one feature: a line string
+					if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
+
+						// Get the Coordinates
+						JSONArray coordinates = geometry.getJSONArray("coordinates");
+						for (int lc = 0; lc < coordinates.length(); lc++) {
+							JSONArray coordinate = coordinates.getJSONArray(lc);
+							Position position = Position.fromCoordinates(coordinate.getDouble(1), coordinate.getDouble(0), coordinate.getDouble(2));
+							points.add(position);
+						}
+					}
+				}
+			}
+		} catch (Exception exception) {
+			Toast.makeText(getContext(),"Не вдалось визначити довжину трека", Toast.LENGTH_SHORT).show();
+			mTrackLength = "unknown";
+		}
+
+
+		if (points.size() > 0) {
+			mPositionRout = new com.example.key.my_carpathians.models.Position();
+			// todo need to verify
+			mPositionRout.setLatitude(points.get(0).getLatitude());
+			mPositionRout.setLongitude(points.get(0).getLongitude());
+
+			LineString lineString = LineString.fromCoordinates(points);
+			double dis = 0;
+			if (points.size() > 0) {
+				dis = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_KILOMETERS);
+			}
+			DecimalFormat df = new DecimalFormat("#.#");
+			df.setRoundingMode(RoundingMode.CEILING);
+			mTrackLength = (df.format(dis) + "km");
+		} else {
+			mTrackLength = "unknown";
+		}
+	}
+
 	private void morePhotos(String name) {
 
 			for (int i = 1; i <= 3; i++) {
@@ -319,6 +403,8 @@ public class EditModeFragment extends DialogFragment {
 			}else if (mRout != null){
 				mRout.setNameRout(editTextName.getText().toString());
 				mRout.setTitleRout(editTextTitle.getText().toString());
+				mRout.setLengthRout(mTrackLength);
+				mRout.setPositionRout(mPositionRout);
 				mRout.setRoutsLevel(routsLevel);
 				mRout.setUrlRout(savePhotoToSDCard(mRout.getNameRout(), bitmap, uriTitlePhoto));
 				 if(bitmap1 != null | bitmap2 != null | bitmap3 != null ){
@@ -371,9 +457,9 @@ public class EditModeFragment extends DialogFragment {
 				 mPlace.setTitlePlace(editTextTitle.getText().toString());
 				 mPlace.setUrlPlace(savePhotoToSDCard(mPlace.getNamePlace(), bitmap, uriTitlePhoto));
 				 if(bitmap1 != null | bitmap2 != null | bitmap3 != null ){
-					 savePhotoToSDCard(mRout.getNameRout() + MORE_PHOTO_1, bitmap1, uriPhoto1);
-					 savePhotoToSDCard(mRout.getNameRout() + MORE_PHOTO_2, bitmap2, uriPhoto2);
-					 savePhotoToSDCard(mRout.getNameRout() + MORE_PHOTO_3, bitmap3, uriPhoto3);
+					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_1, bitmap1, uriPhoto1);
+					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_2, bitmap2, uriPhoto2);
+					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_3, bitmap3, uriPhoto3);
 				 }
 				 File rootPath = new File(getContext().getExternalFilesDir(
 						 Environment.DIRECTORY_DOWNLOADS), "Created");
@@ -412,6 +498,7 @@ public class EditModeFragment extends DialogFragment {
 						 e.printStackTrace();
 					 }
 				 }
+
 
 	}
 

@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
@@ -18,6 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +40,8 @@ import com.example.key.my_carpathians.fragments.RoutsAroundFragment_;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -44,6 +49,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
@@ -65,7 +74,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -91,6 +99,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
     public static final String SELECTED_USER_PLACES = "selected_user_places";
 	public static final String STORAGE_CONSTANT = "/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/";
+	public static final String STORAGE_TRACK_CONSTANT = "/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Routs/";
 	public List<Rout> routList;
     public List<Place> placeList;
     public List<Position> pointsRout;
@@ -109,6 +118,10 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	private int mItemUrlList = 0;
 	private ViewPagerAdapter adapter;
 	private boolean connected = false;
+	private FirebaseDatabase database;
+	private DatabaseReference myRef;
+	@ViewById(R.id.uploadBar)
+	ProgressBar uploadBar;
 
    @ViewById(R.id.toolbar)
     Toolbar toolbar;
@@ -203,6 +216,10 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		if (place != null  ) {
 			if (isOnline() | mProdusedMode){
 				morePhotos(place.getNamePlace());
+				fabChangePhotoLeft.setVisibility(View.GONE);
+			}else{
+				fabChangePhotoLeft.setVisibility(View.GONE);
+				fabChangePhotoRight.setVisibility(View.GONE);
 			}
 
 			textName.setText(place.getNamePlace());
@@ -210,17 +227,15 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				infoFragment.setData(place, rout);
 				adapter.notifyDataSetChanged();
 			}
-			getRating(place.getNamePlace());
-			graphView.setVisibility(View.GONE);
-			fabChangePhotoLeft.setVisibility(View.GONE);
-			fabChangePhotoRight.setVisibility(View.GONE);
 			Glide
 					.with(ActionActivity.this)
 					.load(STORAGE_CONSTANT + place.getNamePlace())
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
 					.skipMemoryCache(true)
 					.into(imageView);
-
+			photoUrlList.add( 0, STORAGE_CONSTANT + place.getNamePlace());
+			graphView.setVisibility(View.GONE);
+			getRating(place.getNamePlace());
 			myPosition = place.getPositionPlace();
 			myName = place.getNamePlace();
 		} else if (rout != null) {
@@ -236,19 +251,16 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	            morePhotos(rout.getNameRout());
 	            imageView.setVisibility(View.GONE);
 	            fabChangePhotoLeft.setVisibility(View.GONE);
-
+	            fabChangePhotoRight.setVisibility(View.VISIBLE);
             }else{
 	            fabChangePhotoLeft.setVisibility(View.GONE);
 	            fabChangePhotoRight.setVisibility(View.GONE);
 	            imageView.setVisibility(View.GONE);
             }
 
-            if (mProdusedMode) {
-                createDataPoint(URI.create(rout.getUrlRoutsTrack()));
-            }else {
-	            createDataPoint(URI.create(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-			            .getString(rout.getNameRout(), null)));
-            }
+
+            createDataPoint(STORAGE_TRACK_CONSTANT + rout.getNameRout());
+
 			myPosition = rout.getPositionRout();
 			myName = rout.getNameRout();
 		}
@@ -265,7 +277,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		}else {
 			FirebaseDatabase database = FirebaseDatabase.getInstance();
 			DatabaseReference myRef = database.getReference();
-			Query myPlace = myRef.child("Photos").child(name);
+			Query myPlace = myRef.child("Photos").child(name).child("placeImage");
 
 			myPlace.addValueEventListener(new ValueEventListener() {
 				@Override
@@ -284,7 +296,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
 
 	private void getRating(String namePlace) {
-		FirebaseDatabase database = FirebaseDatabase.getInstance();
+		database = FirebaseDatabase.getInstance();
 		DatabaseReference myRef = database.getReference();
 		Query myPlace = myRef.child("Rating").child(namePlace);
 
@@ -312,7 +324,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 	}
 	public void setRating(float rating) {
-		FirebaseDatabase database = FirebaseDatabase.getInstance();
+		database = FirebaseDatabase.getInstance();
 		DatabaseReference myRef = database.getReference();
 		FirebaseAuth mAuth = FirebaseAuth.getInstance();
 		myRef.child("Rating").child(myName).child(mAuth.getCurrentUser().getUid()).setValue(rating);
@@ -320,60 +332,64 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
 
 	@Background
-    public void createDataPoint(URI uriRoutTrack) {
+    public void createDataPoint(String uriRoutTrack) {
         List<Position> points = new ArrayList<>();
         try {
             // Load GeoJSON file
+
             File file = new File(uriRoutTrack);
-            InputStream fileInputStream = new FileInputStream(file);
-            BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
-            StringBuilder sb = new StringBuilder();
-            int cp;
-            while ((cp = rd.read()) != -1) {
-                sb.append((char) cp);
-            }
+	        if (file.exists()) {
+		        InputStream fileInputStream = new FileInputStream(file);
+		        BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
+		        StringBuilder sb = new StringBuilder();
+		        int cp;
+		        while ((cp = rd.read()) != -1) {
+			        sb.append((char) cp);
+		        }
 
-            fileInputStream.close();
+		        fileInputStream.close();
+		        // Parse JSON
+		        JSONObject json = new JSONObject(sb.toString());
+		        JSONArray features = json.getJSONArray("features");
+		        JSONObject feature = features.getJSONObject(0);
+		        JSONObject geometry = feature.getJSONObject("geometry");
+		        if (geometry != null) {
+			        String type = geometry.getString("type");
 
-            // Parse JSON
-            JSONObject json = new JSONObject(sb.toString());
-            JSONArray features = json.getJSONArray("features");
-            JSONObject feature = features.getJSONObject(0);
-            JSONObject geometry = feature.getJSONObject("geometry");
-            if (geometry != null) {
-                String type = geometry.getString("type");
+			        // Our GeoJSON only has one feature: a line string
+			        if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
 
-                // Our GeoJSON only has one feature: a line string
-                if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
+				        // Get the Coordinates
+				        JSONArray coords = geometry.getJSONArray("coordinates");
+				        for (int lc = 0; lc < coords.length(); lc++) {
+					        JSONArray coord = coords.getJSONArray(lc);
+					        Position position = Position.fromCoordinates(coord.getDouble(1), coord.getDouble(0), coord.getDouble(2));
+					        points.add(position);
+				        }
 
-                    // Get the Coordinates
-                    JSONArray coords = geometry.getJSONArray("coordinates");
-                    for (int lc = 0; lc < coords.length(); lc++) {
-                        JSONArray coord = coords.getJSONArray(lc);
-                        Position position = Position.fromCoordinates(coord.getDouble(1), coord.getDouble(0), coord.getDouble(2));
-                        points.add(position);
-                    }
-                }
-            }
+			        }
+		        }
+		        int size = points.size();
+		        DataPoint[] values = new DataPoint[size];
+		        Integer xi = 0;
+		        for (int i = 1; i < size; i++) {
+			        Integer yi = (int) points.get(i).getAltitude();
+			        xi = xi + (int) TurfMeasurement.distance(points.get(i - 1), points.get(i), TurfConstants.UNIT_METERS);
+			        DataPoint v = new DataPoint(xi, yi);
+			        values[i] = v;
+		        }
+		        values[0] = new DataPoint(0, (int) points.get(0).getAltitude());
+		        LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
+		        series.setThickness(8);
+		        graphView.addSeries(series);
+		        GridLabelRenderer gridLabel = graphView.getGridLabelRenderer();
+		        gridLabel.setHorizontalAxisTitle("meters");
+		        gridLabel.setVerticalAxisTitle("meters");
+	        }
         } catch (Exception exception) {
             Log.e(TAG, "Exception Loading GeoJSON: " + exception.toString());
         }
-        int size = points.size();
-        DataPoint[] values = new DataPoint[size];
-        Integer xi = 0;
-        for (int i=1; i<size; i++) {
-            Integer yi = (int)points.get(i).getAltitude();
-            xi = xi + (int)TurfMeasurement.distance(points.get(i -1),points.get(i),TurfConstants.UNIT_METERS);
-            DataPoint v = new DataPoint(xi, yi);
-            values[i] = v;
-        }
-        values[0] = new DataPoint(0,(int)points.get(0).getAltitude());
-        LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
-        series.setThickness(8);
-        graphView.addSeries(series);
-        GridLabelRenderer gridLabel = graphView.getGridLabelRenderer();
-        gridLabel.setHorizontalAxisTitle("meters");
-        gridLabel.setVerticalAxisTitle("meters");
+
 
 
     }
@@ -440,41 +456,263 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     @Click(R.id.buttonPublish)
     void buttonPublishWasClicked(){
 	    if (isOnline()) {
-		    saveToFirebase(myPlace, myRout);
-	    }else{
-		    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		    builder.setTitle("Publish");
-		    builder.setMessage("Sorry, \n" +
-				    "no internet access, you will be able to post data later when" +
+		    if (dataIntegrityCheck(myPlace, myRout) == 0) {
+			    saveToFirebase(myPlace, myRout);
+		    }
+	    } else {
+		    showPublisherDialog("Sorry, no internet access, you will be able to post data later when " +
 				    " there is a good connection to the network ");
-		    builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			    @Override
-			    public void onClick(DialogInterface dialogInterface, int i) {
-				    dialogInterface.dismiss();
-			    }
-		    });
-		    AlertDialog alertDialog = builder.create();
-		    alertDialog.show();
+
 	    }
 
     }
-	@Background
-	public void saveToFirebase(Place place, Rout rout) {
+
+	private void showPublisherDialog(String problem) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Publish");
+		builder.setMessage(problem);
+		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int i) {
+				dialogInterface.dismiss();
+			}
+		});
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
+	}
+
+	private int dataIntegrityCheck(Place place, Rout rout) {
+
+		int problem = 0;
 		if (place != null){
-			FirebaseDatabase database = FirebaseDatabase.getInstance();
-			DatabaseReference myRef = database.getReference();
+			if (place.getNamePlace().isEmpty()) {
+				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
+						"Ви не вказали імя місця");
+				problem++;
+			} else if (place.getPositionPlace() == null) {
+				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
+						"Не вказана позиція");
+				problem++;
+			} else if (place.getTitlePlace().isEmpty()) {
+				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
+						"Не вказано титульної інформації про місце");
+				problem++;
+			} else if (place.getUrlPlace().isEmpty()) {
+				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
+						"Ви не встановили титульну фотографію");
+				problem++;
+			}
+
+		}else if (rout != null){
+			if (rout.getNameRout().isEmpty()) {
+				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
+						"Ви не вказали імя маршруту");
+				problem++;
+			} else if (rout.getPositionRout() == null) {
+				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
+						"Не вказана позиція");
+				problem++;
+			} else if (rout.getUrlRout().isEmpty()) {
+				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
+						"Не вказана титульна фотографія");
+				problem++;
+			}else if (rout.getTitleRout().isEmpty()) {
+				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
+						"Немає титульної інформації");
+				problem++;
+			}else if (rout.getRoutsLevel() == 0) {
+				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
+						"Не вказана складність маршруту");
+			problem++;
+		}
+		}
+		return problem;
+	}
+
+	@Background
+	public void saveToFirebase(final Place place, final Rout rout) {
+		if (place != null){
+			database = FirebaseDatabase.getInstance();
+			myRef = database.getReference();
 			FirebaseAuth mAuth = FirebaseAuth.getInstance();
-			place.setPublisher(mAuth.getCurrentUser().getEmail());
-			myRef.child("Places").child(place.getNamePlace()).setValue(place);
+			String email = mAuth.getCurrentUser().getEmail();
+			place.setPublisher(email);
+			myRef.child("Places").child(place.getNamePlace()).addListenerForSingleValueEvent(new ValueEventListener() {
+				@Override
+				public void onDataChange(DataSnapshot snapshot) {
+					if (snapshot.getValue() == null) {
+						FirebaseStorage storage = FirebaseStorage.getInstance();
+						StorageReference storageRef = storage.getReference();
+						Uri uri = Uri.parse(place.getUrlPlace());
+						StorageReference riversRef = storageRef.child("placeImage/" + uri.getLastPathSegment());
+						UploadTask uploadTask = riversRef.putFile(uri);
+						uploadBar.setVisibility(View.VISIBLE);
+						uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+							@Override
+							public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+								double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+								uploadBar.setProgress((int) progress);
+								if (progress == 100.0){
+									uploadBar.setVisibility(View.GONE);
+								}
+							}
+						});
+						uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+								@Override
+								public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+									// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+									Uri downloadUrl = taskSnapshot.getDownloadUrl();
+									place.setUrlPlace(downloadUrl.toString());
+									myRef.child("Places").child(place.getNamePlace()).setValue(place);
+									for (int i = 1; i <= 3; i++){
+										File photoFile = new File(STORAGE_CONSTANT + place.getNamePlace() + String.valueOf(i));
+										if (photoFile.exists()){
+											FirebaseStorage storage = FirebaseStorage.getInstance();
+											StorageReference storageRef = storage.getReference();
+											StorageReference riversRef = storageRef.child("placeImage/" + place.getNamePlace() + String.valueOf(i));
+											UploadTask uploadTask = riversRef.putFile(Uri.fromFile(photoFile));
+											uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+												@Override
+												public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+													Toast.makeText(ActionActivity.this, "  Another photo download", Toast.LENGTH_SHORT).show();
+													myRef.child("Photos").child(place.getNamePlace()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
+												}
+
+											})
+											.addOnFailureListener(new OnFailureListener() {
+														@Override
+														public void onFailure(@NonNull Exception e) {
+															Toast.makeText(ActionActivity.this, "Сталася помилка одна з додаткових фотографій не завантажилась", Toast.LENGTH_SHORT).show();
+														}
+													});
+										}
+									}
+
+								}
+						}).addOnFailureListener(new OnFailureListener() {
+							@Override
+							public void onFailure(@NonNull Exception e) {
+								Toast.makeText(ActionActivity.this, "Сталася помила завантаження не відбулося", Toast.LENGTH_SHORT).show();
+							}
+						});
+					} else {
+						showAlreadyExistDialog("Place");
+					}
+				}
+
+				@Override
+				public void onCancelled(DatabaseError databaseError) {
+
+				}
+			});
 
 
 		}else if (rout != null){
-			FirebaseDatabase database = FirebaseDatabase.getInstance();
-			DatabaseReference myRef = database.getReference();
+			database = FirebaseDatabase.getInstance();
+			myRef = database.getReference();
 			FirebaseAuth mAuth = FirebaseAuth.getInstance();
 			rout.setPublisher(mAuth.getCurrentUser().getEmail());
-			myRef.child("Rout").child(rout.getNameRout()).setValue(rout);
+			myRef.child("Rout").child(rout.getNameRout()).addListenerForSingleValueEvent(new ValueEventListener() {
+				@Override
+				public void onDataChange(DataSnapshot snapshot) {
+					if (snapshot.getValue() == null) {
+						FirebaseStorage storage = FirebaseStorage.getInstance();
+						StorageReference storageRef = storage.getReference();
+						Uri uri = Uri.parse(rout.getUrlRoutsTrack());
+						StorageReference riversRef = storageRef.child("geojson/" + uri.getLastPathSegment());
+						UploadTask uploadTask = riversRef.putFile(uri);
+						uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+							@Override
+							public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+								rout.setUrlRoutsTrack(taskSnapshot.getDownloadUrl().toString());
+							}
+						});
+						Uri uri1 = Uri.parse(rout.getUrlRout());
+						StorageReference riversRef1 = storageRef.child("placeImage/" + uri1.getLastPathSegment());
+						UploadTask uploadTask1 = riversRef1.putFile(uri1);
+						uploadBar.setVisibility(View.VISIBLE);
+						uploadTask1.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+							@Override
+							public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+								double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+								uploadBar.setProgress((int) progress);
+								if (progress == 100.0){
+									uploadBar.setVisibility(View.GONE);
+								}
+							}
+						});
+						uploadTask1.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+							@Override
+							public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+								// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+								Uri downloadUrl = taskSnapshot.getDownloadUrl();
+								rout.setUrlRout(downloadUrl.toString());
+								myRef.child("Rout").child(rout.getNameRout()).setValue(rout);
+								for (int i = 1; i <= 3; i++){
+									File photoFile = new File("file:" + STORAGE_CONSTANT + rout.getNameRout() + String.valueOf(i));
+									if (photoFile.exists()){
+										FirebaseStorage storage = FirebaseStorage.getInstance();
+										StorageReference storageRef = storage.getReference();
+										StorageReference riversRef = storageRef.child("placeImage/" + rout.getNameRout() + String.valueOf(i));
+										UploadTask uploadTask = riversRef.putFile(Uri.fromFile(photoFile));
+										uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+											@Override
+											public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+												Toast.makeText(ActionActivity.this, "  Another photo download", Toast.LENGTH_SHORT).show();
+												myRef.child("Photos").child(rout.getNameRout()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
+											}
+
+										})
+												.addOnFailureListener(new OnFailureListener() {
+													@Override
+													public void onFailure(@NonNull Exception e) {
+														Toast.makeText(ActionActivity.this, "Сталася помилка одна з додаткових фотографій не завантажилась", Toast.LENGTH_SHORT).show();
+													}
+												});
+									}
+								}
+
+							}
+						}).addOnFailureListener(new OnFailureListener() {
+							@Override
+							public void onFailure(@NonNull Exception e) {
+								Toast.makeText(ActionActivity.this, "Сталася помила завантаження не відбулося", Toast.LENGTH_SHORT).show();
+							}
+						});
+					} else {
+						showAlreadyExistDialog("Rout");
+
+					}
+				}
+
+				@Override
+				public void onCancelled(DatabaseError databaseError) {
+
+				}
+			});
 		}
+	}
+
+	private void showAlreadyExistDialog(String name) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(ActionActivity.this);
+		builder.setTitle("Публікація даних")
+				.setMessage( name +"з таким іменем уже існує! Змінити назву?")
+				.setPositiveButton("Так", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int i) {
+						buttonEditWasClicked();
+						dialogInterface.dismiss();
+					}
+				})
+				.setNegativeButton("Ні", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int i) {
+						dialogInterface.dismiss();
+					}
+				});
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
+
 	}
 
 	@Click(R.id.buttonEdit)
@@ -522,11 +760,19 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 					.into(imageView);
 
 
-		}else {
+		}else if (mItemUrlList == 0 && photoUrlList.get(0).equals("graph")) {
 			fabChangePhotoRight.setVisibility(View.VISIBLE);
 			fabChangePhotoLeft.setVisibility(View.GONE);
 			imageView.setVisibility(View.GONE);
 			graphView.setVisibility(View.VISIBLE);
+		}else{
+			fabChangePhotoRight.setVisibility(View.VISIBLE);
+			fabChangePhotoLeft.setVisibility(View.GONE);
+			imageView.setVisibility(View.VISIBLE);
+			Glide
+					.with(ActionActivity.this)
+					.load(photoUrlList.get(mItemUrlList))
+					.into(imageView);
 		}
 	}
     @Override

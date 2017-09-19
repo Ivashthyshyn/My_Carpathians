@@ -87,7 +87,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -354,30 +353,23 @@ public class StartActivity extends AppCompatActivity implements
     public void downloadRoutToStorage(String urlRoutsTrack, final String nameRout) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference httpsReference = storage.getReferenceFromUrl(urlRoutsTrack);
-        String nameFileInStorage = httpsReference.getName();
         File rootPath = new File(context.getExternalFilesDir(
                 Environment.DIRECTORY_DOWNLOADS), "Routs");
         if (!rootPath.exists()) {
             rootPath.mkdirs();
         }
-
-        final File localFile = new File(rootPath, nameFileInStorage);
+        final File localFile = new File(rootPath, nameRout);
         if (!localFile.exists()) {
-
-            final URI fileUri = localFile.toURI();
-
             httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    mSharedPreferences.edit().putString(nameRout, fileUri.toString()).apply();
-
-                    Log.e("firebase ", ";local tem file created  created " + localFile.toString());
+                    Log.e("firebase ", ";local tem file  created " + localFile.toString());
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
 
-                    Log.e("firebase ", ";local tem file not created  created " + exception.toString());
+                    Log.e("firebase ", ";local tem file not created " + exception.toString());
                 }
             });
         }

@@ -35,15 +35,13 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.RoundingMode;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.Context.MODE_PRIVATE;
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
-import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.activities.ActionActivity.STORAGE_TRACK_CONSTANT;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.HARD;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.LIGHT;
@@ -146,11 +144,10 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         @Override
         protected Void doInBackground(Void... strings) {
             List<Position> points = new ArrayList<>();
-            URI mUri = URI.create(context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                    .getString(name, null));
+
             try {
                 // Load GeoJSON file
-                File file = new File(mUri);
+                File file = new File(STORAGE_TRACK_CONSTANT + name);
                 if (file.exists()) {
 
                     InputStream fileInputStream = new FileInputStream(file);

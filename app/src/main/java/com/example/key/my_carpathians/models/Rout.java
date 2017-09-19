@@ -14,12 +14,21 @@ public class Rout implements Serializable {
     public String publisher;
     public String urlRout;
     public String urlRoutsTrack;
+    public String lengthRout;
     public int routsLevel;
     public Position positionRout;
 
 
 
     public Rout() {
+    }
+
+    public String getLengthRout() {
+        return lengthRout;
+    }
+
+    public void setLengthRout(String lengthRout) {
+        this.lengthRout = lengthRout;
     }
 
     public Position getPositionRout() {

@@ -93,6 +93,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final int COMMAND_NO_SAVE = 3;
     public static final String TO_SERVICE_TRACK_NAME = "track_name";
     public static final int BREAK_UP_CONNECTION = 6;
+    public static final int ERROR_TRACK = 10;
     public MapsActivity permissionsManager;
     public ILocation iCapture;
     public static final String JSON_CHARSET = "UTF-8";
@@ -180,7 +181,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void messageForActivity(int type, String name) {
-                showCreateNameDialog(type, name);
+                if (type == ERROR_TRACK){
+                    showErrorDialog(name);
+                }else {
+                    showCreateNameDialog(type, name);
+                }
             }
         };
 
@@ -197,6 +202,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+    }
+
+    private void showErrorDialog(String name) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MapsActivity.this);
+
+        // Setting Dialog Title
+        alertDialog.setTitle("Save data");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Ваш трек містить менше трьох локацій. Будь ласка перевірте якість сигналу GPS і спробуйте знову");
+
+        // On pressing Settings button
+        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                MapsActivity.this.startActivity(intent);
+            }
+        });
+
+        // on pressing cancel button
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+
     }
 
     private void startGPS() {
@@ -800,20 +834,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void showCreateNameDialog(final int model, String name) {
+    private void showCreateNameDialog(final int model, String text) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
         final EditText nameInput = new EditText(this);
         builder.setView(nameInput);
         nameInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-        if (name != null) {
+        if (text != null) {
             builder.setTitle("Вибачте але це імя вже використовується");
-            nameInput.setText(name);
-        }else if(model == ROUT && name == null){
+            nameInput.setText(text);
+        }else if(model == ROUT && text == null){
             builder.setTitle("Введіть назву вашого маршруту");
-        }else if(model == PLACE && name == null){
+        }else if(model == PLACE && text == null){
             builder.setTitle("Введіть назву вашого місця");
         }
-
         builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);

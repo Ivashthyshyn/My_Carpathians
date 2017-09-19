@@ -110,6 +110,17 @@
                     app:fabSize="mini"
                     app:srcCompat="@drawable/ic_right_arrow"/>
 
+                <ProgressBar
+                    android:id="@+id/uploadBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:elevation="5dp"
+                    android:indeterminate="false"
+                    android:max="100"
+                    android:progress="20"
+                    android:visibility="gone"/>
+
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/buttonRatingBar"
                     android:layout_width="wrap_content"

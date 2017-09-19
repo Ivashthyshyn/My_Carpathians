@@ -41,6 +41,7 @@ import static com.example.key.my_carpathians.activities.MapsActivity.BREAK_UP_CO
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_NO_SAVE;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_PLACE;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_ROUT;
+import static com.example.key.my_carpathians.activities.MapsActivity.ERROR_TRACK;
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_COMMANDS;
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_TRACK_NAME;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
@@ -198,9 +199,9 @@ public class LocationService extends Service implements
     }
 
     private void saveRoutToSDCard(String mNameRout) {
-
+    if (mPositionList.size() > 3) {
         LineString lineString = new LineString();
-        lineString.setPositions( mPositionList);
+        lineString.setPositions(mPositionList);
         Feature feature = new Feature();
         try {
             JSONObject geoJSON = new JSONObject();
@@ -215,10 +216,10 @@ public class LocationService extends Service implements
             if (!rootPath.exists()) {
                 rootPath.mkdirs();
             }
-            File localFile = new File(rootPath, mNameRout + ".geojson");
+            File localFile = new File(rootPath, mNameRout);
             if (localFile.exists()) {
                 owner.messageForActivity(ROUT, mNameRout);
-            }else {
+            } else {
                 String fileUri = String.valueOf(localFile.toURI());
                 Writer output = new BufferedWriter(new FileWriter(localFile));
                 output.write(geoJSON.toString());
@@ -239,7 +240,7 @@ public class LocationService extends Service implements
                 String fileUri2 = String.valueOf(file.toURI());
                 if (file.exists()) {
                     owner.messageForActivity(ROUT, mNameRout);
-                }else {
+                } else {
                     try {
                         FileOutputStream fileOutputStream = new FileOutputStream(file);
                         ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
@@ -262,6 +263,11 @@ public class LocationService extends Service implements
         } catch (Exception e) {
             Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
+    }else {
+    if (owner != null){
+        owner.messageForActivity(ERROR_TRACK, "");
+    }
+    }
 
     }
 
