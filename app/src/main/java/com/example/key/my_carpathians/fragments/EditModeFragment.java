@@ -57,7 +57,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.math.RoundingMode;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -68,6 +67,7 @@ import java.util.Set;
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.key.my_carpathians.activities.ActionActivity.STORAGE_CONSTANT;
+import static com.example.key.my_carpathians.activities.ActionActivity.STORAGE_TRACK_CONSTANT;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
@@ -193,9 +193,8 @@ public class EditModeFragment extends DialogFragment {
 				radioGroup.setVisibility(View.GONE);
 				editTextTitle.setText(mPlace.getTitlePlace());
 			}else if (mRout != null){
-				determineLength(URI.create(mRout.getUrlRoutsTrack()));
+				determineLength(STORAGE_TRACK_CONSTANT + mRout.getNameRout());
 				radioGroup.setVisibility(View.VISIBLE);
-				int childCount = radioGroup.getChildCount();
 				for (int i = 1; i < radioGroup.getChildCount(); i++) {
 					RadioButton rButton = (RadioButton) radioGroup.getChildAt(i);
 
@@ -272,7 +271,7 @@ public class EditModeFragment extends DialogFragment {
 		});
 	}
 	@Background
-	public void determineLength(URI uri) {
+	public void determineLength(String uri) {
 		List<Position> points = new ArrayList<>();
 
 		try {
@@ -319,8 +318,8 @@ public class EditModeFragment extends DialogFragment {
 		if (points.size() > 0) {
 			mPositionRout = new com.example.key.my_carpathians.models.Position();
 			// todo need to verify
-			mPositionRout.setLatitude(points.get(0).getLatitude());
-			mPositionRout.setLongitude(points.get(0).getLongitude());
+			mPositionRout.setLatitude(points.get(0).getLongitude());
+			mPositionRout.setLongitude(points.get(0).getLatitude());
 
 			LineString lineString = LineString.fromCoordinates(points);
 			double dis = 0;
@@ -419,13 +418,13 @@ public class EditModeFragment extends DialogFragment {
 				 }
 
 				 File file = new File(rootPath, mRout.getNameRout() + NO_PUBLISH_CONSTANT);
-				 String fileUri = String.valueOf(file.toURI());
+				 String fileUri = String.valueOf(Uri.fromFile(file));
 				 if (file.exists()) {
 					 file.delete();
 				 } else {
-					 File betterFile = new File(rootPath, name);
+					 File betterFile = new File(rootPath, name + NO_PUBLISH_CONSTANT);
 					 if (betterFile.exists()) {
-						 file.delete();
+						 betterFile.delete();
 					 }
 				 }
 				 try {
@@ -436,11 +435,9 @@ public class EditModeFragment extends DialogFragment {
 					 fileOutputStream.close();
 					 SharedPreferences mSharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 					 Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
-					 if (createdByUserTrackList.add(mRout.getNameRout())) {
-						 createdByUserTrackList.remove(name);
-						 mSharedPreferences.edit().remove(name).apply();
+					 if (createdByUserTrackList.add(mRout.getNameRout() + NO_PUBLISH_CONSTANT)) {
+						 createdByUserTrackList.remove(name + NO_PUBLISH_CONSTANT );
 					 }
-					 mSharedPreferences.edit().putString(mRout.getNameRout(), fileUri).apply();
 					 mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
 					 Toast.makeText(getContext(), "Rout saved", Toast.LENGTH_LONG).show();
 					 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity)getContext();
@@ -468,7 +465,7 @@ public class EditModeFragment extends DialogFragment {
 				 }
 
 				 File file = new File(rootPath, mPlace.getNamePlace());
-				 String fileUri = String.valueOf(file.toURI());
+				 String fileUri = String.valueOf(Uri.fromFile(file));
 				 if (file.exists()) {
 					 file.delete();
 				 } else {
@@ -487,9 +484,7 @@ public class EditModeFragment extends DialogFragment {
 						 Set<String> createdByUserPlaceList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
 						 if (createdByUserPlaceList.add(mPlace.getNamePlace())) {
 							 createdByUserPlaceList.remove(name);
-							 mSharedPreferences.edit().remove(name).apply();
 						 }
-						 mSharedPreferences.edit().putString(mPlace.getNamePlace(), fileUri).apply();
 						 mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserPlaceList).apply();
 						 Toast.makeText(getContext(), "Place saved", Toast.LENGTH_LONG).show();
 						 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity) getContext();
@@ -514,7 +509,7 @@ public class EditModeFragment extends DialogFragment {
 				if (file.exists()) {
 					file.delete();
 				}
-				uri = String.valueOf(file.toURI());
+				uri = String.valueOf(Uri.fromFile(file));
 				try {
 					FileOutputStream fileOutputStream = new FileOutputStream(file);
 					bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fileOutputStream);

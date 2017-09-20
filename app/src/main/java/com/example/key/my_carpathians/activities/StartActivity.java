@@ -277,6 +277,9 @@ public class StartActivity extends AppCompatActivity implements
         myPlace.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+	            if (places.size() > 0){
+		            places.clear();
+	            }
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Place place = postSnapshot.getValue(Place.class);
                     places.add(place);
@@ -487,6 +490,7 @@ public class StartActivity extends AppCompatActivity implements
     public void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
+
     }
 
     @Override

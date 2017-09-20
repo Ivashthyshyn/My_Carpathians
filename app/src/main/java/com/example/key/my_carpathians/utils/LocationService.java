@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -175,7 +176,7 @@ public class LocationService extends Service implements
             }
 
             File file = new File(rootPath, mNamePlace);
-            String fileUri = String.valueOf(file.toURI());
+            String fileUri = String.valueOf(Uri.fromFile(file));
             if (file.exists()) {
                 owner.messageForActivity(PLACE, mNamePlace);
             }
@@ -188,7 +189,6 @@ public class LocationService extends Service implements
                 SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
                 Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
                 createdByUserTrackList.add(mNamePlace);
-                mSharedPreferences.edit().putString(mNamePlace, fileUri).apply();
                 mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserTrackList).apply();
                 Toast.makeText(getApplicationContext(), "Place saved", Toast.LENGTH_LONG).show();
                 mLocation = null;
@@ -220,12 +220,11 @@ public class LocationService extends Service implements
             if (localFile.exists()) {
                 owner.messageForActivity(ROUT, mNameRout);
             } else {
-                String fileUri = String.valueOf(localFile.toURI());
+                String fileUri = String.valueOf(Uri.fromFile(localFile));
                 Writer output = new BufferedWriter(new FileWriter(localFile));
                 output.write(geoJSON.toString());
                 output.close();
                 SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                mSharedPreferences.edit().putString(mNameRout, fileUri).apply();
                 Rout mRout = new Rout();
                 mRout.setNameRout(mNameRout);
                 mRout.setUrlRoutsTrack(fileUri);
@@ -237,7 +236,7 @@ public class LocationService extends Service implements
                 }
 
                 File file = new File(rootPath2, mNameRout + NO_PUBLISH_CONSTANT);
-                String fileUri2 = String.valueOf(file.toURI());
+                String fileUri2 = String.valueOf(Uri.fromFile(file));
                 if (file.exists()) {
                     owner.messageForActivity(ROUT, mNameRout);
                 } else {
@@ -249,7 +248,6 @@ public class LocationService extends Service implements
                         fileOutputStream.close();
                         Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
                         createdByUserTrackList.add(mNameRout + NO_PUBLISH_CONSTANT);
-                        mSharedPreferences.edit().putString(mNameRout + NO_PUBLISH_CONSTANT, fileUri2).apply();
                         mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
                         Toast.makeText(getApplicationContext(), "Rout saved", Toast.LENGTH_LONG).show();
                         mPositionList.clear();

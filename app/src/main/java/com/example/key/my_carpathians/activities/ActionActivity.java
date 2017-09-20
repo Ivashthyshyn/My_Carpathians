@@ -625,6 +625,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 							@Override
 							public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 								rout.setUrlRoutsTrack(taskSnapshot.getDownloadUrl().toString());
+								Toast.makeText(ActionActivity.this, "Track saved", Toast.LENGTH_SHORT).show();
 							}
 						});
 						Uri uri1 = Uri.parse(rout.getUrlRout());
@@ -649,7 +650,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 								rout.setUrlRout(downloadUrl.toString());
 								myRef.child("Rout").child(rout.getNameRout()).setValue(rout);
 								for (int i = 1; i <= 3; i++){
-									File photoFile = new File("file:" + STORAGE_CONSTANT + rout.getNameRout() + String.valueOf(i));
+									File photoFile = new File(STORAGE_CONSTANT + rout.getNameRout() + String.valueOf(i));
 									if (photoFile.exists()){
 										FirebaseStorage storage = FirebaseStorage.getInstance();
 										StorageReference storageRef = storage.getReference();

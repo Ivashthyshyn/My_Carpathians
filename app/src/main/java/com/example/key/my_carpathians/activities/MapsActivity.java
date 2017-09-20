@@ -39,6 +39,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.annotations.Polyline;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
@@ -55,6 +56,7 @@ import com.mapbox.mapboxsdk.offline.OfflineRegionError;
 import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
 import com.mapbox.services.commons.utils.TextUtils;
+import com.victor.loading.rotate.RotateLoading;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
@@ -154,6 +156,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void update(Location location, int type) {
                 if (type == DEFINED_LOCATION) {
+                    alert.dismiss();
                     showCreateNameDialog(PLACE, null);
                 }
                 if(location != null) {
@@ -211,7 +214,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         alertDialog.setTitle("Save data");
 
         // Setting Dialog Message
-        alertDialog.setMessage("Ваш трек містить менше трьох локацій. Будь ласка перевірте якість сигналу GPS і спробуйте знову");
+        alertDialog.setMessage("Ваш трек містить менше трьох локацій. Будь ласка перевірте якість сигналу g_p_s і спробуйте знову");
 
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
@@ -260,10 +263,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(MapsActivity.this);
 
                 // Setting Dialog Title
-                alertDialog.setTitle("GPS is settings");
+                alertDialog.setTitle("g_p_s is settings");
 
                 // Setting Dialog Message
-                alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+                alertDialog.setMessage("g_p_s is not enabled. Do you want to go to settings menu?");
 
                 // On pressing Settings button
                 alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
@@ -820,9 +823,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
                     MapsActivity.this.startService(serviceIntent);
                     autoOrientationOff(true);
-                    flashingColorAnimation(true);
+                    buttonRecTrack.setClickable(false);
                     checkForRecButton = false;
                     alert.dismiss();
+                    showProgressDialog();
                 }
             });
             alert = builder.create();
@@ -833,6 +837,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }
+
+    private void showProgressDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+        builder.setTitle("Please wait while the system finds your placement");
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.progres_item, null);
+        RotateLoading rotateLoading = (RotateLoading)dialogView.findViewById(R.id.rotateloading);
+        builder.setView(dialogView);
+        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE);
+                MapsActivity.this.startService(serviceIntent);
+                autoOrientationOff(false);
+                checkForRecButton = true;
+                flashingColorAnimation(false);
+                buttonRecTrack.setClickable(true);
+            }
+        });
+        alert = builder.create();
+        rotateLoading.start();
+        alert.show();
+    }
+
+
 
     private void showCreateNameDialog(final int model, String text) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
@@ -934,6 +964,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }else {
             startGPS();
         }
+    }
+    @Click(R.id.fabHand)
+     void  fabHandWasClicked(){
+        createHandsMode();
+    }
+
+    public void createHandsMode(){
+        mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(@NonNull LatLng point) {
+                mapboxMap.addMarker(new MarkerOptions().setPosition(point));
+            }
+        });
     }
 }
 

@@ -18,6 +18,8 @@
         android:layout_alignParentTop="true"
 
 
+        android:layout_centerHorizontal="false"
+        android:layout_centerVertical="false"
         mapbox:mapbox_cameraTargetLat="49.11053"
         mapbox:mapbox_cameraTargetLng="24.30765"
         mapbox:mapbox_cameraZoom="12"
@@ -27,10 +29,10 @@
             android:id="@+id/toolsContainer"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
-            android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:background="@drawable/round_shape_for_tools_container_black"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginLeft="20dp">
 
             <ImageButton
                 android:id="@+id/buttonShowMyLocation"
@@ -106,6 +108,23 @@
             android:textSize="12sp" />
 
     </LinearLayout>
+
+    <com.victor.loading.rotate.RotateLoading
+        android:id="@+id/rotateloading"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerInParent="true"
+        android:elevation="5dp"
+        app:loading_speed="11"
+        app:loading_width="5dp"/>
+
+    <Button
+        android:id="@+id/fabHand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:text="Button"/>
+
 
 </RelativeLayout>
 
