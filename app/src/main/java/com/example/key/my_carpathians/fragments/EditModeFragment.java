@@ -251,6 +251,7 @@ public class EditModeFragment extends DialogFragment {
 				groupMorePhoto.setVisibility(View.VISIBLE);
 
 				switch (mPhotoSwicher){
+
 					case TITLE_PHOTO:
 						uriTitlePhoto = "";
 						bitmap = cropImageView.getCroppedImage();
