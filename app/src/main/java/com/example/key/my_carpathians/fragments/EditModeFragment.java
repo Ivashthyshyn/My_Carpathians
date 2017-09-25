@@ -239,6 +239,7 @@ public class EditModeFragment extends DialogFragment {
 			}
 
 		});
+
 		cropImageView.setOnCropImageCompleteListener(new CropImageView.OnCropImageCompleteListener() {
 			@Override
 			public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
