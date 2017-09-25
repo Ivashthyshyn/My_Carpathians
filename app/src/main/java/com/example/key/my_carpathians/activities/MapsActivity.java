@@ -1081,6 +1081,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
 
+
+
     }
 
     /**
@@ -1145,6 +1147,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }
+
+
+
+
+
 
     public void enabledHandsMode(final int type){
             mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
