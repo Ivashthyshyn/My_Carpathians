@@ -23,6 +23,7 @@ public class RoutsListFragment extends Fragment {
         RecyclerView recyclerView;
         LinearLayoutManager mLayoutManager;
         List<Rout> mRoutsQuery;
+    RoutsRecyclerAdapter recyclerAdapter;
         @Nullable
         @Override
         public View onCreateView (LayoutInflater inflater, @Nullable ViewGroup container, Bundle
@@ -32,14 +33,16 @@ public class RoutsListFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         Log.d("debugMode", "The application stopped after this");
         recyclerView.setLayoutManager(mLayoutManager);
-        RoutsRecyclerAdapter recyclerAdapter = new RoutsRecyclerAdapter(mRoutsQuery);
+         recyclerAdapter = new RoutsRecyclerAdapter(mRoutsQuery);
         recyclerView.setAdapter(recyclerAdapter);
         return fragment;
     }
 
     public void setList(List<Rout> routList) {
         this.mRoutsQuery = routList;
-
+        if (recyclerAdapter != null){
+            recyclerAdapter.notifyDataSetChanged();
+        }
     }
 
 }

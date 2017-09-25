@@ -1,7 +1,9 @@
 package com.example.key.my_carpathians.adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,11 +43,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
-import static com.example.key.my_carpathians.activities.ActionActivity.STORAGE_TRACK_CONSTANT;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.HARD;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.LIGHT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
+import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 /**
  *
@@ -144,10 +146,17 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         @Override
         protected Void doInBackground(Void... strings) {
             List<Position> points = new ArrayList<>();
+            Uri rootPathForRoutsString;
+            if (isExternalStorageReadable()) {
+                rootPathForRoutsString = Uri.fromFile(context.getExternalFilesDir(
+                        Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
+            }else{
+                rootPathForRoutsString = Uri.fromFile(context.getFilesDir()).buildUpon().appendPath("Routs").build();
+            }
 
             try {
                 // Load GeoJSON file
-                File file = new File(STORAGE_TRACK_CONSTANT + name);
+                File file = new File(rootPathForRoutsString.buildUpon().appendPath(name).build().getPath());
                 if (file.exists()) {
 
                     InputStream fileInputStream = new FileInputStream(file);

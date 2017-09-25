@@ -29,10 +29,10 @@
             android:id="@+id/toolsContainer"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginTop="20dp"
             android:background="@drawable/round_shape_for_tools_container_black"
-            android:orientation="horizontal"
-            android:layout_marginLeft="20dp">
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/buttonShowMyLocation"
@@ -53,6 +53,39 @@
                 android:background="@drawable/round_shape_for_tools_container_black"
                 android:visibility="gone"
                 mapbox:srcCompat="@android:drawable/ic_menu_edit"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/toolsHandContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_gravity="end"
+            android:layout_margin="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/round_shape_for_tools_container_black"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/buttonOnBack"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:visibility="gone"
+                app:srcCompat="@drawable/on_back"/>
+
+            <ImageButton
+                android:id="@+id/buttonHandEditMode"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                app:srcCompat="@drawable/hand_icon"/>
 
         </LinearLayout>
 
@@ -117,13 +150,6 @@
         android:elevation="5dp"
         app:loading_speed="11"
         app:loading_width="5dp"/>
-
-    <Button
-        android:id="@+id/fabHand"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="100dp"
-        android:text="Button"/>
 
 
 </RelativeLayout>

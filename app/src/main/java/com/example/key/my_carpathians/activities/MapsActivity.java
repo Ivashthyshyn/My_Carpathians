@@ -5,12 +5,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -30,9 +33,13 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.cocoahero.android.geojson.Feature;
+import com.cocoahero.android.geojson.LineString;
+import com.cocoahero.android.geojson.Position;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.interfaces.ILocation;
 import com.example.key.my_carpathians.models.Place;
+import com.example.key.my_carpathians.models.Rout;
 import com.example.key.my_carpathians.utils.LocationService;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -65,15 +72,22 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
+import java.io.ObjectOutputStream;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
@@ -82,7 +96,11 @@ import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME
 import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
+import static com.example.key.my_carpathians.fragments.EditModeFragment.NO_PUBLISH_CONSTANT;
+import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
+import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
 import static com.example.key.my_carpathians.utils.LocationService.DEFINED_LOCATION;
+import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -102,7 +120,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
     public ArrayList<String> selectUserRouts = null;
     public List<Place> selectUserPlacesList = null;
-    public PolylineOptions polylineOption = new PolylineOptions();
+    public List<Position> latLngs = new ArrayList<>();
     public Polyline recLine;
     public Marker startMarker;
     public AlertDialog alert;
@@ -120,7 +138,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationService locationService;
     boolean checkForRecButton = true;
     private boolean mTypeMode;
-
+    private int mPointCounter = 0;
+    private Marker mMarker;
     @ViewById(R.id.buttonRecTrack)
     ImageButton buttonRecTrack;
 
@@ -129,6 +148,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @ViewById(R.id.buttonShowMyLocation)
     ImageButton buttonShowMyLocation;
+
+    @ViewById(R.id.buttonHandEditMode)
+    ImageButton buttonHandEditMode;
+
+    @ViewById(R.id.toolsHandContainer)
+    LinearLayout toolsHandContainer;
+
+    @ViewById(R.id.buttonOnBack)
+    ImageButton buttonTouchCreator;
 
     private ServiceConnection captureServiceConnection = new ServiceConnection() {
 
@@ -147,6 +175,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     };
+
 
 
     @Override
@@ -296,10 +325,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
+        Uri rootPathForRoutsString;
+        if (isExternalStorageReadable()) {
+            rootPathForRoutsString = Uri.fromFile(MapsActivity.this.getExternalFilesDir(
+                    Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
+        }else{
+            rootPathForRoutsString = Uri.fromFile(MapsActivity.this.getFilesDir()).buildUpon().appendPath("Routs").build();
+        }
         if (selectUserRouts != null && selectUserRouts.size() > 0) {
             for (int i = 0; i < selectUserRouts.size(); i++) {
-                String mUriString = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                        .getString(selectUserRouts.get(i), null);
+                String mUriString = rootPathForRoutsString.buildUpon().appendPath(selectUserRouts.get(i)).build().getPath();
                 if (mUriString != null) {
                     new DrawGeoJson(mUriString).execute();
                 }
@@ -318,7 +353,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
         if (getIntent().getBooleanExtra(ACTION_MODE, false)) {
-            startGPS();
+            // todo
         } else {
             mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                     new CameraPosition.Builder()
@@ -702,10 +737,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected List<LatLng> doInBackground(Void... voids) {
 
             ArrayList<LatLng> points = new ArrayList<>();
-            URI mUri = URI.create(mNameFileFromURI);
             try {
                 // Load GeoJSON file
-                File file = new File(mUri);
+                File file = new File(mNameFileFromURI);
                 InputStream fileInputStream = new FileInputStream(file);
                 BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
                 StringBuilder sb = new StringBuilder();
@@ -798,14 +832,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Click(R.id.buttonRecTrack)
     void buttonRecTrackWasClicked() {
         if (checkForRecButton) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
-            LayoutInflater inflater = this.getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.alert_write_choose, null);
-            builder.setView(dialogView);
-            ImageButton imageButtonRout = (ImageButton)dialogView.findViewById(R.id.imageButtonRout);
-            imageButtonRout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            showChoseTypeDialog(false);
+        } else {
+            showCreateNameDialog(ROUT, null);
+
+        }
+    }
+
+    private void showChoseTypeDialog(final boolean handType) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.alert_write_choose, null);
+        builder.setView(dialogView);
+        ImageButton imageButtonRout = (ImageButton)dialogView.findViewById(R.id.imageButtonRout);
+        imageButtonRout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (handType) {
+                    enabledHandsMode(COMMAND_REC_ROUT);
+                    alert.dismiss();
+                }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
                     serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_ROUT);
                     MapsActivity.this.startService(serviceIntent);
@@ -814,11 +861,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     checkForRecButton = false;
                     alert.dismiss();
                 }
-            });
-            ImageButton imageButtonPlace = (ImageButton)dialogView.findViewById(R.id.imageButtonPlace);
-            imageButtonPlace.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            }
+        });
+        ImageButton imageButtonPlace = (ImageButton)dialogView.findViewById(R.id.imageButtonPlace);
+        imageButtonPlace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (handType) {
+                    enabledHandsMode(COMMAND_REC_PLACE);
+                    alert.dismiss();
+                }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
                     serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
                     MapsActivity.this.startService(serviceIntent);
@@ -828,14 +880,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     alert.dismiss();
                     showProgressDialog();
                 }
-            });
-            alert = builder.create();
-            alert.show();
-          
-        } else {
-            showCreateNameDialog(ROUT, null);
+            }
+        });
+        alert = builder.create();
+        alert.show();
 
-        }
     }
 
     private void showProgressDialog() {
@@ -879,14 +928,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameInput.getText().toString());
-                serviceIntent.putExtra(TO_SERVICE_COMMANDS, model);
-                MapsActivity.this.startService(serviceIntent);
-                checkForRecButton = true;
-                autoOrientationOff(false);
-                flashingColorAnimation(false);
-                dialog.cancel();
+                if (mMarker != null || latLngs.size() > 2){
+                    save(model, nameInput.getText().toString());
+
+                }else {
+                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                    serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameInput.getText().toString());
+                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, model);
+                    MapsActivity.this.startService(serviceIntent);
+                    checkForRecButton = true;
+                    autoOrientationOff(false);
+                    flashingColorAnimation(false);
+                    dialog.cancel();
+                }
             }
         });
         builder.setNegativeButton("Не зберігати", new DialogInterface.OnClickListener() {
@@ -902,6 +956,106 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
         alert = builder.create();
         alert.show();
+    }
+
+    private void save(int model,String name) {
+        if (model == PLACE){
+            Place mPlace = new Place();
+            mPlace.setNamePlace(name);
+            com.example.key.my_carpathians.models.Position position = new com.example.key.my_carpathians.models.Position();
+            position.setLatitude(mMarker.getPosition().getLatitude());
+            position.setLongitude(mMarker.getPosition().getLongitude());
+            mPlace.setPositionPlace(position);
+
+            File rootPath = new File(getApplicationContext().getExternalFilesDir(
+                    Environment.DIRECTORY_DOWNLOADS), "Created");
+            if (!rootPath.exists()) {
+                rootPath.mkdirs();
+            }
+
+            File file = new File(rootPath, name);
+            String fileUri = String.valueOf(Uri.fromFile(file));
+            if (file.exists()) {
+               showCreateNameDialog(0, null);
+            }
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(mPlace);
+                objectOutputStream.close();
+                fileOutputStream.close();
+                SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
+                createdByUserTrackList.add(name);
+                mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserTrackList).apply();
+                Toast.makeText(getApplicationContext(), "Place saved", Toast.LENGTH_LONG).show();
+                mMarker = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else if(model == ROUT){
+            LineString lineString = new LineString();
+            lineString.setPositions(latLngs);
+            Feature feature = new Feature();
+            try {
+                JSONObject geoJSON = new JSONObject();
+                feature.setProperties(new JSONObject());
+                feature.setGeometry(lineString);
+                feature.setIdentifier("key.my_carpathians");
+                geoJSON.put("features", new JSONArray().put(feature.toJSON()));
+                geoJSON.put("type", "FeatureCollection");
+
+                File rootPath = new File(getApplicationContext().getExternalFilesDir(
+                        Environment.DIRECTORY_DOWNLOADS), "Routs");
+                if (!rootPath.exists()) {
+                    rootPath.mkdirs();
+                }
+                File localFile = new File(rootPath, name);
+                if (localFile.exists()) {
+                    showCreateNameDialog(0, null);
+                } else {
+                    String fileUri = String.valueOf(Uri.fromFile(localFile));
+                    Writer output = new BufferedWriter(new FileWriter(localFile));
+                    output.write(geoJSON.toString());
+                    output.close();
+                    SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                    Rout mRout = new Rout();
+                    mRout.setNameRout(name);
+                    mRout.setUrlRoutsTrack(fileUri);
+
+                    File rootPath2 = new File(getApplicationContext().getExternalFilesDir(
+                            Environment.DIRECTORY_DOWNLOADS), "Created");
+                    if (!rootPath2.exists()) {
+                        rootPath2.mkdirs();
+                    }
+
+                    File file = new File(rootPath2, name + NO_PUBLISH_CONSTANT);
+                    String fileUri2 = String.valueOf(Uri.fromFile(file));
+                    if (file.exists()) {
+                        showCreateNameDialog(0, null);
+                    } else {
+                        try {
+                            FileOutputStream fileOutputStream = new FileOutputStream(file);
+                            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                            objectOutputStream.writeObject(mRout);
+                            objectOutputStream.close();
+                            fileOutputStream.close();
+                            Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
+                            createdByUserTrackList.add(name + NO_PUBLISH_CONSTANT);
+                            mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
+                            Toast.makeText(getApplicationContext(), "Rout saved", Toast.LENGTH_LONG).show();
+                            latLngs.clear();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+
+            } catch (Exception e) {
+                Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     /**
@@ -938,16 +1092,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void showRecLine(LatLng latLng) {
-        // Draw polyline on map
-        polylineOption.add(latLng);
-        recLine = mapboxMap.addPolyline(polylineOption);
-        if (polylineOption.getPoints().size() > 1){
-            polylineOption.getPoints().remove(0);
-        }else{
+        Position mPos = new Position(latLng.getLatitude(), latLng.getLongitude(), 0);
+        latLngs.add(mPos);
+        if (latLngs.size() == 1) {
             IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
             Icon iconStart = iconFactory.fromResource(R.drawable.marcer_flag_start);
-            startMarker = mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(polylineOption
-                .getPoints().get(0)).title("Початок"));
+            startMarker = mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(latLng)
+                    .title("Початок"));
+        }else if(latLngs.size() > 1){
+            mapboxMap.addPolyline(new PolylineOptions().add(new LatLng(latLngs.get(latLngs.size() - 1).getLongitude(),latLngs.get(latLngs.size() - 1).getLatitude()) , new LatLng(latLngs.get(latLngs.size() - 2).getLongitude(),latLngs.get(latLngs.size() - 2).getLatitude())));
+             mapboxMap.addMarker(new MarkerOptions().setPosition(latLng));
+
+
         }
     }
 
@@ -957,6 +1113,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         switchCheck =  savedInstanceState.getBoolean("switchCheck");
         checkForRecButton = savedInstanceState.getBoolean("checkForRecButton");
     }
+
+
+
     @Click(R.id.buttonShowMyLocation)
     void buttonShowMyLocationWasClicked(){
         if (!checkForRecButton){
@@ -965,18 +1124,69 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             startGPS();
         }
     }
-    @Click(R.id.fabHand)
-     void  fabHandWasClicked(){
-        createHandsMode();
+    @Click(R.id.buttonHandEditMode)
+     void  buttonHandEditModeWasClicked(){
+        if (mPointCounter == 0) {
+            buttonTouchCreator.setVisibility(View.VISIBLE);
+            buttonHandEditMode.setImageResource(R.drawable.hand_write_icon);
+            showChoseTypeDialog(true);
+            autoOrientationOff(true);
+        }else {
+            buttonTouchCreator.setVisibility(View.GONE);
+            buttonHandEditMode.setImageResource(R.drawable.hand_icon);
+            if (mMarker != null){
+                showCreateNameDialog(PLACE, null);
+            }else if (latLngs.size() > 2){
+                showCreateNameDialog(ROUT, null);
+            }
+
+        }
     }
 
-    public void createHandsMode(){
-        mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(@NonNull LatLng point) {
-                mapboxMap.addMarker(new MarkerOptions().setPosition(point));
-            }
-        });
+    public void enabledHandsMode(final int type){
+            mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(@NonNull LatLng point) {
+                    mPointCounter++;
+                    if (type == COMMAND_REC_PLACE) {
+                        if (mMarker == null) {
+                            mMarker = mapboxMap.addMarker(new MarkerViewOptions()
+                                    .position(point)
+                                    .title("Intervention")
+                                    .snippet("Desc inter"));
+                        }else {
+                            mMarker.remove();
+                            mMarker = mapboxMap.addMarker(new MarkerViewOptions()
+                                    .position(point)
+                                    .title("Intervention")
+                                    .snippet("Desc inter"));
+                        }
+                    }else if(type == COMMAND_REC_ROUT){
+                        showRecLine(point);
+                    }
+
+                }
+            });
+    }
+    @Click(R.id.buttonOnBack)
+    void  buttonOnBackWasClicked(){
+        if (mapboxMap.getPolylines().size() > 0) {
+               mapboxMap.getPolylines().get(mPointCounter -2).remove();
+                latLngs.remove(latLngs.size() - 1);
+            mPointCounter--;
+        }
+         if (mapboxMap.getMarkers().size() > 1 & mMarker == null){
+             mapboxMap.getMarkers().get(mPointCounter).remove();
+
+        }else if (startMarker != null){
+             startMarker.remove();
+             latLngs.remove(latLngs.size() - 1);
+             mPointCounter = 0;
+         }else if(mMarker != null){
+	         mMarker.remove();
+             mPointCounter = 0;
+             mMarker = null;
+         }
     }
 }
 

@@ -27,20 +27,23 @@ public class PlacesListFragment extends Fragment {
     RecyclerView recyclerView;
     LinearLayoutManager mLayoutManager;
     List<Place> mPlacesQuery;
+    PlacesRecyclerAdapter recyclerAdapter;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View fragment = inflater.inflate(R.layout.fragment_places_list, container, false);
         recyclerView = (RecyclerView) fragment.findViewById(R.id.recyclerViewForPlace);
         mLayoutManager = new LinearLayoutManager(this.getActivity());
-        Log.d("debugMode", "The application stopped after this");
         recyclerView.setLayoutManager(mLayoutManager);
-        PlacesRecyclerAdapter recyclerAdapter = new PlacesRecyclerAdapter(mPlacesQuery);
+        recyclerAdapter = new PlacesRecyclerAdapter(mPlacesQuery);
         recyclerView.setAdapter(recyclerAdapter);
         return fragment;
     }
     public void setList(List<Place> placeList){
        this.mPlacesQuery = placeList;
+        if (recyclerAdapter != null){
+            recyclerAdapter.notifyDataSetChanged();
+        }
     }
 
 }

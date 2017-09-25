@@ -66,11 +66,10 @@ import java.util.Set;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
-import static com.example.key.my_carpathians.activities.ActionActivity.STORAGE_CONSTANT;
-import static com.example.key.my_carpathians.activities.ActionActivity.STORAGE_TRACK_CONSTANT;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
+import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 /**
  .
@@ -182,9 +181,16 @@ public class EditModeFragment extends DialogFragment {
 			buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
 		}
 
+		Uri rootPathForPhotosString;
+		if (isExternalStorageReadable()) {
+			rootPathForPhotosString = Uri.fromFile(getContext().getExternalFilesDir(
+					Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+		}else{
+			rootPathForPhotosString = Uri.fromFile(getContext().getFilesDir()).buildUpon().appendPath("Photos").build();
+		}
 			Glide
 				.with(getContext())
-				.load(STORAGE_CONSTANT + name)
+				.load(rootPathForPhotosString.buildUpon().appendPath(name).build())
 				.diskCacheStrategy(DiskCacheStrategy.NONE)
 				.skipMemoryCache(true)
 				.into(imageTitlePhoto);
@@ -193,7 +199,15 @@ public class EditModeFragment extends DialogFragment {
 				radioGroup.setVisibility(View.GONE);
 				editTextTitle.setText(mPlace.getTitlePlace());
 			}else if (mRout != null){
-				determineLength(STORAGE_TRACK_CONSTANT + mRout.getNameRout());
+				Uri rootPathForRoutsString;
+				if (isExternalStorageReadable()) {
+					rootPathForRoutsString = Uri.fromFile(getContext().getExternalFilesDir(
+							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
+				}else{
+					rootPathForRoutsString = Uri.fromFile(getContext().getFilesDir()).buildUpon().appendPath("Routs").build();
+				}
+
+				determineLength(rootPathForRoutsString.buildUpon().appendPath(mRout.getNameRout()).build().getPath());
 				radioGroup.setVisibility(View.VISIBLE);
 				for (int i = 1; i < radioGroup.getChildCount(); i++) {
 					RadioButton rButton = (RadioButton) radioGroup.getChildAt(i);
@@ -335,9 +349,15 @@ public class EditModeFragment extends DialogFragment {
 	}
 
 	private void morePhotos(String name) {
-
+			Uri rootPathForPhotosString;
+			if (isExternalStorageReadable()) {
+				rootPathForPhotosString = Uri.fromFile(getContext().getExternalFilesDir(
+						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+			}else{
+				rootPathForPhotosString = Uri.fromFile(getContext().getFilesDir()).buildUpon().appendPath("Photos").build();
+			}
 			for (int i = 1; i <= 3; i++) {
-				File photoFile = new File(STORAGE_CONSTANT,  name + String.valueOf(i));
+				File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(name + String.valueOf(i)).build().getPath());
 				if (photoFile.exists()) {
 					Uri uri = Uri.fromFile(photoFile);
 					switch (i){
@@ -523,7 +543,9 @@ public class EditModeFragment extends DialogFragment {
 			} else {
 				File file = new File(uri);
 				if (file.exists()) {
-					file.renameTo(new File(STORAGE_CONSTANT + namePlace));
+					Uri rootPathForTitlePhotoString = Uri.fromFile(getContext().getExternalFilesDir(
+							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+					file.renameTo(new File(rootPathForTitlePhotoString.buildUpon().appendPath(namePlace).build().getPath()));
 				}
 			}
 		return uri;

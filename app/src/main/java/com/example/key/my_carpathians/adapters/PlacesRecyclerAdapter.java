@@ -1,6 +1,8 @@
 package com.example.key.my_carpathians.adapters;
 
 import android.content.Context;
+import android.net.Uri;
+import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -95,9 +97,12 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
             holder.mPlace = places.get(position);
             holder.textName.setText(holder.mPlace.getNamePlace());
             ratingPlace(holder.mPlace.getNamePlace(), holder.ratingBar);
+            Uri rootPathForTitlePhotoString = Uri.fromFile(context.getExternalFilesDir(
+                Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+
             Glide
                     .with(context)
-                    .load("file:/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/" + holder.mPlace.getNamePlace())
+                    .load(rootPathForTitlePhotoString.buildUpon().appendPath(holder.mPlace.getNamePlace()).build())
                     .into(holder.placeImage);
 
     }

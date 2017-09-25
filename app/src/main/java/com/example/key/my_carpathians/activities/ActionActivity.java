@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -98,8 +99,6 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
     public static final String SELECTED_USER_PLACES = "selected_user_places";
-	public static final String STORAGE_CONSTANT = "/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Photos/";
-	public static final String STORAGE_TRACK_CONSTANT = "/storage/sdcard0/Android/data/com.example.key.my_carpathians/files/Download/Routs/";
 	public List<Rout> routList;
     public List<Place> placeList;
     public List<Position> pointsRout;
@@ -227,14 +226,23 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				infoFragment.setData(place, rout);
 				adapter.notifyDataSetChanged();
 			}
-			Glide
-					.with(ActionActivity.this)
-					.load(STORAGE_CONSTANT + place.getNamePlace())
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.skipMemoryCache(true)
-					.into(imageView);
-			photoUrlList.add( 0, STORAGE_CONSTANT + place.getNamePlace());
-			graphView.setVisibility(View.GONE);
+
+			Uri rootPathForTitlePhotoString;
+			if (isExternalStorageReadable()) {
+				rootPathForTitlePhotoString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
+						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+			}else{
+				rootPathForTitlePhotoString = Uri.parse(place.getUrlPlace());
+			}
+				Glide
+						.with(ActionActivity.this)
+						.load(rootPathForTitlePhotoString.buildUpon().appendPath(place.getNamePlace()).build())
+						.diskCacheStrategy(DiskCacheStrategy.NONE)
+						.skipMemoryCache(true)
+						.into(imageView);
+				photoUrlList.add(0, rootPathForTitlePhotoString.toString());
+				graphView.setVisibility(View.GONE);
+
 			getRating(place.getNamePlace());
 			myPosition = place.getPositionPlace();
 			myName = place.getNamePlace();
@@ -257,23 +265,41 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	            fabChangePhotoRight.setVisibility(View.GONE);
 	            imageView.setVisibility(View.GONE);
             }
+			Uri rootPathForRoutsString;
+			if (isExternalStorageReadable()) {
+				rootPathForRoutsString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
+						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
+			}else{
+				rootPathForRoutsString = Uri.fromFile(ActionActivity.this.getFilesDir()).buildUpon().appendPath("Routs").build();
+			}
 
-
-            createDataPoint(STORAGE_TRACK_CONSTANT + rout.getNameRout());
+            createDataPoint(rootPathForRoutsString.buildUpon().appendPath(rout.getNameRout()).build());
 
 			myPosition = rout.getPositionRout();
 			myName = rout.getNameRout();
 		}
 	}
+	/* Checks if external storage is available to at least read */
+	public boolean isExternalStorageReadable() {
+		String state = Environment.getExternalStorageState();
+		if (Environment.MEDIA_MOUNTED.equals(state) ||
+				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+			return true;
+		}
+		return false;
+	}
 
 	private void morePhotos(String name) {
-		if (mProdusedMode){
-			for (int i = 1; i <= 3; i++){
-				File photoFile = new File(STORAGE_CONSTANT + name + String.valueOf(i));
-				if (photoFile.exists()){
-					photoUrlList.add(photoFile.toURI().toString());
+		if (mProdusedMode && isExternalStorageReadable() ){
+				Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
+						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+			for (int i = 1; i <= 3; i++) {
+				File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(name + String.valueOf(i)).build().getPath());
+				if (photoFile.exists()) {
+					photoUrlList.add(Uri.fromFile(photoFile).getPath());
 				}
 			}
+
 		}else {
 			FirebaseDatabase database = FirebaseDatabase.getInstance();
 			DatabaseReference myRef = database.getReference();
@@ -332,12 +358,12 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
 
 	@Background
-    public void createDataPoint(String uriRoutTrack) {
+    public void createDataPoint(Uri uriRoutTrack) {
         List<Position> points = new ArrayList<>();
         try {
             // Load GeoJSON file
 
-            File file = new File(uriRoutTrack);
+            File file = new File(uriRoutTrack.getPath());
 	        if (file.exists()) {
 		        InputStream fileInputStream = new FileInputStream(file);
 		        BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
@@ -562,10 +588,13 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 								public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 									// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
 									Uri downloadUrl = taskSnapshot.getDownloadUrl();
+									Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
+												Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+
 									place.setUrlPlace(downloadUrl.toString());
 									myRef.child("Places").child(place.getNamePlace()).setValue(place);
 									for (int i = 1; i <= 3; i++){
-										File photoFile = new File(STORAGE_CONSTANT + place.getNamePlace() + String.valueOf(i));
+										File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(place.getNamePlace() + String.valueOf(i)).build().getPath());
 										if (photoFile.exists()){
 											FirebaseStorage storage = FirebaseStorage.getInstance();
 											StorageReference storageRef = storage.getReference();
@@ -647,10 +676,12 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 							public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 								// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
 								Uri downloadUrl = taskSnapshot.getDownloadUrl();
+								Uri	rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
+											Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
 								rout.setUrlRout(downloadUrl.toString());
 								myRef.child("Rout").child(rout.getNameRout()).setValue(rout);
 								for (int i = 1; i <= 3; i++){
-									File photoFile = new File(STORAGE_CONSTANT + rout.getNameRout() + String.valueOf(i));
+									File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(rout.getNameRout() + String.valueOf(i)).build().getPath());
 									if (photoFile.exists()){
 										FirebaseStorage storage = FirebaseStorage.getInstance();
 										StorageReference storageRef = storage.getReference();

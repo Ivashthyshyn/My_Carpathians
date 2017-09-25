@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -191,6 +192,7 @@ public class StartActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
 	private String mUserUID;
     private boolean mTypeMode = false;
+    private String rootPathForRoutsString;
 
 
     @Override
@@ -285,7 +287,12 @@ public class StartActivity extends AppCompatActivity implements
                     places.add(place);
 
                 }
-                downloadPhoto(places);
+                if (isExternalStorageWritable()) {
+                    downloadPhoto(places);
+                }else{
+                    Toast.makeText(StartActivity.this, " External Storage does not exist +/n"+"Photos do not downloaded",Toast.LENGTH_LONG).show();
+
+                }
             }
 
             @Override
@@ -298,14 +305,42 @@ public class StartActivity extends AppCompatActivity implements
         myRouts.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Rout rout = postSnapshot.getValue(Rout.class);
-                    if (isOnline()) {
-                        downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
-                    }
-                    routs.add(rout);
+                if (routs.size() > 0){
+                    routs.clear();
                 }
+                if (isExternalStorageWritable()) {
+                     rootPathForRoutsString = Uri.fromFile(context.getExternalFilesDir(
+                            Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build().getPath();
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        Rout rout = postSnapshot.getValue(Rout.class);
+                        if (isOnline()) {
+                            downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
+                        }
+                        routs.add(rout);
+                    }
+                }else {
+                    if (context.getFilesDir().getFreeSpace() > 10485760L){
+                        rootPathForRoutsString = Uri.fromFile(context.getFilesDir()).buildUpon().appendPath("Routs").build().getPath();
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            Rout rout = postSnapshot.getValue(Rout.class);
+                            if (isOnline()) {
+                                downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
+                            }
+                            routs.add(rout);
+                        }
+                    }else {
+                        AlertDialog.Builder noAvailableStorageDialog = new AlertDialog.Builder(StartActivity.this);
+                        noAvailableStorageDialog.setTitle("Save Data");
+                        noAvailableStorageDialog.setMessage("External memory is not available! \n" +
+                                "And in the interior storage  is not enough free space.\n" + " You can not use this program in ofline");
+                        noAvailableStorageDialog.setPositiveButton("Oк", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
 
+                            }
+                        });
+                    }
+                }
             }
 
             @Override
@@ -316,6 +351,14 @@ public class StartActivity extends AppCompatActivity implements
 
     }
 
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
 
 
     private void produceToolsVisibility(boolean mTypeMode) {
@@ -354,10 +397,10 @@ public class StartActivity extends AppCompatActivity implements
      */
     @Background
     public void downloadRoutToStorage(String urlRoutsTrack, final String nameRout) {
+
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference httpsReference = storage.getReferenceFromUrl(urlRoutsTrack);
-        File rootPath = new File(context.getExternalFilesDir(
-                Environment.DIRECTORY_DOWNLOADS), "Routs");
+        File rootPath = new File(rootPathForRoutsString);
         if (!rootPath.exists()) {
             rootPath.mkdirs();
         }
