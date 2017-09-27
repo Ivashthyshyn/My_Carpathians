@@ -71,6 +71,8 @@ import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_US
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
 import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
+
+
 /**
  .
  */
