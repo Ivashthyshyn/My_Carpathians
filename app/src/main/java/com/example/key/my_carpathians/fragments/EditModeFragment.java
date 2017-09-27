@@ -118,6 +118,7 @@ public class EditModeFragment extends DialogFragment {
 
 
 
+
 	@ViewById(R.id.editTextName)
 	EditText editTextName;
 
