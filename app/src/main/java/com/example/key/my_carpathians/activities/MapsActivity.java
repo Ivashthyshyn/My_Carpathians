@@ -1187,6 +1187,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
              mPointCounter = 0;
              mMarker = null;
          }
+
     }
 }
 
