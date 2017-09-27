@@ -1059,6 +1059,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     /**
+     *
      * This method turns on and turns off flashing animation for button buttonRecTrack.
      */
     private void flashingColorAnimation(boolean b) {
@@ -1078,6 +1079,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mapboxMap.removeMarker(startMarker);
             }
         }
+ 
     }
 
     /**
