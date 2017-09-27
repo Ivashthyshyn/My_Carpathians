@@ -1079,10 +1079,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mapboxMap.removeMarker(startMarker);
             }
         }
-
-
-
-
+ 
     }
 
     /**
@@ -1147,11 +1144,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }
-
-
-
-
-
 
     public void enabledHandsMode(final int type){
             mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {

@@ -71,13 +71,6 @@ import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_US
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
 import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
-
-
-
-
-
-
-
 /**
  .
  */
@@ -115,12 +108,8 @@ public class EditModeFragment extends DialogFragment {
 	@ViewById(R.id.imageAdd3)
 	ImageButton imageAdd3;
 
-
 	@ViewById(R.id.buttonAddPhoto)
 	ImageButton buttonAddPhoto;
-
-
-
 
 	@ViewById(R.id.editTextName)
 	EditText editTextName;
@@ -250,7 +239,6 @@ public class EditModeFragment extends DialogFragment {
 			}
 
 		});
-
 		cropImageView.setOnCropImageCompleteListener(new CropImageView.OnCropImageCompleteListener() {
 			@Override
 			public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
@@ -262,7 +250,6 @@ public class EditModeFragment extends DialogFragment {
 				groupMorePhoto.setVisibility(View.VISIBLE);
 
 				switch (mPhotoSwicher){
-
 					case TITLE_PHOTO:
 						uriTitlePhoto = "";
 						bitmap = cropImageView.getCroppedImage();
