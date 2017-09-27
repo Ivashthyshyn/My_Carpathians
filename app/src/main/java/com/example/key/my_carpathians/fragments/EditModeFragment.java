@@ -116,6 +116,7 @@ public class EditModeFragment extends DialogFragment {
 	@ViewById(R.id.buttonAddPhoto)
 	ImageButton buttonAddPhoto;
 
+
 	@ViewById(R.id.editTextName)
 	EditText editTextName;
 
