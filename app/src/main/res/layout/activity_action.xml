@@ -1,91 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/actionActivityContainer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/btn_login"
-    tools:context="com.example.key.my_carpathians.ActionActivity">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/imageView"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        app:srcCompat="@android:drawable/btn_star_big_on"
-        tools:layout_editor_absoluteX="149dp"
-        tools:layout_editor_absoluteY="70dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_height="300dp"
+        android:background="@android:color/transparent"
+        app:elevation="2dp">
 
-    <TextView
-        android:id="@+id/titleText"
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+            app:layout_scrollInterpolator="@android:anim/decelerate_interpolator"
+            app:toolbarId="@+id/toolbar">
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/cardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:elevation="1dp"
+                app:layout_anchorGravity="top">
+
+                <com.jjoe64.graphview.GraphView
+                    android:id="@+id/graph"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:elevation="2dp"/>
+
+                <ImageView
+                    android:id="@+id/imageView"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:elevation="3dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@android:color/transparent"/>
+
+                <RatingBar
+                    android:id="@+id/ratingBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:clickable="false"
+                    android:contextClickable="false"
+                    android:elevation="5dp"
+                    android:numStars="4"
+                    android:progressBackgroundTint="@color/bg_login"
+                    android:progressTint="@color/colorAccent"
+                    android:rating="3"
+                    android:stepSize="0.5"/>
+
+                <TextView
+                    android:id="@+id/textName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="50dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginStart="20dp"
+                    android:elevation="4dp"
+                    android:text="Name"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/fabChangePhotoLeft"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_margin="20dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:padding="20dp"
+                    app:backgroundTint="@android:color/transparent"
+                    app:elevation="7dp"
+                    app:fabSize="mini"
+                    app:srcCompat="@drawable/ic_left_arrow"/>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/fabChangePhotoRight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_margin="20dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    app:backgroundTint="@android:color/transparent"
+                    app:elevation="2dp"
+                    app:fabSize="mini"
+                    app:srcCompat="@drawable/ic_right_arrow"/>
+
+                <ProgressBar
+                    android:id="@+id/uploadBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:elevation="5dp"
+                    android:indeterminate="false"
+                    android:max="100"
+                    android:progress="20"
+                    android:visibility="gone"/>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/buttonRatingBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_margin="12dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:paddingLeft="20dp"
+                    app:elevation="5dp"
+                    app:fabSize="mini"
+                    app:srcCompat="@drawable/ic_ok_like_hand_sign"/>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize">
+            </android.support.v7.widget.Toolbar>
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView"
-        android:layout_centerHorizontal="true"
-        android:ems="10"
-        android:text="Інформація про місце"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:layout_height="20dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:background="@drawable/background_user"
+        android:elevation="2dp"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom"
+        app:tabIndicatorColor="@color/tabTransparant"
+        app:tabIndicatorHeight="20dp">
 
-    <TextView
-        android:id="@+id/textName"
+    </android.support.design.widget.TabLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/buttonEdit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/titleText"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="26dp"
-        android:text="TextView"
-        android:textColor="@color/common_google_signin_btn_text_dark_focused"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:clickable="true"
+        android:scaleType="center"
+        android:src="@drawable/ic_pen"
+        android:visibility="visible"
+        app:elevation="5dp"
+        app:fabSize="normal"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom|center_horizontal"/>
 
-    <Button
-        android:id="@+id/buttonInterestingPlaces"
-        android:layout_width="100dp"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/buttonAddToFavorites"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:text="Місця" />
+        android:layout_marginLeft="10dp"
+        android:clickable="true"
+        android:scaleType="center"
+        android:src="@drawable/ic_favorite"
+        android:visibility="visible"
+        app:fabSize="normal"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom|left"/>
 
-    <Button
-        android:id="@+id/buttonShowWalkRout"
-        android:layout_width="100dp"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/buttonPublish"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textName"
-        android:layout_alignBottom="@+id/textName"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:text="Маршрути" />
+        android:layout_marginLeft="10dp"
+        android:clickable="true"
+        android:scaleType="center"
+        android:src="@drawable/upload"
+        android:visibility="visible"
+        app:elevation="5dp"
+        app:fabSize="normal"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom|left"/>
 
-    <LinearLayout
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/buttonShowOnMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:clickable="true"
+        android:scaleType="center"
+        android:scrollbarAlwaysDrawHorizontalTrack="false"
+        android:src="@drawable/ic_map"
+        app:elevation="5dp"
+        app:fabSize="normal"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom|right|end"/>
+
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_height="match_parent"
+        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
+    </android.support.v4.widget.NestedScrollView>
 
-        <Button
-            android:id="@+id/buttonShowOnMap"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_weight="1"
-            android:text="Показати на карті" />
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:paddingTop="20dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-        <Button
-            android:id="@+id/buttonAdd"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_weight="1"
-            android:text="Додати до обраного" />
-    </LinearLayout>
-
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

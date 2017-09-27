@@ -23,8 +23,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/hint_email"
             android:inputType="textEmailAddress"
-            android:maxLines="1"
-             />
+            android:maxLines="1" />
 
         <EditText
             android:id="@+id/newEmail"
@@ -32,8 +31,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/hint_new_email"
             android:inputType="textEmailAddress"
-            android:maxLines="1"
-            />
+            android:maxLines="1" />
 
         <EditText
             android:id="@+id/password3"
@@ -44,8 +42,7 @@
             android:imeActionId="@+id/login"
             android:imeOptions="actionUnspecified"
             android:inputType="textPassword"
-            android:maxLines="1"
-            />
+            android:maxLines="1" />
 
         <EditText
             android:id="@+id/newPassword"
@@ -56,8 +53,7 @@
             android:imeActionId="@+id/login"
             android:imeOptions="actionUnspecified"
             android:inputType="textPassword"
-            android:maxLines="1"
-            />
+            android:maxLines="1" />
 
         <Button
             android:id="@+id/changeEmail"

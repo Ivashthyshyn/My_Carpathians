@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:card_view="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="230dp"
+              android:background="@android:color/transparent"
+              android:orientation="horizontal">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:animateLayoutChanges="true"
+        android:backgroundTintMode="multiply"
+        app:cardBackgroundColor="@color/input_register"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="0dp"
+        app:cardUseCompatPadding="true"
+        android:elevation="5dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/imagePlace"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                android:elevation="5dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/line_to_text"
+                android:orientation="horizontal"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="15dp"
+                android:elevation="5dp">
+
+                <TextView
+                    android:id="@+id/textNamePlace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/imagePlace"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginBottom="3dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_weight="1"
+                    android:shadowColor="@color/black_overlay"
+                    android:text="Name"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginLeft="10dp"
+                    android:elevation="5dp"/>
+
+                <RatingBar
+                    android:id="@+id/ratingBarForPlaceList"
+                    style="@style/Widget.AppCompat.RatingBar.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/textNamePlace"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="10dp"
+                    android:backgroundTint="@color/bg_login"
+                    android:elevation="5dp"
+                    android:isIndicator="true"
+                    android:numStars="5"
+                    android:rating="1"
+                    android:secondaryProgressTint="@color/colorAccent"
+                    android:stepSize="0.5"/>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

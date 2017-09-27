@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimary">#3f51b5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#9673b5</color>
 
     <color name="black_overlay">#66000000</color>
 
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#E0E0E0</color>
-    <color name="bg_login">#26ae90</color>
+    <color name="bg_login">#9698a0</color>
     <color name="bg_register">#2e3237</color>
     <color name="bg_main">#428bca</color>
     <color name="white">#ffffff</color>
     <color name="input_login">#222222</color>
     <color name="input_login_hint">#999999</color>
     <color name="input_register">#888888</color>
-    <color name="input_register_bg">#3b4148</color>
-    <color name="input_register_hint">#5e6266</color>
+    <color name="input_register_bg">#3b3e41</color>
+    <color name="input_register_hint">#af5e6266</color>
     <color name="btn_login">#26ae90</color>
     <color name="btn_login_bg">#eceef1</color>
-    <color name="lbl_name">#333333</color>
+    <color name="lbl_name">#1f7a1d</color>
     <color name="btn_logut_bg">#ff6861</color>
+    <color name="background_material_light">#7b7878</color>
+    <color name="colorGreenPrimary">#117608</color>
+    <color name="colorYellowPrimary">#c6c24b</color>
+    <color name="colorRedPrimary">#ef5350</color>
+    <color name="tabTransparant">#5a3f51b5</color>
+    <color name="background">#726e6e</color>
 </resources>
