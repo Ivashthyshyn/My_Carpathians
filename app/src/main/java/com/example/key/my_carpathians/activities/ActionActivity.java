@@ -28,6 +28,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.cocoahero.android.geojson.Feature;
+import com.cocoahero.android.geojson.LineString;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.ViewPagerAdapter;
 import com.example.key.my_carpathians.fragments.EditModeFragment;
@@ -69,13 +71,18 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -900,7 +907,50 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
 	@Click(R.id.buttonGetAltitude)
 	void buttonGetAltitude(){
+		start();
+	}
+	@Background
+	void start(){
 		AltitudeFinder altitudeFinder = new AltitudeFinder();
-		altitudeFinder.extractAltitude(mPositionList);
+		try {
+		List<com.cocoahero.android.geojson.Position> hadAltitudePosition = altitudeFinder.getElevation(mPositionList);
+
+			LineString lineString = new LineString();
+			lineString.setPositions(hadAltitudePosition);
+			Feature feature = new Feature();
+			try {
+				JSONObject geoJSON = new JSONObject();
+				feature.setProperties(new JSONObject());
+				feature.setGeometry(lineString);
+				feature.setIdentifier("key.my_carpathians");
+				geoJSON.put("features", new JSONArray().put(feature.toJSON()));
+				geoJSON.put("type", "FeatureCollection");
+
+				File rootPath = new File(getApplicationContext().getExternalFilesDir(
+						Environment.DIRECTORY_DOWNLOADS), "Routs");
+				if (!rootPath.exists()) {
+					rootPath.mkdirs();
+				}
+				File localFile = new File(rootPath, myName);
+				if (localFile.exists()) {
+					localFile.delete();
+				}
+					String fileUri = String.valueOf(Uri.fromFile(localFile));
+					Writer output = new BufferedWriter(new FileWriter(localFile));
+					output.write(geoJSON.toString());
+					output.close();
+					SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+					Rout mRout = new Rout();
+					mRout.setNameRout(myName);
+					mRout.setUrlRoutsTrack(fileUri);
+				createDataPoint(Uri.fromFile(localFile));
+				} catch (Exception e) {
+					Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+				}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 }

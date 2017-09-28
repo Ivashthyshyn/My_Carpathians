@@ -15,14 +15,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.NoRouteToHostException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.SSLException;
+import javax.net.ssl.HttpsURLConnection;
 
 
 /**
@@ -33,9 +31,74 @@ public class AltitudeFinder {
 
 	private static final String LOG_TAG = AltitudeFinder.class.getSimpleName();
 	private static final String USGS_REQUEST_URL = "https://maps.googleapis.com/maps/api/elevation/json?locations=";
-	private static final String YOUR_API_KEY = "&key=AIzaSyD2BCy-prEsCoH9NOe2wnmNDKKBnSMe3do;";
+	private static final String YOUR_API_KEY = "&key=AIzaSyD2BCy-prEsCoH9NOe2wnmNDKKBnSMe3do";
 	public AltitudeFinder(){
 
+	}
+
+	public static final int cTimeOutMs = 30 * 1000;
+
+	public static List<com.cocoahero.android.geojson.Position> getElevation(List<Position> location ) throws IOException, JSONException {
+		List<com.cocoahero.android.geojson.Position> pos = new ArrayList<>();
+		// https://developers.google.com/maps/documentation/elevation/
+		String valueLocation = "https://maps.googleapis.com/maps/api/elevation/json?locations=";
+		for (int i = 0 ; i < location.size() - 1; i++){
+			valueLocation = valueLocation + String.valueOf(location.get(i).getLatitude()) + "," +
+					String.valueOf(location.get(i).getLongitude()) +"|";
+		}
+
+		URL url = new URL(valueLocation +
+				String.valueOf(location.get(location.size() - 1).getLatitude()) + "," +
+				String.valueOf(location.get(location.size() - 1).getLongitude()) +
+				"&key=AIzaSyCW-3Yyo8aeNIj-Bj9LK-Z1g97MYf9lWlg");
+		Log.d(LOG_TAG, "url=" + url);
+		HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+
+		urlConnection.setConnectTimeout(cTimeOutMs);
+		urlConnection.setReadTimeout(cTimeOutMs);
+		urlConnection.setRequestProperty("Accept", "application/json");
+
+		// Set request type
+		urlConnection.setRequestMethod("GET");
+		urlConnection.setDoOutput(false);
+		urlConnection.setDoInput(true);
+
+		try {
+			// Check for errors
+			int code = urlConnection.getResponseCode();
+			if (code != HttpsURLConnection.HTTP_OK)
+				throw new IOException("HTTP error " + urlConnection.getResponseCode());
+
+			// Get response
+			BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+			StringBuilder json = new StringBuilder();
+			String line;
+			while ((line = br.readLine()) != null)
+				json.append(line);
+			Log.d(LOG_TAG, json.toString());
+
+			// Decode result
+			JSONObject jroot = new JSONObject(json.toString());
+			String status = jroot.getString("status");
+			if ("OK".equals(status)) {
+				JSONArray results = jroot.getJSONArray("results");
+				if (results.length() > 0) {
+					for (int lc = 0; lc < results.length(); lc++) {
+						double elevation = results.getJSONObject(lc).getDouble("elevation");
+						double lat = results.getJSONObject(lc).getJSONObject("location").getDouble("lat");
+						double lng = results.getJSONObject(lc).getJSONObject("location").getDouble("lng");
+						com.cocoahero.android.geojson.Position p = new com.cocoahero.android.geojson.Position(lat, lng, elevation);
+						pos.add(p);
+						Log.i(LOG_TAG, "Elevation " + location);
+					}
+				} else
+					throw new IOException("JSON no results");
+			} else
+				throw new IOException("JSON status " + status);
+		} finally {
+			urlConnection.disconnect();
+		}
+		return pos;
 	}
 
 	public static List<com.cocoahero.android.geojson.Position> extractAltitude(List<Position> positionList) {
@@ -60,6 +123,7 @@ public class AltitudeFinder {
 	 * Returns new URL object from the given string URL.
 	 */
 	private static URL createUrl(List<Position> positions) {
+
 		URL url = null;
 		StringBuilder baseUri = new StringBuilder();
 		baseUri.append(USGS_REQUEST_URL);
@@ -71,7 +135,7 @@ public class AltitudeFinder {
 			}
 		}
 		String createdUri = String.valueOf(baseUri.append(YOUR_API_KEY));
-		GetHttpToServer(createdUri);
+		String ura =  "https://maps.googleapis.com/maps/api/elevation/json?locations=" + 49.1313733 + "," +24.3051567 + "&key="+"AIzaSyD2BCy-prEsCoH9NOe2wnmNDKKBnSMe3do";
 		try {
 			url = new URL(createdUri);
 		} catch (MalformedURLException e) {
@@ -121,44 +185,7 @@ public class AltitudeFinder {
 		return jsonResponse;
 	}
 
-	public static int GetHttpToServer(String urlLink) {
-		try {
-			URL obj = new URL(urlLink);
-			HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
-			conn.setRequestMethod("GET");
-			int responseCode = conn.getResponseCode();
 
-			BufferedReader in = new BufferedReader(
-					new InputStreamReader(conn.getInputStream()));
-			String inputLine;
-
-			while ((inputLine = in.readLine()) != null) {
-				//response.append(inputLine);
-			}
-			in.close();
-		} catch (MalformedURLException ex) {
-			Log.e("GetHttp", Log.getStackTraceString(ex));
-			return 2;
-		} catch (NoRouteToHostException ex) {
-			Log.e("GetHttp", Log.getStackTraceString(ex));
-			return 3;
-		} catch (SocketTimeoutException ex){
-			Log.e("GetHttp", Log.getStackTraceString(ex));
-			return 4;
-		} catch (SSLException ex){
-			Log.e("GetHttp", Log.getStackTraceString(ex));
-			return 5;
-
-		} catch (IOException ex) {
-			Log.e("GetHttp", Log.getStackTraceString(ex));
-			return 6;
-		} catch (Exception e){
-			Log.e("GetHttp", Log.getStackTraceString(e));
-			return 7;
-
-		}
-		return 0;
-	}
 	/**
 	 * Convert the {@link InputStream} into a String which contains the
 	 * whole JSON response from the server.
