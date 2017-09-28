@@ -120,7 +120,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
     public ArrayList<String> selectUserRouts = null;
     public List<Place> selectUserPlacesList = null;
-    public List<Position> latLngs = new ArrayList<>();
+    public List<Position> createdTrackPosition;
     public Polyline recLine;
     public Marker startMarker;
     public AlertDialog alert;
@@ -928,7 +928,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                if (mMarker != null || latLngs.size() > 2){
+                if (mMarker != null || createdTrackPosition.size() > 2){
                     save(model, nameInput.getText().toString());
 
                 }else {
@@ -995,7 +995,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }else if(model == ROUT){
             LineString lineString = new LineString();
-            lineString.setPositions(latLngs);
+            lineString.setPositions(createdTrackPosition);
             Feature feature = new Feature();
             try {
                 JSONObject geoJSON = new JSONObject();
@@ -1044,7 +1044,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             createdByUserTrackList.add(name + NO_PUBLISH_CONSTANT);
                             mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
                             Toast.makeText(getApplicationContext(), "Rout saved", Toast.LENGTH_LONG).show();
-                            latLngs.clear();
+                            createdTrackPosition.clear();
                         } catch (IOException e) {
                             e.printStackTrace();
                             Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -1095,14 +1095,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void showRecLine(LatLng latLng) {
         Position mPos = new Position(latLng.getLatitude(), latLng.getLongitude(), 0);
-        latLngs.add(mPos);
-        if (latLngs.size() == 1) {
+        createdTrackPosition.add(mPos);
+        if (createdTrackPosition.size() == 1) {
             IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
             Icon iconStart = iconFactory.fromResource(R.drawable.marcer_flag_start);
             startMarker = mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(latLng)
                     .title("Початок"));
-        }else if(latLngs.size() > 1){
-            mapboxMap.addPolyline(new PolylineOptions().add(new LatLng(latLngs.get(latLngs.size() - 1).getLongitude(),latLngs.get(latLngs.size() - 1).getLatitude()) , new LatLng(latLngs.get(latLngs.size() - 2).getLongitude(),latLngs.get(latLngs.size() - 2).getLatitude())));
+        }else if(createdTrackPosition.size() > 1){
+            LatLng p1 = new LatLng(createdTrackPosition.get(createdTrackPosition.size() - 1).getLatitude(), createdTrackPosition.get(createdTrackPosition.size() - 1).getLongitude());
+            LatLng p2 = new LatLng(createdTrackPosition.get(createdTrackPosition.size() - 2).getLatitude(), createdTrackPosition.get(createdTrackPosition.size() - 2).getLongitude());
+
+
+
+            mapboxMap.addPolyline(new PolylineOptions().add(p1,p2));
              mapboxMap.addMarker(new MarkerOptions().setPosition(latLng));
 
 
@@ -1128,7 +1133,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     @Click(R.id.buttonHandEditMode)
      void  buttonHandEditModeWasClicked(){
-        if (mPointCounter == 0) {
+        if (mPointCounter == 0 &&  createdTrackPosition == null) {
+            createdTrackPosition = new ArrayList<>();
             buttonTouchCreator.setVisibility(View.VISIBLE);
             buttonHandEditMode.setImageResource(R.drawable.hand_write_icon);
             showChoseTypeDialog(true);
@@ -1138,7 +1144,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             buttonHandEditMode.setImageResource(R.drawable.hand_icon);
             if (mMarker != null){
                 showCreateNameDialog(PLACE, null);
-            }else if (latLngs.size() > 2){
+            }else if (createdTrackPosition.size() > 2){
                 showCreateNameDialog(ROUT, null);
             }
 
@@ -1174,7 +1180,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     void  buttonOnBackWasClicked(){
         if (mapboxMap.getPolylines().size() > 0) {
                mapboxMap.getPolylines().get(mPointCounter -2).remove();
-                latLngs.remove(latLngs.size() - 1);
+                createdTrackPosition.remove(createdTrackPosition.size() - 1);
             mPointCounter--;
         }
          if (mapboxMap.getMarkers().size() > 1 & mMarker == null){
@@ -1182,7 +1188,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }else if (startMarker != null){
              startMarker.remove();
-             latLngs.remove(latLngs.size() - 1);
+             createdTrackPosition.remove(createdTrackPosition.size() - 1);
              mPointCounter = 0;
          }else if(mMarker != null){
 	         mMarker.remove();

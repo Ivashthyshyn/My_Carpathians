@@ -41,6 +41,7 @@ import com.example.key.my_carpathians.fragments.RoutsAroundFragment_;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
+import com.example.key.my_carpathians.utils.AltitudeFinder;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -119,6 +120,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	private boolean connected = false;
 	private FirebaseDatabase database;
 	private DatabaseReference myRef;
+	private List<Position> mPositionList;
 	@ViewById(R.id.uploadBar)
 	ProgressBar uploadBar;
 
@@ -359,7 +361,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 	@Background
     public void createDataPoint(Uri uriRoutTrack) {
-        List<Position> points = new ArrayList<>();
+       mPositionList = new ArrayList<>();
         try {
             // Load GeoJSON file
 
@@ -390,21 +392,21 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				        for (int lc = 0; lc < coords.length(); lc++) {
 					        JSONArray coord = coords.getJSONArray(lc);
 					        Position position = Position.fromCoordinates(coord.getDouble(1), coord.getDouble(0), coord.getDouble(2));
-					        points.add(position);
+					        mPositionList.add(position);
 				        }
 
 			        }
 		        }
-		        int size = points.size();
+		        int size = mPositionList.size();
 		        DataPoint[] values = new DataPoint[size];
 		        Integer xi = 0;
 		        for (int i = 1; i < size; i++) {
-			        Integer yi = (int) points.get(i).getAltitude();
-			        xi = xi + (int) TurfMeasurement.distance(points.get(i - 1), points.get(i), TurfConstants.UNIT_METERS);
+			        Integer yi = (int) mPositionList.get(i).getAltitude();
+			        xi = xi + (int) TurfMeasurement.distance(mPositionList.get(i - 1), mPositionList.get(i), TurfConstants.UNIT_METERS);
 			        DataPoint v = new DataPoint(xi, yi);
 			        values[i] = v;
 		        }
-		        values[0] = new DataPoint(0, (int) points.get(0).getAltitude());
+		        values[0] = new DataPoint(0, (int) mPositionList.get(0).getAltitude());
 		        LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
 		        series.setThickness(8);
 		        graphView.addSeries(series);
@@ -895,5 +897,10 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		}else {
 			super.onBackPressed();
 		}
+	}
+	@Click(R.id.buttonGetAltitude)
+	void buttonGetAltitude(){
+		AltitudeFinder altitudeFinder = new AltitudeFinder();
+		altitudeFinder.extractAltitude(mPositionList);
 	}
 }
