@@ -2,17 +2,13 @@ package com.example.key.my_carpathians.utils;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import com.cocoahero.android.geojson.Feature;
-import com.cocoahero.android.geojson.LineString;
 import com.cocoahero.android.geojson.Position;
 import com.example.key.my_carpathians.interfaces.ILocation;
 import com.example.key.my_carpathians.models.Place;
@@ -23,20 +19,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_NO_SAVE;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_PLACE;
@@ -44,10 +28,9 @@ import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC
 import static com.example.key.my_carpathians.activities.MapsActivity.ERROR_TRACK;
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_COMMANDS;
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_TRACK_NAME;
-import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
-import static com.example.key.my_carpathians.fragments.EditModeFragment.NO_PUBLISH_CONSTANT;
+import static com.example.key.my_carpathians.utils.ObjectSaver.FILE_EXISTS;
 
 
 public class LocationService extends Service implements
@@ -167,104 +150,32 @@ public class LocationService extends Service implements
 
     private void savePlaceToSDCard(String mNamePlace) {
         if (mLocation != null) {
-            Place mPlace = new Place();
-            mPlace.setNamePlace(mNamePlace);
-            com.example.key.my_carpathians.models.Position position = new com.example.key.my_carpathians.models.Position();
-            position.setLatitude(mLocation.getLatitude());
-            position.setLongitude(mLocation.getLongitude());
-            mPlace.setPositionPlace(position);
-
-            File rootPath = new File(getApplicationContext().getExternalFilesDir(
-                    Environment.DIRECTORY_DOWNLOADS), "Created");
-            if (!rootPath.exists()) {
-                rootPath.mkdirs();
-            }
-
-            File file = new File(rootPath, mNamePlace);
-            String fileUri = String.valueOf(Uri.fromFile(file));
-            if (file.exists()) {
-                owner.messageForActivity(PLACE, mNamePlace);
-            }
-            try {
-                FileOutputStream fileOutputStream = new FileOutputStream(file);
-                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                objectOutputStream.writeObject(mPlace);
-                objectOutputStream.close();
-                fileOutputStream.close();
-                SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
-                createdByUserTrackList.add(mNamePlace);
-                mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserTrackList).apply();
-                Toast.makeText(getApplicationContext(), "Place saved", Toast.LENGTH_LONG).show();
-                mLocation = null;
-            } catch (IOException e) {
-                e.printStackTrace();
+	        Place mPlace = new Place();
+	        mPlace.setNamePlace(mNamePlace);
+	        mPlace.setPositionPlace(new com.example.key.my_carpathians.models.
+			        Position(mLocation.getLatitude(), mLocation.getLongitude()));
+            ObjectSaver objectSaver = new ObjectSaver();
+            String outcome = objectSaver.savePlace(mNamePlace, mPlace, false);
+            if (outcome.equals(FILE_EXISTS) & owner != null){
+                owner.messageForActivity(ROUT, mNamePlace);
+            }else{
+                Toast.makeText(getApplicationContext(), outcome, Toast.LENGTH_LONG).show();
             }
         }
     }
 
     private void saveRoutToSDCard(String mNameRout) {
-    if (mPositionList.size() > 3) {
-        LineString lineString = new LineString();
-        lineString.setPositions(mPositionList);
-        Feature feature = new Feature();
-        try {
-            JSONObject geoJSON = new JSONObject();
-            feature.setProperties(new JSONObject());
-            feature.setGeometry(lineString);
-            feature.setIdentifier("key.my_carpathians");
-            geoJSON.put("features", new JSONArray().put(feature.toJSON()));
-            geoJSON.put("type", "FeatureCollection");
-
-            File rootPath = new File(getApplicationContext().getExternalFilesDir(
-                    Environment.DIRECTORY_DOWNLOADS), "Routs");
-            if (!rootPath.exists()) {
-                rootPath.mkdirs();
-            }
-            File localFile = new File(rootPath, mNameRout);
-            if (localFile.exists()) {
-                owner.messageForActivity(ROUT, mNameRout);
-            } else {
-                String fileUri = String.valueOf(Uri.fromFile(localFile));
-                Writer output = new BufferedWriter(new FileWriter(localFile));
-                output.write(geoJSON.toString());
-                output.close();
-                SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                Rout mRout = new Rout();
-                mRout.setNameRout(mNameRout);
-                mRout.setUrlRoutsTrack(fileUri);
-
-                File rootPath2 = new File(getApplicationContext().getExternalFilesDir(
-                        Environment.DIRECTORY_DOWNLOADS), "Created");
-                if (!rootPath2.exists()) {
-                    rootPath2.mkdirs();
-                }
-
-                File file = new File(rootPath2, mNameRout + NO_PUBLISH_CONSTANT);
-                String fileUri2 = String.valueOf(Uri.fromFile(file));
-                if (file.exists()) {
-                    owner.messageForActivity(ROUT, mNameRout);
-                } else {
-                    try {
-                        FileOutputStream fileOutputStream = new FileOutputStream(file);
-                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                        objectOutputStream.writeObject(mRout);
-                        objectOutputStream.close();
-                        fileOutputStream.close();
-                        Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
-                        createdByUserTrackList.add(mNameRout + NO_PUBLISH_CONSTANT);
-                        mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
-                        Toast.makeText(getApplicationContext(), "Rout saved", Toast.LENGTH_LONG).show();
-                        mPositionList.clear();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+    if (mPositionList.size() > 2) {
+	    Rout mRout = new Rout();
+	    mRout.setNameRout(mNameRout);
+	    mRout.setPositionRout(new com.example.key.my_carpathians.models.Position(
+	    		mPositionList.get(0).getLatitude(), mPositionList.get(0).getLongitude()));
+        ObjectSaver objectSaver = new ObjectSaver();
+        String outcome = objectSaver.saveRout(mNameRout, mPositionList, mRout, false);
+        if (outcome.equals(FILE_EXISTS) & owner != null){
+            owner.messageForActivity(ROUT, mNameRout);
+        }else{
+            Toast.makeText(getApplicationContext(), outcome, Toast.LENGTH_LONG).show();
         }
     }else {
     if (owner != null){
@@ -274,6 +185,13 @@ public class LocationService extends Service implements
 
     }
 
+	public boolean isExternalStorageWritable() {
+		String state = Environment.getExternalStorageState();
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+			return true;
+		}
+		return false;
+	}
     /**
      * Callback when the location changes. Inform the owner.
      *
@@ -299,7 +217,7 @@ public class LocationService extends Service implements
         }else if (mIntCommand == COMMAND_REC_ROUT) {
             mLocationRequest.setInterval(UPDATE_INTERVAL_REC);
             mLocationRequest.setFastestInterval(FASTEST_INTERVAL_REC);
-            saveRoutLocationList(location);
+            saveLocationToLocationList(location);
             owner.update(location, 0);
         }
     }
@@ -307,7 +225,7 @@ public class LocationService extends Service implements
 
 
 
-    private void saveRoutLocationList(Location location) {
+    private void saveLocationToLocationList(Location location) {
 
         Position position = new Position(location);
         if(position.getAltitude() != 0 && mPositionList.size() != 0){
@@ -319,7 +237,7 @@ public class LocationService extends Service implements
 
                 }
             }
-
+//TODO need to verify bottom line
         }else if(mPositionList.size() == 0 && position.getAltitude() != 0){
             mPositionList.add(position);
         }

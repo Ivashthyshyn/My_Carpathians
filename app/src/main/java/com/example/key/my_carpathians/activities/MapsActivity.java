@@ -38,6 +38,7 @@ import com.cocoahero.android.geojson.Position;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.interfaces.ILocation;
 import com.example.key.my_carpathians.models.Place;
+import com.example.key.my_carpathians.models.Rout;
 import com.example.key.my_carpathians.utils.AltitudeFinder;
 import com.example.key.my_carpathians.utils.LocationService;
 import com.example.key.my_carpathians.utils.ObjectSaver;
@@ -85,7 +86,6 @@ import java.util.Random;
 
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
-import static com.example.key.my_carpathians.activities.StartActivity.ACTION_MODE;
 import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
@@ -149,27 +149,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @ViewById(R.id.buttonOnBack)
     ImageButton buttonTouchCreator;
 
-    private ServiceConnection captureServiceConnection = new ServiceConnection() {
+    private ServiceConnection captureServiceConnection;
+    private MapboxMap.OnMyLocationChangeListener myLocationChangeListener;
 
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            LocationService.MyLocalBinder binder = (LocationService.MyLocalBinder) service;
-            locationService = binder.getService();
-            locationService.setOwner(iCapture);
+
+    @Override
+    public void onBackPressed() {
+        if (captureServiceConnection != null){
+            Intent intent = new Intent(this, LocationService.class);
+            unbindService(captureServiceConnection);
+            MapsActivity.this.stopService(intent);
+            mapboxMap.setMyLocationEnabled(false);
         }
+        super.onBackPressed();
+    }
 
-        public void onServiceDisconnected(ComponentName arg0) {
-        }
-    };
-    private MapboxMap.OnMyLocationChangeListener myLocationChangeListener = new MapboxMap.OnMyLocationChangeListener() {
-        @Override
-        public void onMyLocationChange(@Nullable Location location) {
-
-        }
-    };
-
-
-
-	@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         iCapture = new ILocation() {
@@ -234,7 +229,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         alertDialog.setTitle("Save data");
 
         // Setting Dialog Message
-        alertDialog.setMessage("Ваш трек містить менше трьох локацій. Будь ласка перевірте якість сигналу g_p_s і спробуйте знову");
+        alertDialog.setMessage("Ваш трек містить менше трьох локацій. Будь ласка перевірте якість сигналу gps і спробуйте знову");
 
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
@@ -262,7 +257,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             checkGPSEnabled();
             toggleGps(true);
             buttonShowMyLocation.setImageResource(R.drawable.ic_location_disabled_24dp);
-            if (mTypeMode) {
+            if (mTypeMode){
                 buttonRecTrack.setVisibility(View.VISIBLE);
             }
             switchCheck = true;
@@ -343,17 +338,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         }
-        if (getIntent().getBooleanExtra(ACTION_MODE, false)) {
-            // todo
-        } else {
-            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
-                    new CameraPosition.Builder()
-                            .target(new LatLng(lat, lng))  // set the camera's center position
-                            .zoom(10)  // set the camera's zoom level
-                            .tilt(20)  // set the camera's tilt
-                            .build()));
+        if (mTypeMode) {
+            lat = 48.635022;
+            lng = 24.141080;
+        }else {
+            toolsHandContainer.setVisibility(View.GONE);
         }
-
+        mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                new CameraPosition.Builder()
+                        .target(new LatLng(lat, lng))  // set the camera's center position
+                        .zoom(10)  // set the camera's zoom level
+                        .tilt(20)  // set the camera's tilt
+                        .build()));
     }
 
     // This method show download dialog
@@ -662,6 +658,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // This method monitors the position of the user on the map
     private void toggleGps(boolean checker) {
         if (checker) {
+            captureServiceConnection= new ServiceConnection() {
+
+                public void onServiceConnected(ComponentName className, IBinder service) {
+                    LocationService.MyLocalBinder binder = (LocationService.MyLocalBinder) service;
+                    locationService = binder.getService();
+                    locationService.setOwner(iCapture);
+                }
+
+                public void onServiceDisconnected(ComponentName arg0) {
+                }
+            };
+            myLocationChangeListener= new MapboxMap.OnMyLocationChangeListener() {
+                @Override
+                public void onMyLocationChange(@Nullable Location location) {
+
+                }
+            };
             Intent intent = new Intent(this, LocationService.class);
             startService(intent);
             bindService(intent, captureServiceConnection, Context.BIND_AUTO_CREATE);
@@ -842,7 +855,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 if (handType) {
                     enabledHandsMode(COMMAND_REC_ROUT);
-                    checkForRecButton = false;
                     alert.dismiss();
                 }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
@@ -862,7 +874,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 if (handType) {
                     enabledHandsMode(COMMAND_REC_PLACE);
-                    checkForRecButton = false;
                     createdTrackPosition = new ArrayList<Position>();
                     alert.dismiss();
                 }else {
@@ -950,6 +961,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     MapsActivity.this.startService(serviceIntent);
                     autoOrientationOff(false);
                     flashingColorAnimation(false);
+                    removeViews("canceled by user");
                 }
             }
         });
@@ -959,8 +971,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	@Background
     public void saveCreatedObject(int model, String name) {
         if (model == PLACE){
+            Place mPlace = new Place();
+            mPlace.setNamePlace(name);
+            mPlace.setPositionPlace(new com.example.key.my_carpathians.models.Position(
+                    mMarker.getPosition().getLatitude(), mMarker.getPosition().getLongitude()));
+
             ObjectSaver objectSaver = new ObjectSaver();
-            String outcome = objectSaver.savePlace(name, new com.example.key.my_carpathians.models.Position(mMarker.getPosition().getLatitude(), mMarker.getPosition().getLongitude()));
+            String outcome = objectSaver.savePlace(name, mPlace, false);
            if (outcome.equals(FILE_EXISTS)){
                showCreateNameDialog(0, null);
             }else{
@@ -978,7 +995,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 createdTrackPosition = altitudeFinder.extractAltitude(pos);
             }
             ObjectSaver objectSaver = new ObjectSaver();
-            String outcome = objectSaver.saveRout(name, createdTrackPosition);
+            Rout mRout = new Rout();
+            mRout.setNameRout(name);
+            mRout.setPositionRout(new com.example.key.my_carpathians.models.Position(createdTrackPosition.get(0).getLatitude(),
+                    createdTrackPosition.get(0).getLongitude()));
+            String outcome = objectSaver.saveRout(name, createdTrackPosition, mRout, false);
             if (outcome.equals(FILE_EXISTS)){
                 showCreateNameDialog(0, null);
             }else{
@@ -986,6 +1007,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
         }
+    }
+
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
     }
 
     @UiThread

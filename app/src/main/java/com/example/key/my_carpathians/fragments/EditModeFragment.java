@@ -3,7 +3,6 @@ package com.example.key.my_carpathians.fragments;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,9 +19,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-
-
-
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -36,6 +32,7 @@ import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
+import com.example.key.my_carpathians.utils.ObjectSaver;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.commons.geojson.LineString;
@@ -58,20 +55,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static android.app.Activity.RESULT_OK;
-import static android.content.Context.MODE_PRIVATE;
-import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
-import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
 import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 /**
@@ -434,44 +424,13 @@ public class EditModeFragment extends DialogFragment {
 					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), bitmap2, uriPhoto2);
 					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), bitmap3, uriPhoto3);
 				 }
-				 File rootPath = new File(getContext().getExternalFilesDir(
-						 Environment.DIRECTORY_DOWNLOADS), "Created");
-				 if (!rootPath.exists()) {
-					 rootPath.mkdirs();
-				 }
-
-				 File file = new File(rootPath, mRout.getNameRout() + NO_PUBLISH_CONSTANT);
-				 String fileUri = String.valueOf(Uri.fromFile(file));
-				 if (file.exists()) {
-					 file.delete();
-				 } else {
-					 File betterFile = new File(rootPath, name + NO_PUBLISH_CONSTANT);
-					 if (betterFile.exists()) {
-						 betterFile.delete();
-					 }
-				 }
-				 try {
-					 FileOutputStream fileOutputStream = new FileOutputStream(file);
-					 ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-					 objectOutputStream.writeObject(mRout);
-					 objectOutputStream.close();
-					 fileOutputStream.close();
-					 SharedPreferences mSharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-					 Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
-					 if (createdByUserTrackList.add(mRout.getNameRout() + NO_PUBLISH_CONSTANT)) {
-						 createdByUserTrackList.remove(name + NO_PUBLISH_CONSTANT );
-					 }
-					 mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
-					 Toast.makeText(getContext(), "Rout saved", Toast.LENGTH_LONG).show();
-					 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity)getContext();
+				ObjectSaver objectSaver = new ObjectSaver();
+				 String outcome = objectSaver.saveRout(name, null, mRout, true);
+				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
+				 if (outcome.equals("Rout saved")) {
+					 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity) getContext();
 					 communicatorActionActivity.saveChanges(mRout, null);
-				 } catch (IOException e) {
-					 e.printStackTrace();
 				 }
-
-
-
-
 			}else if(mPlace != null) {
 				 mPlace.setNamePlace(editTextName.getText().toString());
 				 mPlace.setTitlePlace(editTextTitle.getText().toString());
@@ -481,43 +440,15 @@ public class EditModeFragment extends DialogFragment {
 					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_2, bitmap2, uriPhoto2);
 					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_3, bitmap3, uriPhoto3);
 				 }
-				 File rootPath = new File(getContext().getExternalFilesDir(
-						 Environment.DIRECTORY_DOWNLOADS), "Created");
-				 if (!rootPath.exists()) {
-					 rootPath.mkdirs();
+				 ObjectSaver objectSaver = new ObjectSaver();
+				 String outcome =  objectSaver.savePlace( name, mPlace, true);
+				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
+				 if (outcome.equals("Place saved")) {
+					 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity) getContext();
+					 communicatorActionActivity.saveChanges(null, mPlace);
 				 }
 
-				 File file = new File(rootPath, mPlace.getNamePlace());
-				 String fileUri = String.valueOf(Uri.fromFile(file));
-				 if (file.exists()) {
-					 file.delete();
-				 } else {
-					 File betterFile = new File(rootPath, name);
-					 if (betterFile.exists()) {
-						 file.delete();
-					 }
 				 }
-					 try {
-						 FileOutputStream fileOutputStream = new FileOutputStream(file);
-						 ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-						 objectOutputStream.writeObject(mPlace);
-						 objectOutputStream.close();
-						 fileOutputStream.close();
-						 SharedPreferences mSharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-						 Set<String> createdByUserPlaceList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
-						 if (createdByUserPlaceList.add(mPlace.getNamePlace())) {
-							 createdByUserPlaceList.remove(name);
-						 }
-						 mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserPlaceList).apply();
-						 Toast.makeText(getContext(), "Place saved", Toast.LENGTH_LONG).show();
-						 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity) getContext();
-						 communicatorActionActivity.saveChanges(null, mPlace);
-					 } catch (IOException e) {
-						 e.printStackTrace();
-					 }
-				 }
-
-
 	}
 
 	private String savePhotoToSDCard(String namePlace, Bitmap bitmap, String uri) {

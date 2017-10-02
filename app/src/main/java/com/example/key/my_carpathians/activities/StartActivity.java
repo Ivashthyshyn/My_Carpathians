@@ -96,7 +96,6 @@ import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.example.key.my_carpathians.activities.MapsActivity.REC_MODE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_ROUT;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
@@ -741,7 +740,6 @@ public class StartActivity extends AppCompatActivity implements
     void buttonFastRecWasClicked() {
         if (mTypeMode) {
             Intent intentMapActivity = new Intent(context, MapsActivity_.class);
-            intentMapActivity.putExtra(ACTION_MODE, REC_MODE);
             intentMapActivity.putExtra(PRODUCE_MODE, mTypeMode);
             startActivity(intentMapActivity);
         }else {
