@@ -13,7 +13,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -32,73 +31,9 @@ public class AltitudeFinder {
 	private static final String LOG_TAG = AltitudeFinder.class.getSimpleName();
 	private static final String USGS_REQUEST_URL = "https://maps.googleapis.com/maps/api/elevation/json?locations=";
 	private static final String YOUR_API_KEY = "&key=AIzaSyD2BCy-prEsCoH9NOe2wnmNDKKBnSMe3do";
+	public static final int cTimeOutMs = 30 * 1000;
 	public AltitudeFinder(){
 
-	}
-
-	public static final int cTimeOutMs = 30 * 1000;
-
-	public static List<com.cocoahero.android.geojson.Position> getElevation(List<Position> location ) throws IOException, JSONException {
-		List<com.cocoahero.android.geojson.Position> pos = new ArrayList<>();
-		// https://developers.google.com/maps/documentation/elevation/
-		String valueLocation = "https://maps.googleapis.com/maps/api/elevation/json?locations=";
-		for (int i = 0 ; i < location.size() - 1; i++){
-			valueLocation = valueLocation + String.valueOf(location.get(i).getLatitude()) + "," +
-					String.valueOf(location.get(i).getLongitude()) +"|";
-		}
-
-		URL url = new URL(valueLocation +
-				String.valueOf(location.get(location.size() - 1).getLatitude()) + "," +
-				String.valueOf(location.get(location.size() - 1).getLongitude()) +
-				"&key=AIzaSyCW-3Yyo8aeNIj-Bj9LK-Z1g97MYf9lWlg");
-		Log.d(LOG_TAG, "url=" + url);
-		HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-
-		urlConnection.setConnectTimeout(cTimeOutMs);
-		urlConnection.setReadTimeout(cTimeOutMs);
-		urlConnection.setRequestProperty("Accept", "application/json");
-
-		// Set request type
-		urlConnection.setRequestMethod("GET");
-		urlConnection.setDoOutput(false);
-		urlConnection.setDoInput(true);
-
-		try {
-			// Check for errors
-			int code = urlConnection.getResponseCode();
-			if (code != HttpsURLConnection.HTTP_OK)
-				throw new IOException("HTTP error " + urlConnection.getResponseCode());
-
-			// Get response
-			BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-			StringBuilder json = new StringBuilder();
-			String line;
-			while ((line = br.readLine()) != null)
-				json.append(line);
-			Log.d(LOG_TAG, json.toString());
-
-			// Decode result
-			JSONObject jroot = new JSONObject(json.toString());
-			String status = jroot.getString("status");
-			if ("OK".equals(status)) {
-				JSONArray results = jroot.getJSONArray("results");
-				if (results.length() > 0) {
-					for (int lc = 0; lc < results.length(); lc++) {
-						double elevation = results.getJSONObject(lc).getDouble("elevation");
-						double lat = results.getJSONObject(lc).getJSONObject("location").getDouble("lat");
-						double lng = results.getJSONObject(lc).getJSONObject("location").getDouble("lng");
-						com.cocoahero.android.geojson.Position p = new com.cocoahero.android.geojson.Position(lat, lng, elevation);
-						pos.add(p);
-						Log.i(LOG_TAG, "Elevation " + location);
-					}
-				} else
-					throw new IOException("JSON no results");
-			} else
-				throw new IOException("JSON status " + status);
-		} finally {
-			urlConnection.disconnect();
-		}
-		return pos;
 	}
 
 	public static List<com.cocoahero.android.geojson.Position> extractAltitude(List<Position> positionList) {
@@ -123,21 +58,19 @@ public class AltitudeFinder {
 	 * Returns new URL object from the given string URL.
 	 */
 	private static URL createUrl(List<Position> positions) {
-
 		URL url = null;
-		StringBuilder baseUri = new StringBuilder();
-		baseUri.append(USGS_REQUEST_URL);
-		for(int i = 0; i < 1; i++){
-			if (i <  1) {
-				baseUri.append(positions.get(i).getLatitude()).append(",").append(positions.get(i).getLongitude());
-			}else {
-				baseUri.append(positions.get(i).getLatitude()).append(",").append(positions.get(i).getLongitude());
-			}
+		String valueLocation = "https://maps.googleapis.com/maps/api/elevation/json?locations=";
+		for (int i = 0 ; i < positions.size() - 1; i++){
+			valueLocation = valueLocation + String.valueOf(positions.get(i).getLatitude()) + "," +
+					String.valueOf(positions.get(i).getLongitude()) +"|";
 		}
-		String createdUri = String.valueOf(baseUri.append(YOUR_API_KEY));
-		String ura =  "https://maps.googleapis.com/maps/api/elevation/json?locations=" + 49.1313733 + "," +24.3051567 + "&key="+"AIzaSyD2BCy-prEsCoH9NOe2wnmNDKKBnSMe3do";
+
+
 		try {
-			url = new URL(createdUri);
+			url = new URL(valueLocation +
+					String.valueOf(positions.get(positions.size() - 1).getLatitude()) + "," +
+					String.valueOf(positions.get(positions.size() - 1).getLongitude()) +
+					"&key=AIzaSyCW-3Yyo8aeNIj-Bj9LK-Z1g97MYf9lWlg");
 		} catch (MalformedURLException e) {
 			Log.e(LOG_TAG, "Error with creating URL ", e);
 		}
@@ -154,24 +87,28 @@ public class AltitudeFinder {
 		if (url == null) {
 			return jsonResponse;
 		}
-
-		HttpURLConnection urlConnection = null;
+		HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
 		InputStream inputStream = null;
 		try {
-			urlConnection = (HttpURLConnection) url.openConnection();
-			urlConnection.setReadTimeout(5000 /* milliseconds */);
-			urlConnection.setConnectTimeout(5000 /* milliseconds */);
-			urlConnection.setRequestMethod("GET");
-			urlConnection.connect();
+		urlConnection.setConnectTimeout(cTimeOutMs);
+		urlConnection.setReadTimeout(cTimeOutMs);
+		urlConnection.setRequestProperty("Accept", "application/json");
 
-			// If the request was successful (response code 200),
+		// Set request type
+		urlConnection.setRequestMethod("GET");
+		urlConnection.setDoOutput(false);
+		urlConnection.setDoInput(true);
+
+			// Check for errors
+			// If the request was successful (response code HTTP_OK),
 			// then read the input stream and parse the response.
-			if (urlConnection.getResponseCode() == 200) {
+			if (urlConnection.getResponseCode() == HttpsURLConnection.HTTP_OK){
 				inputStream = urlConnection.getInputStream();
 				jsonResponse = readFromStream(inputStream);
 			} else {
-				Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
+			Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
 			}
+
 		} catch (IOException e) {
 			Log.e(LOG_TAG, "Problem retrieving the earthquake JSON results.", e);
 		} finally {
@@ -220,19 +157,20 @@ public class AltitudeFinder {
 		// is formatted, a JSONException exception object will be thrown.
 		// Catch the exception so the app doesn't crash, and print the error message to the logs.
 		try {
-			JSONObject baseJsonResponse = new JSONObject(resultJSON);
-			// Extract the JSONArray associated with the key called "response",
-			// which represents a list of response
-			JSONArray response = baseJsonResponse.getJSONArray("results");
-			if (response.length() > 0) {
-			for (int lc = 0; lc < response.length(); lc++) {
-				JSONObject coord = response.getJSONObject(lc);
-				JSONObject locationJSON = coord.getJSONObject("location");
-				com.cocoahero.android.geojson.Position pos = new com.cocoahero.android.geojson.Position(locationJSON.getDouble("lng"), locationJSON.getDouble("lat"), coord.getDouble("elevation"));
-				trackPositions.add(pos);
+			JSONObject jroot = new JSONObject(resultJSON);
+			String status = jroot.getString("status");
+			if ("OK".equals(status)) {
+				JSONArray results = jroot.getJSONArray("results");
+				if (results.length() > 0) {
+					for (int lc = 0; lc < results.length(); lc++) {
+						double elevation = results.getJSONObject(lc).getDouble("elevation");
+						double lat = results.getJSONObject(lc).getJSONObject("location").getDouble("lat");
+						double lng = results.getJSONObject(lc).getJSONObject("location").getDouble("lng");
+						com.cocoahero.android.geojson.Position p = new com.cocoahero.android.geojson.Position(lat, lng, elevation);
+						trackPositions.add(p);
+					}
 				}
-				
-				}
+			}
 
 		} catch (JSONException e) {
 			// If an error is thrown when executing any of the above statements in the "try" block,

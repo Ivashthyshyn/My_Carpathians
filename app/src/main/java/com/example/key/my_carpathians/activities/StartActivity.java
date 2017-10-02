@@ -128,6 +128,20 @@ public class StartActivity extends AppCompatActivity implements
     public ArrayList<Place> places = new ArrayList<>();
     public ArrayList<Rout> routs = new ArrayList<>();
     public AlertDialog.Builder builder;
+    private boolean connected = false;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private Context context = StartActivity.this;
+    private SharedPreferences mSharedPreferences;
+    private DrawerLayout mDrawerLayout;
+    private FirebaseUser mFirebaseUser;
+    private CallbackManager mCallbackManager;
+    private FirebaseUser mUser;
+    private FirebaseAuth mAuth;
+    private GoogleApiClient mGoogleApiClient;
+    private String mUserUID;
+    private boolean mTypeMode = false;
+    private String rootPathForRoutsString;
+
     @ViewById(R.id.buttonFastRec)
     Button buttonFastRec;
     @ViewById(R.id.userAcountImage)
@@ -180,19 +194,6 @@ public class StartActivity extends AppCompatActivity implements
     RecyclerView listCreatedPlaces;
     @ViewById(R.id.textViewCreated)
     TextView textViewCreated;
-    private boolean connected = false;
-    private FirebaseAuth.AuthStateListener mAuthListener;
-    private Context context = StartActivity.this;
-    private SharedPreferences mSharedPreferences;
-    private DrawerLayout mDrawerLayout;
-    private FirebaseUser mFirebaseUser;
-    private CallbackManager mCallbackManager;
-    private FirebaseUser mUser;
-    private FirebaseAuth mAuth;
-    private GoogleApiClient mGoogleApiClient;
-	private String mUserUID;
-    private boolean mTypeMode = false;
-    private String rootPathForRoutsString;
 
 
     @Override

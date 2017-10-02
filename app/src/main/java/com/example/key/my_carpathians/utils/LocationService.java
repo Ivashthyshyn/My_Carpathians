@@ -38,7 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.example.key.my_carpathians.activities.MapsActivity.BREAK_UP_CONNECTION;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_NO_SAVE;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_PLACE;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_ROUT;
@@ -112,6 +111,8 @@ public class LocationService extends Service implements
      * The binder that returns the service activity.
      */
     public class MyLocalBinder extends Binder {
+
+
         public LocationService getService() {
             return LocationService.this;
         }
@@ -121,6 +122,7 @@ public class LocationService extends Service implements
     public IBinder onBind(Intent arg0) {
         return myBinder;
     }
+
 
     /**
      * Bound methods.
@@ -153,11 +155,14 @@ public class LocationService extends Service implements
             mLocation = null;
             mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
             mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
-        }else if(mIntCommand == BREAK_UP_CONNECTION){
-            mGoogleApiClient.disconnect();
-            super.onDestroy();
         }
         return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        mGoogleApiClient.disconnect();
+        super.onDestroy();
     }
 
     private void savePlaceToSDCard(String mNamePlace) {

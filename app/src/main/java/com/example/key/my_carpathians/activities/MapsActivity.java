@@ -5,11 +5,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,14 +34,13 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.cocoahero.android.geojson.Feature;
-import com.cocoahero.android.geojson.LineString;
 import com.cocoahero.android.geojson.Position;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.interfaces.ILocation;
 import com.example.key.my_carpathians.models.Place;
-import com.example.key.my_carpathians.models.Rout;
+import com.example.key.my_carpathians.utils.AltitudeFinder;
 import com.example.key.my_carpathians.utils.LocationService;
+import com.example.key.my_carpathians.utils.ObjectSaver;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -65,41 +65,32 @@ import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
 import com.mapbox.services.commons.utils.TextUtils;
 import com.victor.loading.rotate.RotateLoading;
 
+import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
 import static com.example.key.my_carpathians.activities.StartActivity.ACTION_MODE;
-import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
-import static com.example.key.my_carpathians.fragments.EditModeFragment.NO_PUBLISH_CONSTANT;
-import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
-import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
 import static com.example.key.my_carpathians.utils.LocationService.DEFINED_LOCATION;
+import static com.example.key.my_carpathians.utils.ObjectSaver.FILE_EXISTS;
 import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 @EActivity
@@ -112,7 +103,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final int COMMAND_REC_PLACE = 5;
     public static final int COMMAND_NO_SAVE = 3;
     public static final String TO_SERVICE_TRACK_NAME = "track_name";
-    public static final int BREAK_UP_CONNECTION = 6;
     public static final int ERROR_TRACK = 10;
     public MapsActivity permissionsManager;
     public ILocation iCapture;
@@ -140,6 +130,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mTypeMode;
     private int mPointCounter = 0;
     private Marker mMarker;
+	private boolean connected;
     @ViewById(R.id.buttonRecTrack)
     ImageButton buttonRecTrack;
 
@@ -178,7 +169,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
-    @Override
+	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         iCapture = new ILocation() {
@@ -681,8 +672,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapboxMap.setMyLocationEnabled(true);
         }else{
             Intent intent = new Intent(this, LocationService.class);
-            intent.putExtra(TO_SERVICE_COMMANDS, BREAK_UP_CONNECTION);
-            MapsActivity.this.startService(intent);
+            unbindService(captureServiceConnection);
+            MapsActivity.this.stopService(intent);
             mapboxMap.setMyLocationEnabled(false);
         }
     }
@@ -851,6 +842,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 if (handType) {
                     enabledHandsMode(COMMAND_REC_ROUT);
+                    checkForRecButton = false;
                     alert.dismiss();
                 }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
@@ -859,6 +851,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     autoOrientationOff(true);
                     flashingColorAnimation(true);
                     checkForRecButton = false;
+                    createdTrackPosition = new ArrayList<Position>();
                     alert.dismiss();
                 }
             }
@@ -869,16 +862,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 if (handType) {
                     enabledHandsMode(COMMAND_REC_PLACE);
+                    checkForRecButton = false;
+                    createdTrackPosition = new ArrayList<Position>();
                     alert.dismiss();
                 }else {
-                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
-                    MapsActivity.this.startService(serviceIntent);
-                    autoOrientationOff(true);
-                    buttonRecTrack.setClickable(false);
-                    checkForRecButton = false;
-                    alert.dismiss();
-                    showProgressDialog();
+	                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+	                serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
+	                MapsActivity.this.startService(serviceIntent);
+	                autoOrientationOff(true);
+	                buttonRecTrack.setClickable(false);
+	                checkForRecButton = false;
+                    createdTrackPosition = new ArrayList<Position>();
+	                alert.dismiss();
+	                showProgressDialog();
                 }
             }
         });
@@ -925,18 +921,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             builder.setTitle("Введіть назву вашого маршруту");
         }else if(model == PLACE && text == null){
             builder.setTitle("Введіть назву вашого місця");
+            checkForRecButton = true;
         }
         builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 if (mMarker != null || createdTrackPosition.size() > 2){
-                    save(model, nameInput.getText().toString());
+                    saveCreatedObject(model, nameInput.getText().toString());
 
                 }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
                     serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameInput.getText().toString());
                     serviceIntent.putExtra(TO_SERVICE_COMMANDS, model);
                     MapsActivity.this.startService(serviceIntent);
-                    checkForRecButton = true;
                     autoOrientationOff(false);
                     flashingColorAnimation(false);
                     dialog.cancel();
@@ -946,118 +942,91 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.setNegativeButton("Не зберігати", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE);
-                MapsActivity.this.startService(serviceIntent);
-                autoOrientationOff(false);
-                checkForRecButton = true;
-                flashingColorAnimation(false);
+                if (mMarker != null || createdTrackPosition.size() > 2){
+                   removeViews("canceled by user");
+                }else {
+                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE);
+                    MapsActivity.this.startService(serviceIntent);
+                    autoOrientationOff(false);
+                    flashingColorAnimation(false);
+                }
             }
         });
         alert = builder.create();
         alert.show();
     }
-
-    private void save(int model,String name) {
+	@Background
+    public void saveCreatedObject(int model, String name) {
         if (model == PLACE){
-            Place mPlace = new Place();
-            mPlace.setNamePlace(name);
-            com.example.key.my_carpathians.models.Position position = new com.example.key.my_carpathians.models.Position();
-            position.setLatitude(mMarker.getPosition().getLatitude());
-            position.setLongitude(mMarker.getPosition().getLongitude());
-            mPlace.setPositionPlace(position);
-
-            File rootPath = new File(getApplicationContext().getExternalFilesDir(
-                    Environment.DIRECTORY_DOWNLOADS), "Created");
-            if (!rootPath.exists()) {
-                rootPath.mkdirs();
-            }
-
-            File file = new File(rootPath, name);
-            String fileUri = String.valueOf(Uri.fromFile(file));
-            if (file.exists()) {
+            ObjectSaver objectSaver = new ObjectSaver();
+            String outcome = objectSaver.savePlace(name, new com.example.key.my_carpathians.models.Position(mMarker.getPosition().getLatitude(), mMarker.getPosition().getLongitude()));
+           if (outcome.equals(FILE_EXISTS)){
                showCreateNameDialog(0, null);
-            }
-            try {
-                FileOutputStream fileOutputStream = new FileOutputStream(file);
-                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                objectOutputStream.writeObject(mPlace);
-                objectOutputStream.close();
-                fileOutputStream.close();
-                SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
-                createdByUserTrackList.add(name);
-                mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserTrackList).apply();
-                Toast.makeText(getApplicationContext(), "Place saved", Toast.LENGTH_LONG).show();
-                mMarker = null;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }else if(model == ROUT){
-            LineString lineString = new LineString();
-            lineString.setPositions(createdTrackPosition);
-            Feature feature = new Feature();
-            try {
-                JSONObject geoJSON = new JSONObject();
-                feature.setProperties(new JSONObject());
-                feature.setGeometry(lineString);
-                feature.setIdentifier("key.my_carpathians");
-                geoJSON.put("features", new JSONArray().put(feature.toJSON()));
-                geoJSON.put("type", "FeatureCollection");
-
-                File rootPath = new File(getApplicationContext().getExternalFilesDir(
-                        Environment.DIRECTORY_DOWNLOADS), "Routs");
-                if (!rootPath.exists()) {
-                    rootPath.mkdirs();
+            }else{
+               removeViews(outcome);
+           }
+        }else if(model == ROUT) {
+            if (isOnline()) {
+                AltitudeFinder altitudeFinder = new AltitudeFinder();
+                List<com.mapbox.services.commons.models.Position> pos = new ArrayList<>();
+                for (int i = 0; i < createdTrackPosition.size(); i++) {
+                    pos.add(com.mapbox.services.commons.models.Position.fromCoordinates(
+                            createdTrackPosition.get(i).getLatitude(),
+                            createdTrackPosition.get(i).getLongitude()));
                 }
-                File localFile = new File(rootPath, name);
-                if (localFile.exists()) {
-                    showCreateNameDialog(0, null);
-                } else {
-                    String fileUri = String.valueOf(Uri.fromFile(localFile));
-                    Writer output = new BufferedWriter(new FileWriter(localFile));
-                    output.write(geoJSON.toString());
-                    output.close();
-                    SharedPreferences mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                    Rout mRout = new Rout();
-                    mRout.setNameRout(name);
-                    mRout.setUrlRoutsTrack(fileUri);
-
-                    File rootPath2 = new File(getApplicationContext().getExternalFilesDir(
-                            Environment.DIRECTORY_DOWNLOADS), "Created");
-                    if (!rootPath2.exists()) {
-                        rootPath2.mkdirs();
-                    }
-
-                    File file = new File(rootPath2, name + NO_PUBLISH_CONSTANT);
-                    String fileUri2 = String.valueOf(Uri.fromFile(file));
-                    if (file.exists()) {
-                        showCreateNameDialog(0, null);
-                    } else {
-                        try {
-                            FileOutputStream fileOutputStream = new FileOutputStream(file);
-                            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                            objectOutputStream.writeObject(mRout);
-                            objectOutputStream.close();
-                            fileOutputStream.close();
-                            Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
-                            createdByUserTrackList.add(name + NO_PUBLISH_CONSTANT);
-                            mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
-                            Toast.makeText(getApplicationContext(), "Rout saved", Toast.LENGTH_LONG).show();
-                            createdTrackPosition.clear();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }
-
-            } catch (Exception e) {
-                Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                createdTrackPosition = altitudeFinder.extractAltitude(pos);
             }
+            ObjectSaver objectSaver = new ObjectSaver();
+            String outcome = objectSaver.saveRout(name, createdTrackPosition);
+            if (outcome.equals(FILE_EXISTS)){
+                showCreateNameDialog(0, null);
+            }else{
+                removeViews(outcome);
+            }
+
         }
     }
 
+    @UiThread
+    public void removeViews(String message){
+        Toast.makeText(MapsActivity.this, message, Toast.LENGTH_LONG).show();
+        if (mMarker != null){
+            mMarker.remove();
+            mMarker = null;
+        }
+        if (createdTrackPosition != null){
+            int countsPolylinesInMap = mapboxMap.getPolylines().size();
+            for(int i = 0; i < countsPolylinesInMap; i++){
+                mapboxMap.getPolylines().get(0).remove();
+            }
+            int countsMarkersInMap = mapboxMap.getMarkers().size();
+            for (int i = 0; i < countsMarkersInMap;i++){
+                mapboxMap.getMarkers().get(0).remove();
+            }
+            createdTrackPosition.clear();
+            mPointCounter = 0;
+        }
+
+    }
+
+	public boolean isOnline() {
+		try {
+			ConnectivityManager connectivityManager = (ConnectivityManager) MapsActivity.this
+					.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+			NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+			connected = networkInfo != null && networkInfo.isAvailable() &&
+					networkInfo.isConnected();
+			return connected;
+
+
+		} catch (Exception e) {
+			System.out.println("CheckConnectivity Exception: " + e.getMessage());
+			Log.v("connectivity", e.toString());
+		}
+		return connected;
+	}
     /**
      *
      * This method turns on and turns off flashing animation for button buttonRecTrack.
@@ -1134,7 +1103,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Click(R.id.buttonHandEditMode)
      void  buttonHandEditModeWasClicked(){
         if (mPointCounter == 0 &&  createdTrackPosition == null) {
-            createdTrackPosition = new ArrayList<>();
             buttonTouchCreator.setVisibility(View.VISIBLE);
             buttonHandEditMode.setImageResource(R.drawable.hand_write_icon);
             showChoseTypeDialog(true);
@@ -1142,6 +1110,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }else {
             buttonTouchCreator.setVisibility(View.GONE);
             buttonHandEditMode.setImageResource(R.drawable.hand_icon);
+            mapboxMap.setOnMapClickListener(null);
             if (mMarker != null){
                 showCreateNameDialog(PLACE, null);
             }else if (createdTrackPosition.size() > 2){
@@ -1152,7 +1121,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void enabledHandsMode(final int type){
-            mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
+        MapboxMap.OnMapClickListener fingerTouchListener = new MapboxMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(@NonNull LatLng point) {
                     mPointCounter++;
@@ -1174,7 +1143,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
 
                 }
-            });
+            };
+
+            mapboxMap.setOnMapClickListener(fingerTouchListener);
     }
     @Click(R.id.buttonOnBack)
     void  buttonOnBackWasClicked(){
