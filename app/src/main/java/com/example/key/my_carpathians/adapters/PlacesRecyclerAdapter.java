@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,6 +77,11 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
                 .inflate(R.layout.list_item_for_place, parent, false);
         context = mView.getContext();
 
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int height = metrics.heightPixels;
+        ViewGroup.LayoutParams params = mView.getLayoutParams();
+        params.height = (height / 4) - 6;
+        mView.setLayoutParams(params);
         ViewHolder mHolder = new ViewHolder(mView, new ViewHolder.ClickListener() {
             @Override
             public void onPressed(Place placeName) {

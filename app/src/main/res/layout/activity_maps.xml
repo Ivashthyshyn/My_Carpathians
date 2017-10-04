@@ -9,146 +9,161 @@
     android:orientation="vertical"
     tools:context=".activities.ActionActivity">
 
-    <com.mapbox.mapboxsdk.maps.MapView
-        android:id="@+id/mapView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+        android:orientation="vertical">
 
-
-        android:layout_centerHorizontal="false"
-        android:layout_centerVertical="false"
-        mapbox:mapbox_cameraTargetLat="49.11053"
-        mapbox:mapbox_cameraTargetLng="24.30765"
-        mapbox:mapbox_cameraZoom="12"
-        mapbox:mapbox_styleUrl="mapbox://styles/vylky/cj6z0f00y2pii2rnrrshfx481">
-
-        <LinearLayout
-            android:id="@+id/toolsContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/round_shape_for_tools_container_black"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/buttonShowMyLocation"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:background="@drawable/round_shape_for_tools_container_black"
-                app:srcCompat="@drawable/ic_my_location_24dp"/>
-
-            <ImageButton
-                android:id="@+id/buttonRecTrack"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_gravity="center"
-                android:layout_marginLeft="10dp"
-                android:layout_weight="1"
-                android:background="@drawable/round_shape_for_tools_container_black"
-                android:visibility="gone"
-                mapbox:srcCompat="@android:drawable/ic_menu_edit"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/toolsHandContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:layout_gravity="end"
-            android:layout_margin="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/round_shape_for_tools_container_black"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/buttonOnBack"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_gravity="center"
-                android:layout_marginLeft="10dp"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:visibility="gone"
-                app:srcCompat="@drawable/on_back"/>
-
-            <ImageButton
-                android:id="@+id/buttonHandEditMode"
-                android:layout_width="63dp"
-                android:layout_height="60dp"
-                android:layout_gravity="center"
-                android:background="@android:color/transparent"
-                app:srcCompat="@drawable/hand_icon"/>
-
-        </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="25dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerInParent="true"
-            android:paddingLeft="25dp"
-            android:paddingRight="25dp"
-            android:visibility="gone"/>
-
-    </com.mapbox.mapboxsdk.maps.MapView>
-
-    <LinearLayout
-        android:id="@+id/bottom_navigation"
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/bg_register"
-        android:elevation="8dp"
-        android:orientation="horizontal"
-        android:paddingTop="8dp">
-
-        <Button
-            android:id="@+id/buttonDownloadOfflineRegion"
-            style="?android:attr/buttonBarButtonStyle"
+        <com.mapbox.mapboxsdk.maps.MapView
+            android:id="@+id/mapView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="false"
+            android:layout_centerVertical="false"
             android:layout_weight="1"
-            android:background="@color/mapbox_blue"
-            android:clickable="true"
-            android:drawableTop="@drawable/ic_get_app_24dp"
-            android:text="@string/download_button_text"
-            android:textAllCaps="false"
-            android:textColor="@color/btn_login_bg"
-            android:textSize="12sp" />
+            android:elevation="4dp"
+            mapbox:mapbox_cameraTargetLat="49.11053"
+            mapbox:mapbox_cameraTargetLng="24.30765"
+            mapbox:mapbox_cameraZoom="12"
+            mapbox:mapbox_styleUrl="mapbox://styles/vylky/cj6z0f00y2pii2rnrrshfx481">
 
-        <Button
-            android:id="@+id/buttonShowListRegion"
-            style="?android:attr/buttonBarButtonStyle"
+            <LinearLayout
+                android:id="@+id/toolsGPSContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/round_shape_for_tools_container_black"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/buttonShowMyLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@drawable/round_shape_for_tools_container_black"
+                    app:backgroundTint="@android:color/transparent"
+                    app:fabSize="mini"
+                    app:srcCompat="@drawable/ic_my_location_24dp"/>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/buttonRecTrack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/round_shape_for_tools_container_black"
+                    android:visibility="gone"
+                    app:backgroundTint="@android:color/transparent"
+                    mapbox:srcCompat="@android:drawable/ic_menu_edit"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/toolsHandContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/round_shape_for_tools_container_black"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/buttonOnBack"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:visibility="gone"
+                    app:backgroundTint="@android:color/transparent"
+                    app:srcCompat="@drawable/on_back"/>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/buttonHandEditMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@android:color/transparent"
+                    app:backgroundTint="@android:color/transparent"
+                    app:fabSize="mini"
+                    app:srcCompat="@drawable/hand_icon"/>
+
+            </LinearLayout>
+
+        </com.mapbox.mapboxsdk.maps.MapView>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/mapbox_blue"
-            android:drawableTop="@drawable/ic_list_24dp"
-            android:text="@string/list_button_text"
-            android:textAllCaps="false"
-            android:textColor="@color/btn_login_bg"
-            android:textSize="12sp" />
+            android:layout_weight="8"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/bottom_navigation"
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true"
+                android:layout_weight="1"
+                android:background="@color/bg_register"
+                android:elevation="8dp"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerInParent="true"
+                    android:layout_weight="1"
+                    android:paddingLeft="25dp"
+                    android:paddingRight="25dp"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/buttonDownloadOfflineRegion"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/mapbox_blue"
+                    android:clickable="true"
+                    android:drawableTop="@drawable/ic_get_app_24dp"
+                    android:text="@string/download_button_text"
+                    android:textAllCaps="false"
+                    android:textColor="@color/btn_login_bg"
+                    android:textSize="12sp"/>
+
+                <Button
+                    android:id="@+id/buttonShowListRegion"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/mapbox_blue"
+                    android:drawableTop="@drawable/ic_list_24dp"
+                    android:text="@string/list_button_text"
+                    android:textAllCaps="false"
+                    android:textColor="@color/btn_login_bg"
+                    android:textSize="12sp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
-
-    <com.victor.loading.rotate.RotateLoading
-        android:id="@+id/rotateloading"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_centerInParent="true"
-        android:elevation="5dp"
-        app:loading_speed="11"
-        app:loading_width="5dp"/>
 
 
 </RelativeLayout>

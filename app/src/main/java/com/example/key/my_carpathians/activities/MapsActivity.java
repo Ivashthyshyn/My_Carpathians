@@ -19,10 +19,12 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -95,7 +97,6 @@ import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
-    public static final boolean REC_MODE = true;
     public static final double PERIMETER_SIZE_TO_LATITUDE = 0.3;
     public static final double PERIMETER_SIZE_TO_LONGITUDE = 0.4;
     public static final String TO_SERVICE_COMMANDS = "service_commands";
@@ -132,22 +133,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker mMarker;
 	private boolean connected;
     @ViewById(R.id.buttonRecTrack)
-    ImageButton buttonRecTrack;
+    FloatingActionButton buttonRecTrack;
 
-    @ViewById(R.id.toolsContainer)
-    LinearLayout toolsContainer;
+    @ViewById(R.id.toolsGPSContainer)
+    LinearLayout toolsGPSContainer;
 
     @ViewById(R.id.buttonShowMyLocation)
-    ImageButton buttonShowMyLocation;
+    FloatingActionButton buttonShowMyLocation;
 
     @ViewById(R.id.buttonHandEditMode)
-    ImageButton buttonHandEditMode;
+    FloatingActionButton buttonHandEditMode;
 
     @ViewById(R.id.toolsHandContainer)
     LinearLayout toolsHandContainer;
 
     @ViewById(R.id.buttonOnBack)
-    ImageButton buttonTouchCreator;
+    FloatingActionButton buttonTouchCreator;
 
     private ServiceConnection captureServiceConnection;
     private MapboxMap.OnMyLocationChangeListener myLocationChangeListener;
@@ -160,6 +161,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             unbindService(captureServiceConnection);
             MapsActivity.this.stopService(intent);
             mapboxMap.setMyLocationEnabled(false);
+            captureServiceConnection = null;
         }
         super.onBackPressed();
     }
@@ -255,6 +257,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (mapboxMap != null && !switchCheck) {
             checkGPSEnabled();
+            toolsHandContainer.setVisibility(View.GONE);
             toggleGps(true);
             buttonShowMyLocation.setImageResource(R.drawable.ic_location_disabled_24dp);
             if (mTypeMode){
@@ -262,6 +265,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             switchCheck = true;
         } else if (switchCheck) {
+            toolsHandContainer.setVisibility(View.VISIBLE);
             toggleGps(false);
             buttonShowMyLocation.setImageResource(R.drawable.ic_my_location_24dp);
             buttonRecTrack.setVisibility(View.GONE);
@@ -311,6 +315,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
+        mapboxMap.getUiSettings().setCompassGravity(Gravity.CENTER_HORIZONTAL);
+
         Uri rootPathForRoutsString;
         if (isExternalStorageReadable()) {
             rootPathForRoutsString = Uri.fromFile(MapsActivity.this.getExternalFilesDir(
@@ -688,6 +694,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             unbindService(captureServiceConnection);
             MapsActivity.this.stopService(intent);
             mapboxMap.setMyLocationEnabled(false);
+            captureServiceConnection = null;
         }
     }
 
@@ -836,14 +843,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Click(R.id.buttonRecTrack)
     void buttonRecTrackWasClicked() {
         if (checkForRecButton) {
-            showChoseTypeDialog(false);
+            showChoseCreateObjectDialog(false);
         } else {
             showCreateNameDialog(ROUT, null);
 
         }
     }
 
-    private void showChoseTypeDialog(final boolean handType) {
+    private void showChoseCreateObjectDialog(final boolean handType) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
         LayoutInflater inflater = this.getLayoutInflater();
@@ -854,7 +861,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 if (handType) {
+                    createdTrackPosition = new ArrayList<Position>();
                     enabledHandsMode(COMMAND_REC_ROUT);
+
                     alert.dismiss();
                 }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
@@ -873,8 +882,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 if (handType) {
-                    enabledHandsMode(COMMAND_REC_PLACE);
                     createdTrackPosition = new ArrayList<Position>();
+                    enabledHandsMode(COMMAND_REC_PLACE);
                     alert.dismiss();
                 }else {
 	                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
@@ -889,6 +898,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         });
+	    builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+		    @Override
+		    public void onCancel(DialogInterface dialogInterface) {
+			    buttonTouchCreator.setVisibility(View.GONE);
+			    buttonHandEditMode.setImageResource(R.drawable.hand_icon);
+			    mapboxMap.setOnMapClickListener(null);
+                toolsGPSContainer.setVisibility(View.VISIBLE);
+		    }
+	    });
         alert = builder.create();
         alert.show();
 
@@ -919,8 +937,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
-    private void showCreateNameDialog(final int model, String text) {
+    @UiThread
+    public void showCreateNameDialog(final int model, String text) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
         final EditText nameInput = new EditText(this);
         builder.setView(nameInput);
@@ -938,6 +956,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(DialogInterface dialog, int id) {
                 if (mMarker != null || createdTrackPosition.size() > 2){
                     saveCreatedObject(model, nameInput.getText().toString());
+	                mPointCounter = 0;
+	                createdTrackPosition.clear();
 
                 }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
@@ -965,6 +985,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         });
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                if (mMarker != null || createdTrackPosition.size() > 2){
+                    removeViews("canceled by user");
+                }else {
+                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE);
+                    MapsActivity.this.startService(serviceIntent);
+                    autoOrientationOff(false);
+                    flashingColorAnimation(false);
+                    removeViews("canceled by user");
+                }
+            }
+        });
         alert = builder.create();
         alert.show();
     }
@@ -979,7 +1014,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             ObjectSaver objectSaver = new ObjectSaver();
             String outcome = objectSaver.savePlace(name, mPlace, false);
            if (outcome.equals(FILE_EXISTS)){
-               showCreateNameDialog(0, null);
+               showCreateNameDialog(0, name);
             }else{
                removeViews(outcome);
            }
@@ -1001,7 +1036,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     createdTrackPosition.get(0).getLongitude()));
             String outcome = objectSaver.saveRout(name, createdTrackPosition, mRout, false);
             if (outcome.equals(FILE_EXISTS)){
-                showCreateNameDialog(0, null);
+                showCreateNameDialog(0, name);
             }else{
                 removeViews(outcome);
             }
@@ -1009,14 +1044,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    /* Checks if external storage is available for read and write */
-    public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
-    }
 
     @UiThread
     public void removeViews(String message){
@@ -1035,6 +1062,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mapboxMap.getMarkers().get(0).remove();
             }
             createdTrackPosition.clear();
+            createdTrackPosition = null;
             mPointCounter = 0;
         }
 
@@ -1106,7 +1134,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
-            mapboxMap.addPolyline(new PolylineOptions().add(p1,p2));
+            mapboxMap.addPolyline(new PolylineOptions().add(p1,p2).width(2));
              mapboxMap.addMarker(new MarkerOptions().setPosition(latLng));
 
 
@@ -1126,6 +1154,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     void buttonShowMyLocationWasClicked(){
         if (!checkForRecButton){
             showCreateNameDialog(ROUT, null);
+
         }else {
             startGPS();
         }
@@ -1135,16 +1164,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (mPointCounter == 0 &&  createdTrackPosition == null) {
             buttonTouchCreator.setVisibility(View.VISIBLE);
             buttonHandEditMode.setImageResource(R.drawable.hand_write_icon);
-            showChoseTypeDialog(true);
+            showChoseCreateObjectDialog(true);
             autoOrientationOff(true);
+            toolsGPSContainer.setVisibility(View.GONE);
         }else {
             buttonTouchCreator.setVisibility(View.GONE);
+            toolsGPSContainer.setVisibility(View.VISIBLE);
             buttonHandEditMode.setImageResource(R.drawable.hand_icon);
             mapboxMap.setOnMapClickListener(null);
             if (mMarker != null){
                 showCreateNameDialog(PLACE, null);
             }else if (createdTrackPosition.size() > 2){
                 showCreateNameDialog(ROUT, null);
+            }else{
+                removeViews(null);
             }
 
         }

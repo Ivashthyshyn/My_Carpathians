@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
@@ -18,6 +20,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -44,6 +47,7 @@ import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.example.key.my_carpathians.utils.AltitudeFinder;
+import com.example.key.my_carpathians.utils.ObjectSaver;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -69,6 +73,7 @@ import com.mapbox.services.commons.utils.TextUtils;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -132,6 +137,9 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
    @ViewById(R.id.toolbar)
     Toolbar toolbar;
 
+	@ViewById(R.id.appBarLayout)
+	AppBarLayout appBarLayout;
+
     @ViewById(R.id.imageView)
     ImageView imageView;
     @ViewById(R.id.textName)
@@ -169,11 +177,9 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         setContentView(R.layout.activity_action);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+		setupSizeViews();
         tabLayout.setupWithViewPager(viewPager);
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
-
-
 
         sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         routList = (List<Rout>) getIntent().getSerializableExtra(PUT_EXTRA_ROUTS_LIST);
@@ -217,6 +223,15 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		    placeAroundFragment.setData(myPlace, placeList, myPosition);
 	    }
     }
+
+	private void setupSizeViews() {
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		int height = metrics.heightPixels / 3;
+CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.WRAP_CONTENT, height);
+		appBarLayout.setLayoutParams(params);
+
+	}
 
 	private void setBaseInformation(Place place, Rout rout) {
 		if (place != null  ) {
@@ -328,6 +343,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		}
 	}
 
+
+
 	private void getRating(String namePlace) {
 		database = FirebaseDatabase.getInstance();
 		DatabaseReference myRef = database.getReference();
@@ -399,25 +416,12 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 					        Position position = Position.fromCoordinates(coord.getDouble(1), coord.getDouble(0), coord.getDouble(2));
 					        mPositionList.add(position);
 				        }
-
+						if (mPositionList.size() > 0){
+							buildGraph(mPositionList);
+						}
 			        }
 		        }
-		        int size = mPositionList.size();
-		        DataPoint[] values = new DataPoint[size];
-		        Integer xi = 0;
-		        for (int i = 1; i < size; i++) {
-			        Integer yi = (int) mPositionList.get(i).getAltitude();
-			        xi = xi + (int) TurfMeasurement.distance(mPositionList.get(i - 1), mPositionList.get(i), TurfConstants.UNIT_METERS);
-			        DataPoint v = new DataPoint(xi, yi);
-			        values[i] = v;
-		        }
-		        values[0] = new DataPoint(0, (int) mPositionList.get(0).getAltitude());
-		        LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
-		        series.setThickness(8);
-		        graphView.addSeries(series);
-		        GridLabelRenderer gridLabel = graphView.getGridLabelRenderer();
-		        gridLabel.setHorizontalAxisTitle("meters");
-		        gridLabel.setVerticalAxisTitle("meters");
+
 	        }
         } catch (Exception exception) {
             Log.e(TAG, "Exception Loading GeoJSON: " + exception.toString());
@@ -427,6 +431,28 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
     }
 
+    @UiThread
+   public void buildGraph(List<Position> positions){
+	    int size = positions.size();
+	    DataPoint[] values = new DataPoint[size];
+	    Integer xi = 0;
+	    for (int i = 1; i < size; i++) {
+		    Integer yi = (int) mPositionList.get(i).getAltitude();
+		    xi = xi + (int) TurfMeasurement.distance(mPositionList.get(i - 1), mPositionList.get(i), TurfConstants.UNIT_METERS);
+		    DataPoint v = new DataPoint(xi, yi);
+		    values[i] = v;
+	    }
+	    values[0] = new DataPoint(0, (int) mPositionList.get(0).getAltitude());
+	    LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
+	    series.setThickness(8);
+	    graphView.addSeries(series);
+	    GridLabelRenderer gridLabel = graphView.getGridLabelRenderer();
+	    gridLabel.setHorizontalAxisTitle("meters");
+	    gridLabel.setVerticalAxisTitle("meters");
+	    if(mPositionList.get(0).getAltitude() == 0 & isOnline()){
+		    downloadAltitude();
+	    }
+    }
     @Click(R.id.buttonShowOnMap)
     public void buttonShowOnMapWasClicked() {
         if(mProdusedMode) {
@@ -455,16 +481,6 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         }
     }
 
-
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        selectedUserRouts.clear();
-        selectedUserPlacesStringList.clear();
-        selectedUserPlacesList.clear();
-    }
 
     @Click(R.id.buttonAddToFavorites)
     void buttonAddToFavoritesWasClicked() {
@@ -903,14 +919,25 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			super.onBackPressed();
 		}
 	}
-	@Click(R.id.buttonGetAltitude)
-	void buttonGetAltitude(){
-		start();
-	}
+
 	@Background
-	void start(){
+	public void  downloadAltitude(){
 		AltitudeFinder altitudeFinder = new AltitudeFinder();
 		List<com.cocoahero.android.geojson.Position> hadAltitudePosition = altitudeFinder.extractAltitude(mPositionList);
+		List<Position> positions = new ArrayList<>();
+		for (int i = 0; i < hadAltitudePosition.size(); i++){
+			positions.add(Position.fromCoordinates(hadAltitudePosition.get(i).getLatitude(),
+					hadAltitudePosition.get(i).getLongitude(),
+					hadAltitudePosition.get(i).getAltitude()));
+		}
+
+
+
+		if (hadAltitudePosition .size() > 0){
+			buildGraph(positions);
+			ObjectSaver objectSaver = new ObjectSaver();
+			String outcome = objectSaver.saveRout(myName, null, myRout, true);
+		}
 
 		LineString lineString = new LineString();
 		lineString.setPositions(hadAltitudePosition);

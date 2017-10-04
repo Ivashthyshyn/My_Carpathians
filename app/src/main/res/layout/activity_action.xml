@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:background="@android:color/transparent"
+        android:weightSum="1"
         app:elevation="2dp">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -25,7 +26,7 @@
             <android.support.v7.widget.CardView
                 android:id="@+id/cardView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
@@ -35,14 +36,15 @@
                 <com.jjoe64.graphview.GraphView
                     android:id="@+id/graph"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="7dp"
                     android:elevation="2dp"/>
 
                 <ImageView
                     android:id="@+id/imageView"
 
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="match_parent"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
@@ -50,21 +52,11 @@
                     android:scaleType="centerCrop"
                     app:srcCompat="@android:color/transparent"/>
 
-                <RatingBar
-                    android:id="@+id/ratingBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_margin="10dp"
-                    android:layout_weight="1"
-                    android:clickable="false"
-                    android:contextClickable="false"
-                    android:elevation="5dp"
-                    android:numStars="4"
-                    android:progressBackgroundTint="@color/bg_login"
-                    android:progressTint="@color/colorAccent"
-                    android:rating="3"
-                    android:stepSize="0.5"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/textName"
@@ -121,28 +113,6 @@
                     android:progress="20"
                     android:visibility="gone"/>
 
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/buttonRatingBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_margin="12dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_weight="1"
-                    android:clickable="true"
-                    android:paddingLeft="20dp"
-                    app:elevation="5dp"
-                    app:fabSize="mini"
-                    app:srcCompat="@drawable/ic_ok_like_hand_sign"/>
-
-                <Button
-                    android:id="@+id/buttonGetAltitude"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="50dp"
-                    android:elevation="5dp"
-                    android:text="Button"/>
-
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.Toolbar
@@ -160,7 +130,7 @@
         android:layout_marginLeft="2dp"
         android:layout_marginRight="2dp"
         android:background="@drawable/background_user"
-        android:elevation="2dp"
+        android:elevation="0dp"
         app:layout_anchor="@id/appBarLayout"
         app:layout_anchorGravity="bottom"
         app:tabIndicatorColor="@color/tabTransparant"
@@ -168,60 +138,6 @@
 
     </android.support.design.widget.TabLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/buttonEdit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:scaleType="center"
-        android:src="@drawable/ic_pen"
-        android:visibility="visible"
-        app:elevation="5dp"
-        app:fabSize="normal"
-        app:layout_anchor="@id/appBarLayout"
-        app:layout_anchorGravity="bottom|center_horizontal"/>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/buttonAddToFavorites"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:clickable="true"
-        android:scaleType="center"
-        android:src="@drawable/ic_favorite"
-        android:visibility="visible"
-        app:fabSize="normal"
-        app:layout_anchor="@id/appBarLayout"
-        app:layout_anchorGravity="bottom|left"/>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/buttonPublish"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:clickable="true"
-        android:scaleType="center"
-        android:src="@drawable/upload"
-        android:visibility="visible"
-        app:elevation="5dp"
-        app:fabSize="normal"
-        app:layout_anchor="@id/appBarLayout"
-        app:layout_anchorGravity="bottom|left"/>
-
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/buttonShowOnMap"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="10dp"
-        android:clickable="true"
-        android:scaleType="center"
-        android:scrollbarAlwaysDrawHorizontalTrack="false"
-        android:src="@drawable/ic_map"
-        app:elevation="5dp"
-        app:fabSize="normal"
-        app:layout_anchor="@id/appBarLayout"
-        app:layout_anchorGravity="bottom|right|end"/>
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -234,7 +150,101 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="10dp"
-        android:paddingTop="20dp"
+        android:paddingTop="10dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/buttonEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:scaleType="center"
+        android:src="@drawable/ic_pen"
+        android:visibility="visible"
+        app:elevation="0dp"
+        app:fabSize="mini"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom|center_horizontal"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/buttonShowOnMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:clickable="true"
+        android:scaleType="center"
+        android:scrollbarAlwaysDrawHorizontalTrack="false"
+        android:src="@drawable/ic_map"
+        app:elevation="0dp"
+        app:fabSize="mini"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom|right|end"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/buttonPublish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:clickable="true"
+        android:scaleType="center"
+        android:src="@drawable/upload"
+        android:visibility="visible"
+        app:elevation="0dp"
+        app:fabSize="mini"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom|left"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/buttonAddToFavorites"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:clickable="true"
+        android:scaleType="center"
+        android:src="@drawable/ic_favorite"
+        android:visibility="visible"
+        app:elevation="0dp"
+        app:fabSize="mini"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom|left"/>
+
+    <LinearLayout
+        android:id="@+id/ratingBarrContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingRight="10dp"
+        android:paddingTop="5dp">
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:clickable="false"
+            android:contextClickable="false"
+            android:numStars="4"
+            android:progressBackgroundTint="@color/bg_login"
+            android:progressTint="@color/colorAccent"
+            android:rating="3"
+            android:stepSize="0.5"/>
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/buttonRatingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|end"
+        android:layout_margin="10dp"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:paddingLeft="20dp"
+        app:elevation="0dp"
+        app:fabSize="mini"
+        app:layout_anchor="@id/ratingBarrContainer"
+        app:layout_anchorGravity="right"
+        app:srcCompat="@drawable/ic_ok_like_hand_sign"/>
 
 </android.support.design.widget.CoordinatorLayout>
