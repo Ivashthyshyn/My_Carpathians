@@ -34,8 +34,8 @@
                 android:id="@+id/toolsGPSContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/round_shape_for_tools_container_black"
                 android:gravity="center"
                 android:orientation="horizontal">
@@ -70,8 +70,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginRight="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/round_shape_for_tools_container_black"
                 android:gravity="center"
                 android:orientation="horizontal">

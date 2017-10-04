@@ -29,7 +29,8 @@ public class PlaceAroundFragment extends Fragment {
 	List<Place> placeList;
 	RecyclerView recyclerView;
 	List<Place> placesAround;
-	private Position position;
+	Position position;
+	CheckListAdapter recyclerAdapter;
 
 	public PlaceAroundFragment() {
 		// Required empty public constructor
@@ -84,9 +85,10 @@ public class PlaceAroundFragment extends Fragment {
 
 	@AfterViews
 	public void afterView(){
-		CheckListAdapter recyclerAdapter = new CheckListAdapter(placesAround, null);
+		recyclerAdapter = new CheckListAdapter(placesAround, null);
 		recyclerView.setAdapter(recyclerAdapter);
 	}
+
 
 
 	public void setData(Place place, List<Place> placeList, Position myPosition){

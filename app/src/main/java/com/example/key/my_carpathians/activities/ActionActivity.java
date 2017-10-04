@@ -47,6 +47,7 @@ import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.example.key.my_carpathians.utils.AltitudeFinder;
+import com.example.key.my_carpathians.utils.ObjectSaver;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -72,6 +73,7 @@ import com.mapbox.services.commons.utils.TextUtils;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -341,6 +343,8 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 		}
 	}
 
+
+
 	private void getRating(String namePlace) {
 		database = FirebaseDatabase.getInstance();
 		DatabaseReference myRef = database.getReference();
@@ -412,25 +416,12 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 					        Position position = Position.fromCoordinates(coord.getDouble(1), coord.getDouble(0), coord.getDouble(2));
 					        mPositionList.add(position);
 				        }
-
+						if (mPositionList.size() > 0){
+							buildGraph(mPositionList);
+						}
 			        }
 		        }
-		        int size = mPositionList.size();
-		        DataPoint[] values = new DataPoint[size];
-		        Integer xi = 0;
-		        for (int i = 1; i < size; i++) {
-			        Integer yi = (int) mPositionList.get(i).getAltitude();
-			        xi = xi + (int) TurfMeasurement.distance(mPositionList.get(i - 1), mPositionList.get(i), TurfConstants.UNIT_METERS);
-			        DataPoint v = new DataPoint(xi, yi);
-			        values[i] = v;
-		        }
-		        values[0] = new DataPoint(0, (int) mPositionList.get(0).getAltitude());
-		        LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
-		        series.setThickness(8);
-		        graphView.addSeries(series);
-		        GridLabelRenderer gridLabel = graphView.getGridLabelRenderer();
-		        gridLabel.setHorizontalAxisTitle("meters");
-		        gridLabel.setVerticalAxisTitle("meters");
+
 	        }
         } catch (Exception exception) {
             Log.e(TAG, "Exception Loading GeoJSON: " + exception.toString());
@@ -440,6 +431,28 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 
     }
 
+    @UiThread
+   public void buildGraph(List<Position> positions){
+	    int size = positions.size();
+	    DataPoint[] values = new DataPoint[size];
+	    Integer xi = 0;
+	    for (int i = 1; i < size; i++) {
+		    Integer yi = (int) mPositionList.get(i).getAltitude();
+		    xi = xi + (int) TurfMeasurement.distance(mPositionList.get(i - 1), mPositionList.get(i), TurfConstants.UNIT_METERS);
+		    DataPoint v = new DataPoint(xi, yi);
+		    values[i] = v;
+	    }
+	    values[0] = new DataPoint(0, (int) mPositionList.get(0).getAltitude());
+	    LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
+	    series.setThickness(8);
+	    graphView.addSeries(series);
+	    GridLabelRenderer gridLabel = graphView.getGridLabelRenderer();
+	    gridLabel.setHorizontalAxisTitle("meters");
+	    gridLabel.setVerticalAxisTitle("meters");
+	    if(mPositionList.get(0).getAltitude() == 0 & isOnline()){
+		    downloadAltitude();
+	    }
+    }
     @Click(R.id.buttonShowOnMap)
     public void buttonShowOnMapWasClicked() {
         if(mProdusedMode) {
@@ -468,16 +481,6 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
         }
     }
 
-
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        selectedUserRouts.clear();
-        selectedUserPlacesStringList.clear();
-        selectedUserPlacesList.clear();
-    }
 
     @Click(R.id.buttonAddToFavorites)
     void buttonAddToFavoritesWasClicked() {
@@ -916,14 +919,25 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 			super.onBackPressed();
 		}
 	}
-	@Click(R.id.buttonGetAltitude)
-	void buttonGetAltitude(){
-		start();
-	}
+
 	@Background
-	void start(){
+	public void  downloadAltitude(){
 		AltitudeFinder altitudeFinder = new AltitudeFinder();
 		List<com.cocoahero.android.geojson.Position> hadAltitudePosition = altitudeFinder.extractAltitude(mPositionList);
+		List<Position> positions = new ArrayList<>();
+		for (int i = 0; i < hadAltitudePosition.size(); i++){
+			positions.add(Position.fromCoordinates(hadAltitudePosition.get(i).getLatitude(),
+					hadAltitudePosition.get(i).getLongitude(),
+					hadAltitudePosition.get(i).getAltitude()));
+		}
+
+
+
+		if (hadAltitudePosition .size() > 0){
+			buildGraph(positions);
+			ObjectSaver objectSaver = new ObjectSaver();
+			String outcome = objectSaver.saveRout(myName, null, myRout, true);
+		}
 
 		LineString lineString = new LineString();
 		lineString.setPositions(hadAltitudePosition);

@@ -17,10 +17,11 @@
             android:id="@+id/textViewNameObject"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="1dp"
-            android:background="@color/input_register_hint"
+            android:background="@color/input_register_bg"
             android:gravity="center"
-            android:text="TextView"/>
+            android:padding="4dp"
+            android:text="TextView"
+            android:textStyle="bold"/>
 
         <LinearLayout
             android:id="@+id/groupForRout"
@@ -36,7 +37,9 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:background="@color/bg_login"
-                android:text="Level"/>
+                android:paddingLeft="4dp"
+                android:text="Level"
+                android:textColor="@color/black_overlay"/>
 
             <TextView
                 android:id="@+id/textDifficultyValue"
@@ -46,7 +49,8 @@
                 android:layout_weight="1"
                 android:background="@color/bg_login"
                 android:gravity="center"
-                android:text="difficulty"/>
+                android:text="difficulty"
+                android:textColor="@color/colorGreenPrimary"/>
 
             <TextView
                 android:id="@+id/textView11"
@@ -55,7 +59,8 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:background="@color/bg_login"
-                android:text="Lenght"/>
+                android:text="Lenght"
+                android:textColor="@color/black_overlay"/>
 
             <TextView
                 android:id="@+id/textRoutLength"
@@ -74,7 +79,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:background="@color/input_register_hint"
-            android:text="Info"/>
+            android:paddingLeft="4dp"
+            android:text="Info"
+            android:textColor="@color/black_overlay"/>
 
         <TextView
             android:id="@+id/titleText"
@@ -82,6 +89,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:background="@color/input_register_hint"
+            android:paddingLeft="4dp"
             android:text="TextView"/>
     </LinearLayout>
 
