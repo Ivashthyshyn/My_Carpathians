@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
@@ -18,6 +20,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -132,6 +135,9 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
    @ViewById(R.id.toolbar)
     Toolbar toolbar;
 
+	@ViewById(R.id.appBarLayout)
+	AppBarLayout appBarLayout;
+
     @ViewById(R.id.imageView)
     ImageView imageView;
     @ViewById(R.id.textName)
@@ -169,11 +175,9 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         setContentView(R.layout.activity_action);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+		setupSizeViews();
         tabLayout.setupWithViewPager(viewPager);
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
-
-
 
         sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         routList = (List<Rout>) getIntent().getSerializableExtra(PUT_EXTRA_ROUTS_LIST);
@@ -217,6 +221,15 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		    placeAroundFragment.setData(myPlace, placeList, myPosition);
 	    }
     }
+
+	private void setupSizeViews() {
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		int height = metrics.heightPixels / 3;
+CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.WRAP_CONTENT, height);
+		appBarLayout.setLayoutParams(params);
+
+	}
 
 	private void setBaseInformation(Place place, Rout rout) {
 		if (place != null  ) {
