@@ -17,13 +17,13 @@ import com.example.key.my_carpathians.models.Rout;
 import java.util.List;
 
 
-public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.ViewHolder> {
+public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectListAdapter.ViewHolder> {
 	public Context context;
 	private List<Rout> routs;
 	private List<Place> places;
 
 
-	public CheckListAdapter(List<Place> placeList, List<Rout> routList) {
+	public AroundObjectListAdapter(List<Place> placeList, List<Rout> routList) {
 		this.places = placeList;
 		this.routs = routList;
 	}
@@ -65,7 +65,7 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
 	}
 
 	@Override
-	public CheckListAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
+	public AroundObjectListAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
 		View mView = LayoutInflater.from(parent.getContext())
 				.inflate(R.layout.lis_item_for_rout, parent, false);
 		context = mView.getContext();

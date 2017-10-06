@@ -345,4 +345,14 @@
         android:src="@drawable/com_facebook_button_like_icon_selected"
         app:fabSize="mini"/>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabDeleteCreatedObject"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|left"
+        android:layout_margin="10dp"
+        android:clickable="true"
+        app:fabSize="mini"
+        app:srcCompat="@android:drawable/ic_delete"/>
+
 </android.support.design.widget.CoordinatorLayout>

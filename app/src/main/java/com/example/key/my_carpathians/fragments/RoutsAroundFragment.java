@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.adapters.CheckListAdapter;
+import com.example.key.my_carpathians.adapters.AroundObjectListAdapter;
 import com.example.key.my_carpathians.models.Position;
 import com.example.key.my_carpathians.models.Rout;
 
@@ -51,7 +51,7 @@ public class RoutsAroundFragment extends Fragment {
 
 	@AfterViews
 	public void afterView(){
-		CheckListAdapter recyclerAdapter = new CheckListAdapter( null, routsAround);
+		AroundObjectListAdapter recyclerAdapter = new AroundObjectListAdapter( null, routsAround);
 		recyclerView.setAdapter(recyclerAdapter);
 	}
 

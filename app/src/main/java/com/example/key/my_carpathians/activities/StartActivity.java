@@ -35,9 +35,10 @@ import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
 import com.example.key.my_carpathians.fragments.RoutsListFragment;
 import com.example.key.my_carpathians.fragments.RoutsListFragment_;
-import com.example.key.my_carpathians.interfaces.Communicator;
+import com.example.key.my_carpathians.interfaces.CommunicatorStartActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
+import com.example.key.my_carpathians.utils.ObjectService;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -104,6 +105,7 @@ import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.View
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
+import static com.example.key.my_carpathians.utils.ObjectService.ERROR;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -111,7 +113,7 @@ import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_US
  */
 @EActivity
 public class StartActivity extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener,Communicator {
+        GoogleApiClient.OnConnectionFailedListener,CommunicatorStartActivity {
     public static final String PUT_EXTRA_PLACE_LIST = "place_list";
     public static final String PUT_EXTRA_ROUTS_LIST = "routs_list";
     public static final String FAVORITES_ROUTS_LIST = "favorites_user_routs";
@@ -735,6 +737,99 @@ public class StartActivity extends AppCompatActivity implements
 
         }
     }
+
+    @Override
+    public void deletedFromFavoriteList(final String name, final int type) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Deleting!");
+        if (type == ROUT){
+            builder.setMessage("Do You really want to delete Rout " + name + " from FavoriteList"  );
+
+        }else if (type == PLACE) {
+            builder.setMessage("Do You really want to delete Place " + name );
+        }
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (type == ROUT){
+                    ObjectService objectService = new ObjectService(StartActivity.this);
+                    String mOutcome = objectService.deleteRout(name);
+                    if(!mOutcome.equals(ERROR)){
+                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
+                        dialogInterface.dismiss();
+                    }else{
+                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
+                    }
+
+                }else if (type == PLACE) {
+                    ObjectService objectService = new ObjectService(StartActivity.this);
+                    String mOutcome = objectService.deletePlace(name);
+                    if(!mOutcome.equals(ERROR)){
+                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
+                        dialogInterface.dismiss();
+                    }else{
+                        Toast.makeText(StartActivity.this,mOutcome,Toast.LENGTH_LONG ).show();
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    @Override
+    public void deletedFromCreatedList(final String name, final int type) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Deleting!");
+        if (type == MY_ROUT){
+            builder.setMessage("Do You really want to delete Rout " + name + " from FavoriteList"  );
+
+        }else if (type == MY_PLACE) {
+            builder.setMessage("Do You really want to delete Place " + name );
+        }
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (type == MY_ROUT){
+                    ObjectService objectService = new ObjectService(StartActivity.this);
+                    String mOutcome = objectService.deleteRout(name);
+                    if(!mOutcome.equals(ERROR)){
+                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
+                        dialogInterface.dismiss();
+                    }else{
+                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
+                    }
+
+                }else if (type == MY_PLACE) {
+                    ObjectService objectService = new ObjectService(StartActivity.this);
+                    String mOutcome = objectService.deletePlace(name);
+                    if(!mOutcome.equals(ERROR)){
+                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
+                        dialogInterface.dismiss();
+                    }else{
+                        Toast.makeText(StartActivity.this,mOutcome,Toast.LENGTH_LONG ).show();
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+
+
 
     @Click(R.id.buttonFastRec)
     void buttonFastRecWasClicked() {

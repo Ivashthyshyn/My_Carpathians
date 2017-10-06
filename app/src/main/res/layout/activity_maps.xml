@@ -38,7 +38,8 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/round_shape_for_tools_container_black"
                 android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                >
 
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/buttonShowMyLocation"
@@ -47,6 +48,8 @@
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="@drawable/round_shape_for_tools_container_black"
+                    android:scaleType="centerCrop"
+                    android:visibility="visible"
                     app:backgroundTint="@android:color/transparent"
                     app:fabSize="mini"
                     app:srcCompat="@drawable/ic_my_location_24dp"/>
@@ -56,11 +59,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginLeft="10dp"
                     android:layout_weight="1"
                     android:background="@drawable/round_shape_for_tools_container_black"
+                    android:scaleType="centerCrop"
                     android:visibility="gone"
                     app:backgroundTint="@android:color/transparent"
+                    app:fabSize="mini"
                     mapbox:srcCompat="@android:drawable/ic_menu_edit"/>
 
             </LinearLayout>
@@ -78,22 +82,22 @@
 
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/buttonOnBack"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:layout_marginLeft="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
+                    android:scaleType="centerCrop"
                     android:visibility="gone"
                     app:backgroundTint="@android:color/transparent"
+                    app:fabSize="mini"
                     app:srcCompat="@drawable/on_back"/>
 
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/buttonHandEditMode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:background="@android:color/transparent"
+                    android:scaleType="centerCrop"
                     app:backgroundTint="@android:color/transparent"
                     app:fabSize="mini"
                     app:srcCompat="@drawable/hand_icon"/>
@@ -105,8 +109,20 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="8"
+            android:layout_weight="9"
             android:orientation="vertical">
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerInParent="true"
+                android:layout_weight="1"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
+                android:visibility="gone"/>
 
             <LinearLayout
                 android:id="@+id/bottom_navigation"
@@ -119,18 +135,6 @@
                 android:elevation="8dp"
                 android:orientation="horizontal"
                 android:paddingTop="8dp">
-
-                <ProgressBar
-                    android:id="@+id/progress_bar"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="25dp"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerInParent="true"
-                    android:layout_weight="1"
-                    android:paddingLeft="25dp"
-                    android:paddingRight="25dp"
-                    android:visibility="gone"/>
 
                 <Button
                     android:id="@+id/buttonDownloadOfflineRegion"

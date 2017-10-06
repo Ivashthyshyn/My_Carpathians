@@ -29,10 +29,11 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.activities.StartActivity_;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
-import com.example.key.my_carpathians.utils.ObjectSaver;
+import com.example.key.my_carpathians.utils.ObjectService;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.commons.geojson.LineString;
@@ -62,6 +63,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static com.example.key.my_carpathians.utils.ObjectService.ERROR;
 import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 /**
@@ -73,7 +75,6 @@ public class EditModeFragment extends DialogFragment {
 	public static final int LIGHT = 1;
 	public static final int MEDIUM = 2;
 	public static final int HARD = 3;
-	public static final String NO_PUBLISH_CONSTANT = "_";
 	private static final int TITLE_PHOTO = 0;
 	private static final int MORE_PHOTO_1 = 1;
 	private static final int MORE_PHOTO_2 = 2;
@@ -96,6 +97,7 @@ public class EditModeFragment extends DialogFragment {
 	View view;
 	@ViewById(R.id.imageAdd1)
 	ImageButton imageAdd1;
+
 	@ViewById(R.id.imageAdd2)
 	ImageButton imageAdd2;
 	@ViewById(R.id.imageAdd3)
@@ -424,8 +426,8 @@ public class EditModeFragment extends DialogFragment {
 					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), bitmap2, uriPhoto2);
 					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), bitmap3, uriPhoto3);
 				 }
-				ObjectSaver objectSaver = new ObjectSaver();
-				 String outcome = objectSaver.saveRout(name, null, mRout, true);
+				ObjectService objectService = new ObjectService(getContext());
+				 String outcome = objectService.saveRout(name, null, mRout, true);
 				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
 				 if (outcome.equals("Rout saved")) {
 					 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity) getContext();
@@ -440,8 +442,8 @@ public class EditModeFragment extends DialogFragment {
 					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_2, bitmap2, uriPhoto2);
 					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_3, bitmap3, uriPhoto3);
 				 }
-				 ObjectSaver objectSaver = new ObjectSaver();
-				 String outcome =  objectSaver.savePlace( name, mPlace, true);
+				 ObjectService objectService = new ObjectService(getContext());
+				 String outcome =  objectService.savePlace( name, mPlace, true);
 				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
 				 if (outcome.equals("Place saved")) {
 					 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity) getContext();
@@ -572,5 +574,47 @@ public class EditModeFragment extends DialogFragment {
 			mPhotoSwicher = MORE_PHOTO_3;
 			searchPhotoInGallery();
 		}
+	}
+	@Click(R.id.fabDeleteCreatedObject)
+	public void fabDeleteCreatedObject(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+		builder.setTitle("Deleting!");
+		if (mRout != null){
+			builder.setMessage("Do You really want to delete Rout " + mRout.getNameRout() );
+
+		}else if (mPlace != null) {
+			builder.setMessage("Do You really want to delete Place " + mPlace.getNamePlace() );
+		}
+		builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int i) {
+				if (mRout != null){
+					ObjectService objectService = new ObjectService(getContext());
+					String mOutcome = objectService.deleteRout(mRout.getNameRout());
+					if(!mOutcome.equals(ERROR)){
+						Toast.makeText(getContext(),mOutcome,Toast.LENGTH_LONG ).show();
+						Intent intent = new Intent(getContext(), StartActivity_.class);
+						startActivity(intent);
+						dialogInterface.dismiss();
+					}else{
+						Toast.makeText(getContext(),mOutcome,Toast.LENGTH_LONG ).show();
+					}
+
+				}else if (mPlace != null) {
+					ObjectService objectService = new ObjectService(getContext());
+					String mOutcome = objectService.deletePlace(mPlace.getNamePlace());
+					if(!mOutcome.equals(ERROR)){
+						Toast.makeText(getContext(),mOutcome,Toast.LENGTH_LONG ).show();
+						Intent intent = new Intent(getContext(), StartActivity_.class);
+						startActivity(intent);
+						dialogInterface.dismiss();
+					}else{
+						Toast.makeText(getContext(),mOutcome,Toast.LENGTH_LONG ).show();
+					}
+				}
+			}
+		});
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
 	}
 }

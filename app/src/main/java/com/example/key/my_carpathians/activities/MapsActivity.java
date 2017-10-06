@@ -43,7 +43,7 @@ import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.example.key.my_carpathians.utils.AltitudeFinder;
 import com.example.key.my_carpathians.utils.LocationService;
-import com.example.key.my_carpathians.utils.ObjectSaver;
+import com.example.key.my_carpathians.utils.ObjectService;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -92,7 +92,7 @@ import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MO
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
 import static com.example.key.my_carpathians.utils.LocationService.DEFINED_LOCATION;
-import static com.example.key.my_carpathians.utils.ObjectSaver.FILE_EXISTS;
+import static com.example.key.my_carpathians.utils.ObjectService.FILE_EXISTS;
 import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 @EActivity
@@ -957,7 +957,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (mMarker != null || createdTrackPosition.size() > 2){
                     saveCreatedObject(model, nameInput.getText().toString());
 	                mPointCounter = 0;
-	                createdTrackPosition.clear();
+
 
                 }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
@@ -1011,8 +1011,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mPlace.setPositionPlace(new com.example.key.my_carpathians.models.Position(
                     mMarker.getPosition().getLatitude(), mMarker.getPosition().getLongitude()));
 
-            ObjectSaver objectSaver = new ObjectSaver();
-            String outcome = objectSaver.savePlace(name, mPlace, false);
+            ObjectService objectService = new ObjectService(MapsActivity.this);
+            String outcome = objectService.savePlace(name, mPlace, false);
            if (outcome.equals(FILE_EXISTS)){
                showCreateNameDialog(0, name);
             }else{
@@ -1029,12 +1029,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 createdTrackPosition = altitudeFinder.extractAltitude(pos);
             }
-            ObjectSaver objectSaver = new ObjectSaver();
+            ObjectService objectService = new ObjectService(MapsActivity.this);
             Rout mRout = new Rout();
             mRout.setNameRout(name);
             mRout.setPositionRout(new com.example.key.my_carpathians.models.Position(createdTrackPosition.get(0).getLatitude(),
                     createdTrackPosition.get(0).getLongitude()));
-            String outcome = objectSaver.saveRout(name, createdTrackPosition, mRout, false);
+            String outcome = objectService.saveRout(name, createdTrackPosition, mRout, false);
             if (outcome.equals(FILE_EXISTS)){
                 showCreateNameDialog(0, name);
             }else{

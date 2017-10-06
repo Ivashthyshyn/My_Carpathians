@@ -47,7 +47,7 @@ import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.example.key.my_carpathians.utils.AltitudeFinder;
-import com.example.key.my_carpathians.utils.ObjectSaver;
+import com.example.key.my_carpathians.utils.ObjectService;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -935,8 +935,8 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 
 		if (hadAltitudePosition .size() > 0){
 			buildGraph(positions);
-			ObjectSaver objectSaver = new ObjectSaver();
-			String outcome = objectSaver.saveRout(myName, null, myRout, true);
+			ObjectService objectService = new ObjectService(ActionActivity.this);
+			String outcome = objectService.saveRout(myName, null, myRout, true);
 		}
 
 		LineString lineString = new LineString();

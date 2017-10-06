@@ -14,7 +14,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.interfaces.Communicator;
+import com.example.key.my_carpathians.interfaces.CommunicatorStartActivity;
 import com.example.key.my_carpathians.models.Rout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -73,8 +73,8 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             @Override
             public void onPressed(Rout routObject) {
                 if (routObject != null) {
-                    Communicator communicator = (Communicator)context;
-                    communicator.putStringNameRout(routObject.getNameRout(), ROUT);
+                    CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
+                    communicatorStartActivity.putStringNameRout(routObject.getNameRout(), ROUT);
                 }
             }
 

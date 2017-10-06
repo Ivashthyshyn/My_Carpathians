@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.adapters.CheckListAdapter;
+import com.example.key.my_carpathians.adapters.AroundObjectListAdapter;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Position;
 
@@ -30,7 +30,7 @@ public class PlaceAroundFragment extends Fragment {
 	RecyclerView recyclerView;
 	List<Place> placesAround;
 	Position position;
-	CheckListAdapter recyclerAdapter;
+	AroundObjectListAdapter recyclerAdapter;
 
 	public PlaceAroundFragment() {
 		// Required empty public constructor
@@ -85,7 +85,7 @@ public class PlaceAroundFragment extends Fragment {
 
 	@AfterViews
 	public void afterView(){
-		recyclerAdapter = new CheckListAdapter(placesAround, null);
+		recyclerAdapter = new AroundObjectListAdapter(placesAround, null);
 		recyclerView.setAdapter(recyclerAdapter);
 	}
 

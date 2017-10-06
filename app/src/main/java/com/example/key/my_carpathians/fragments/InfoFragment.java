@@ -67,7 +67,7 @@ public class InfoFragment extends Fragment {
 		}else if(rout != null){
 			textViewNameObject.setText(rout.getNameRout());
 			textDifficultyValue.setText(dificultyLevel(rout.getRoutsLevel()));
-			textRoutLength.setText("12");
+			textRoutLength.setText(rout.getLengthRout() + "km");
 			titleText.setText(rout.getTitleRout());
 		}
 	}

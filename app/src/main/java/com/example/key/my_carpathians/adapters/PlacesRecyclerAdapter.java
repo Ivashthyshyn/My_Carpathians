@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.interfaces.Communicator;
+import com.example.key.my_carpathians.interfaces.CommunicatorStartActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -86,8 +86,8 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
             @Override
             public void onPressed(Place placeName) {
                 if (placeName != null){
-                    Communicator communicator = (Communicator)context;
-                    communicator.putStringNamePlace(placeName.getNamePlace(), PLACE);
+                    CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
+                    communicatorStartActivity.putStringNamePlace(placeName.getNamePlace(), PLACE);
 
                 }
             }

@@ -1,5 +1,6 @@
 package com.example.key.my_carpathians.utils;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Environment;
@@ -25,7 +26,6 @@ import java.util.Set;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.example.key.my_carpathians.fragments.EditModeFragment.NO_PUBLISH_CONSTANT;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
@@ -34,11 +34,16 @@ import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
  * Created by key on 29.09.17.
  */
 
-public class ObjectSaver {
+public class ObjectService {
 	public static final String FILE_EXISTS = "file_exists";
+	public static final String ERROR = "error";
+	public Context context;
 
+	public ObjectService(Context context){
+		this.context = context;
+	}
 	public String saveRout(String name, List<com.cocoahero.android.geojson.Position> positionList, Rout rout, boolean replaceExistFile) {
-		SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		SharedPreferences mSharedPreferences = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		if (!replaceExistFile) {
 			String mRootPathToSaveTrack;
 			if (isExternalStorageWritable()) {
@@ -90,7 +95,7 @@ public class ObjectSaver {
 						rootPath2.mkdirs();
 					}
 
-					File file = new File(rootPath2, name + NO_PUBLISH_CONSTANT);
+					File file = new File(rootPath2, name);
 					if (file.exists()) {
 						return FILE_EXISTS;
 					} else {
@@ -101,7 +106,7 @@ public class ObjectSaver {
 							objectOutputStream.close();
 							fileOutputStream.close();
 							Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
-							createdByUserTrackList.add(name + NO_PUBLISH_CONSTANT);
+							createdByUserTrackList.add(name);
 							mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
 							return ("Rout saved");
 						} catch (IOException e) {
@@ -130,7 +135,7 @@ public class ObjectSaver {
 				rootPath2.mkdirs();
 			}
 
-			File file = new File(rootPath2, rout.getNameRout() + NO_PUBLISH_CONSTANT);
+			File file = new File(rootPath2, rout.getNameRout());
 			if (file.exists()) {
 				file.delete();
 			} else {
@@ -146,8 +151,8 @@ public class ObjectSaver {
 				objectOutputStream.close();
 				fileOutputStream.close();
 				Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
-				if (createdByUserTrackList.add(rout.getNameRout() + NO_PUBLISH_CONSTANT)) {
-					createdByUserTrackList.remove(name + NO_PUBLISH_CONSTANT );
+				if (createdByUserTrackList.add(rout.getNameRout() )) {
+					createdByUserTrackList.remove(name);
 				}
 				mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
 				return ("Rout saved");
@@ -158,16 +163,64 @@ public class ObjectSaver {
 
 		}
 	}
+	public String deleteRout(String name){
+		SharedPreferences mSharedPreferences = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		String mRootPathToSaveRout;
+		if (isExternalStorageWritable()) {
+			mRootPathToSaveRout = Uri.fromFile(context.getExternalFilesDir(
+					Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+					.getPath();
+		} else {
+			mRootPathToSaveRout = Uri.fromFile(context.getFilesDir()).buildUpon()
+					.appendPath("Created").build().getPath();
+		}
+		File rootPathRout = new File(mRootPathToSaveRout);
+		if (!rootPathRout.exists()) {
+			rootPathRout.mkdirs();
+		}
+		File localFileRout = new File(rootPathRout, name);
+		if (localFileRout.exists()) {
+			localFileRout.delete();
+			String mRootPathToSaveTrack;
+			if (isExternalStorageWritable()) {
+				mRootPathToSaveTrack = Uri.fromFile(context.getExternalFilesDir(
+						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build()
+						.getPath();
+			} else {
+				mRootPathToSaveTrack = Uri.fromFile(context.getFilesDir()).buildUpon()
+						.appendPath("Routs").build().getPath();
+			}
+			File rootPathTrack = new File(mRootPathToSaveTrack);
+			if (!rootPathTrack.exists()) {
+				rootPathTrack.mkdirs();
+			}
+			File localFileTrack = new File(rootPathTrack, name);
+			if (localFileTrack.exists()) {
+				localFileTrack.delete();
+				Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
+				if (createdByUserTrackList.contains(name)) {
+					createdByUserTrackList.remove(name);
+				}
+				mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
+				return "Rout deleted";
+			}else{
+			return ERROR;
+			}
+		}else{
+			return ERROR;
+		}
+
+	}
 	public String savePlace(String name,  Place place, boolean replaceExistFile){
-		SharedPreferences mSharedPreferences = getApplicationContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		SharedPreferences mSharedPreferences = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		if (!replaceExistFile) {
 			String mRootPathToSavePlace;
 			if (isExternalStorageWritable()) {
-				mRootPathToSavePlace = Uri.fromFile(getApplicationContext().getExternalFilesDir(
+				mRootPathToSavePlace = Uri.fromFile(context.getExternalFilesDir(
 						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
 						.getPath();
 			} else {
-				mRootPathToSavePlace = Uri.fromFile(getApplicationContext().getFilesDir()).buildUpon()
+				mRootPathToSavePlace = Uri.fromFile(context.getFilesDir()).buildUpon()
 						.appendPath("Created").build().getPath();
 			}
 
@@ -177,7 +230,6 @@ public class ObjectSaver {
 			}
 
 			File file = new File(rootPath, name);
-			String fileUri = String.valueOf(Uri.fromFile(file));
 			if (file.exists()) {
 				return FILE_EXISTS;
 			}
@@ -197,11 +249,11 @@ public class ObjectSaver {
 		}else {
 			String mRootPathToSavePlace;
 			if (isExternalStorageWritable()) {
-				mRootPathToSavePlace = Uri.fromFile(getApplicationContext().getExternalFilesDir(
+				mRootPathToSavePlace = Uri.fromFile(context.getExternalFilesDir(
 						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
 						.getPath();
 			} else {
-				mRootPathToSavePlace = Uri.fromFile(getApplicationContext().getFilesDir()).buildUpon()
+				mRootPathToSavePlace = Uri.fromFile(context.getFilesDir()).buildUpon()
 						.appendPath("Created").build().getPath();
 			}
 
@@ -236,6 +288,36 @@ public class ObjectSaver {
 			}
 		}
 	}
+	public String deletePlace(String name){
+		SharedPreferences mSharedPreferences = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		String mRootPathToSavePlace;
+		if (isExternalStorageWritable()) {
+			mRootPathToSavePlace = Uri.fromFile(context.getExternalFilesDir(
+					Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+					.getPath();
+		} else {
+			mRootPathToSavePlace = Uri.fromFile(context.getFilesDir()).buildUpon()
+					.appendPath("Created").build().getPath();
+		}
+
+		File rootPath = new File(mRootPathToSavePlace);
+		if (!rootPath.exists()) {
+			rootPath.mkdirs();
+		}
+		File file = new File(rootPath, name);
+		if (file.exists()) {
+			file.delete();
+			Set<String> createdByUserPlaceList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, new HashSet<String>()));
+			if (createdByUserPlaceList.contains(name)) {
+				createdByUserPlaceList.remove(name);
+			}
+			mSharedPreferences.edit().putStringSet(CREATED_BY_USER_PLACE_LIST, createdByUserPlaceList).apply();
+			return "Place deleted";
+		}else {
+			return ERROR;
+		}
+	}
+
 	public boolean isExternalStorageWritable() {
 		String state = Environment.getExternalStorageState();
 		if (Environment.MEDIA_MOUNTED.equals(state)) {

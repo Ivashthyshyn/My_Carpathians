@@ -9,13 +9,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.interfaces.Communicator;
+import com.example.key.my_carpathians.interfaces.CommunicatorStartActivity;
 
 import java.util.List;
 
 
 public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecyclerAdapter.FavoritesViewHolder>{
-	public Communicator comunicator;
+	public CommunicatorStartActivity comunicator;
 	public Activity activity;
 	public static final int PLACE = 1;
 	public static final int ROUT = 2;
@@ -42,7 +42,7 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
 		FavoritesViewHolder mHolder = new FavoritesViewHolder(mView, new FavoritesViewHolder.ClickListener() {
 			@Override
 			public void onPressed(String name) {
-				comunicator = (Communicator)context;
+				comunicator = (CommunicatorStartActivity)context;
 				if (type == PLACE) {
 					comunicator.putStringNamePlace(name, type);
 				}else if(type == MY_PLACE){
@@ -51,6 +51,20 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
 					comunicator.putStringNameRout(name, type);
 				}else if (type == MY_ROUT){
 					comunicator.putStringNameRout(name, type);
+				}
+			}
+
+			@Override
+			public void onLongPressed(String name) {
+				comunicator = (CommunicatorStartActivity)context;
+				if (type == PLACE) {
+					comunicator.deletedFromFavoriteList(name, type);
+				}else if(type == MY_PLACE){
+					comunicator.deletedFromCreatedList(name, type);
+				}else if (type == ROUT){
+					comunicator.deletedFromFavoriteList(name, type);
+				}else if (type == MY_ROUT){
+					comunicator.deletedFromCreatedList(name, type);
 				}
 			}
 
@@ -71,26 +85,34 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
 		return stringList.size();
 	}
 
-	static class FavoritesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+	static class FavoritesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 		TextView textName;
 		private ClickListener mClickListener;
-
 
 		FavoritesViewHolder(View itemView, ClickListener listener) {
 			super(itemView);
 			mClickListener = listener;
 			textName = (TextView) itemView.findViewById(R.id.textViewFavoritName);
 			itemView.setOnClickListener(this);
+			itemView.setOnLongClickListener(this);
 		}
 
 		@Override
 		public void onClick(View v) {
 			mClickListener.onPressed(textName.getText().toString());
+
+		}
+
+		@Override
+		public boolean onLongClick(View view) {
+			mClickListener.onLongPressed(textName.getText().toString());
+			return false;
 		}
 
 
 		interface ClickListener {
 			void onPressed(String name);
+			void onLongPressed(String name);
 		}
 	}
 }

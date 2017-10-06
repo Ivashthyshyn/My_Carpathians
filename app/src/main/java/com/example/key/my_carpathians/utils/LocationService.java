@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -30,7 +29,7 @@ import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_TRACK_NAME;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
-import static com.example.key.my_carpathians.utils.ObjectSaver.FILE_EXISTS;
+import static com.example.key.my_carpathians.utils.ObjectService.FILE_EXISTS;
 
 
 public class LocationService extends Service implements
@@ -154,8 +153,8 @@ public class LocationService extends Service implements
 	        mPlace.setNamePlace(mNamePlace);
 	        mPlace.setPositionPlace(new com.example.key.my_carpathians.models.
 			        Position(mLocation.getLatitude(), mLocation.getLongitude()));
-            ObjectSaver objectSaver = new ObjectSaver();
-            String outcome = objectSaver.savePlace(mNamePlace, mPlace, false);
+            ObjectService objectService = new ObjectService(getApplicationContext());
+            String outcome = objectService.savePlace(mNamePlace, mPlace, false);
             if (outcome.equals(FILE_EXISTS) & owner != null){
                 owner.messageForActivity(ROUT, mNamePlace);
             }else{
@@ -170,8 +169,8 @@ public class LocationService extends Service implements
 	    mRout.setNameRout(mNameRout);
 	    mRout.setPositionRout(new com.example.key.my_carpathians.models.Position(
 	    		mPositionList.get(0).getLatitude(), mPositionList.get(0).getLongitude()));
-        ObjectSaver objectSaver = new ObjectSaver();
-        String outcome = objectSaver.saveRout(mNameRout, mPositionList, mRout, false);
+        ObjectService objectService = new ObjectService(getApplicationContext());
+        String outcome = objectService.saveRout(mNameRout, mPositionList, mRout, false);
         if (outcome.equals(FILE_EXISTS) & owner != null){
             owner.messageForActivity(ROUT, mNameRout);
         }else{
@@ -185,13 +184,6 @@ public class LocationService extends Service implements
 
     }
 
-	public boolean isExternalStorageWritable() {
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-			return true;
-		}
-		return false;
-	}
     /**
      * Callback when the location changes. Inform the owner.
      *
