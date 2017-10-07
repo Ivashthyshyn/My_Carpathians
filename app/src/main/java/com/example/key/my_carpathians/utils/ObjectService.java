@@ -28,7 +28,6 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
-import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 /**
  * Created by key on 29.09.17.
@@ -47,11 +46,11 @@ public class ObjectService {
 		if (!replaceExistFile) {
 			String mRootPathToSaveTrack;
 			if (isExternalStorageWritable()) {
-				mRootPathToSaveTrack = Uri.fromFile(getApplicationContext().getExternalFilesDir(
+				mRootPathToSaveTrack = Uri.fromFile(context.getExternalFilesDir(
 						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build()
 						.getPath();
 			} else {
-				mRootPathToSaveTrack = Uri.fromFile(getApplicationContext().getFilesDir()).buildUpon()
+				mRootPathToSaveTrack = Uri.fromFile(context.getFilesDir()).buildUpon()
 						.appendPath("Routs").build().getPath();
 			}
 
@@ -82,11 +81,11 @@ public class ObjectService {
 
 					String mRootPathToSaveRout;
 					if (isExternalStorageWritable()) {
-						mRootPathToSaveRout = Uri.fromFile(getApplicationContext().getExternalFilesDir(
+						mRootPathToSaveRout = Uri.fromFile(context.getExternalFilesDir(
 								Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
 								.getPath();
 					} else {
-						mRootPathToSaveRout = Uri.fromFile(getApplicationContext().getFilesDir()).buildUpon()
+						mRootPathToSaveRout = Uri.fromFile(context.getFilesDir()).buildUpon()
 								.appendPath("Created").build().getPath();
 					}
 
@@ -120,48 +119,70 @@ public class ObjectService {
 				return (e.getMessage());
 			}
 		} else {
-			String mRootPathToSaveRout;
+			String mRootPathToSaveTrack;
 			if (isExternalStorageWritable()) {
-				mRootPathToSaveRout = Uri.fromFile(getApplicationContext().getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+				mRootPathToSaveTrack = Uri.fromFile(context.getExternalFilesDir(
+						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build()
 						.getPath();
 			} else {
-				mRootPathToSaveRout = Uri.fromFile(getApplicationContext().getFilesDir()).buildUpon()
-						.appendPath("Created").build().getPath();
+				mRootPathToSaveTrack = Uri.fromFile(context.getFilesDir()).buildUpon()
+						.appendPath("Routs").build().getPath();
 			}
-
-			File rootPath2 = new File(mRootPathToSaveRout);
-			if (!rootPath2.exists()) {
-				rootPath2.mkdirs();
+			File rootPath = new File(mRootPathToSaveTrack);
+			if (!rootPath.exists()) {
+				rootPath.mkdirs();
 			}
+			File localFile = new File(rootPath, name);
+			if (localFile.exists()) {
+				localFile.renameTo(new File(rootPath, rout.getNameRout()));
+                rout.setUrlRoutsTrack(Uri.fromFile(localFile).getPath());
 
-			File file = new File(rootPath2, rout.getNameRout());
-			if (file.exists()) {
-				file.delete();
-			} else {
-				File betterFile = new File(rootPath2, name);
-				if (betterFile.exists()) {
+				String mRootPathToSaveRout;
+				if (isExternalStorageWritable()) {
+					mRootPathToSaveRout = Uri.fromFile(context.getExternalFilesDir(
+							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+							.getPath();
+				} else {
+					mRootPathToSaveRout = Uri.fromFile(context.getFilesDir()).buildUpon()
+							.appendPath("Created").build().getPath();
+				}
+
+				File rootPath2 = new File(mRootPathToSaveRout);
+				if (!rootPath2.exists()) {
+					rootPath2.mkdirs();
+				}
+
+				File file = new File(rootPath2, rout.getNameRout());
+				if (file.exists()) {
 					file.delete();
+				} else {
+					File betterFile = new File(rootPath2, name);
+					if (betterFile.exists()) {
+						betterFile.delete();
+					}
 				}
-			}
-			try {
-				FileOutputStream fileOutputStream = new FileOutputStream(file);
-				ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-				objectOutputStream.writeObject(rout);
-				objectOutputStream.close();
-				fileOutputStream.close();
-				Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
-				if (createdByUserTrackList.add(rout.getNameRout() )) {
-					createdByUserTrackList.remove(name);
-				}
-				mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
-				return ("Rout saved");
-			} catch (IOException e) {
-				e.printStackTrace();
-				return (e.getMessage());
-			}
+				try {
+					FileOutputStream fileOutputStream = new FileOutputStream(file);
+					ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+					objectOutputStream.writeObject(rout);
+					objectOutputStream.close();
+					fileOutputStream.close();
+					Set<String> createdByUserTrackList = new HashSet<>(mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, new HashSet<String>()));
+					if (createdByUserTrackList.add(rout.getNameRout())) {
+						createdByUserTrackList.remove(name);
+					}
+					mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
+					return ("Rout saved");
 
+				} catch (IOException e) {
+					e.printStackTrace();
+					return (e.getMessage());
+				}
+			}else {
+				return ERROR;
+			}
 		}
+
 	}
 	public String deleteRout(String name){
 		SharedPreferences mSharedPreferences = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -202,6 +223,39 @@ public class ObjectService {
 					createdByUserTrackList.remove(name);
 				}
 				mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
+				String mRootPathToSaveRoutPhoto;
+				if (isExternalStorageWritable()) {
+					mRootPathToSaveRoutPhoto = Uri.fromFile(context.getExternalFilesDir(
+							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photo").build()
+							.getPath();
+				} else {
+					mRootPathToSaveRoutPhoto = Uri.fromFile(context.getFilesDir()).buildUpon()
+							.appendPath("Photo").build().getPath();
+				}
+				File rootPathRoutPhoto = new File(mRootPathToSaveRoutPhoto);
+				if (!rootPathRoutPhoto.exists()) {
+					rootPathRoutPhoto.mkdirs();
+				}
+				File localFileRoutPhoto = new File(rootPathRoutPhoto, name);
+				if (localFileRoutPhoto.exists()) {
+					localFileRoutPhoto.delete();
+					File localFileRoutPhoto1 = new File(rootPathRoutPhoto, name + 1);
+					if (localFileRoutPhoto1.exists()) {
+						localFileRoutPhoto1.delete();
+
+					}
+					File localFileRoutPhoto2 = new File(rootPathRoutPhoto, name + 2);
+					if (localFileRoutPhoto2.exists()) {
+						localFileRoutPhoto2.delete();
+
+					}
+					File localFileRoutPhoto3 = new File(rootPathRoutPhoto, name + 3);
+					if (localFileRoutPhoto3.exists()) {
+						localFileRoutPhoto3.delete();
+
+					}
+				}
+
 				return "Rout deleted";
 			}else{
 			return ERROR;

@@ -357,13 +357,13 @@ public class EditModeFragment extends DialogFragment {
 					Uri uri = Uri.fromFile(photoFile);
 					switch (i){
 						case 1: imageAdd1.setImageURI(uri);
-							uriPhoto1 = uri.toString();
+							uriPhoto1 = uri.getPath();
 							break;
 						case 2: imageAdd2.setImageURI(uri);
-							uriPhoto2 = uri.toString();
+							uriPhoto2 = uri.getPath();
 							break;
 						case 3: imageAdd3.setImageURI(uri);
-							uriPhoto3 = uri.toString();
+							uriPhoto3 = uri.getPath();
 					}
 				}
 			}
@@ -421,11 +421,10 @@ public class EditModeFragment extends DialogFragment {
 				mRout.setPositionRout(mPositionRout);
 				mRout.setRoutsLevel(routsLevel);
 				mRout.setUrlRout(savePhotoToSDCard(mRout.getNameRout(), bitmap, uriTitlePhoto));
-				 if(bitmap1 != null | bitmap2 != null | bitmap3 != null ){
 					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_1), bitmap1, uriPhoto1);
 					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), bitmap2, uriPhoto2);
 					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), bitmap3, uriPhoto3);
-				 }
+
 				ObjectService objectService = new ObjectService(getContext());
 				 String outcome = objectService.saveRout(name, null, mRout, true);
 				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
@@ -437,11 +436,10 @@ public class EditModeFragment extends DialogFragment {
 				 mPlace.setNamePlace(editTextName.getText().toString());
 				 mPlace.setTitlePlace(editTextTitle.getText().toString());
 				 mPlace.setUrlPlace(savePhotoToSDCard(mPlace.getNamePlace(), bitmap, uriTitlePhoto));
-				 if(bitmap1 != null | bitmap2 != null | bitmap3 != null ){
 					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_1, bitmap1, uriPhoto1);
 					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_2, bitmap2, uriPhoto2);
 					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_3, bitmap3, uriPhoto3);
-				 }
+
 				 ObjectService objectService = new ObjectService(getContext());
 				 String outcome =  objectService.savePlace( name, mPlace, true);
 				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
@@ -465,7 +463,7 @@ public class EditModeFragment extends DialogFragment {
 				if (file.exists()) {
 					file.delete();
 				}
-				uri = String.valueOf(Uri.fromFile(file));
+				uri = Uri.fromFile(file).getPath();
 				try {
 					FileOutputStream fileOutputStream = new FileOutputStream(file);
 					bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fileOutputStream);
@@ -476,13 +474,15 @@ public class EditModeFragment extends DialogFragment {
 					e.printStackTrace();
 					Toast.makeText(getContext(), "Photo do not saved", Toast.LENGTH_SHORT).show();
 				}
-			} else {
+			} else if(uri != null ) {
 				File file = new File(uri);
+				boolean f = file.exists();
 				if (file.exists()) {
 					Uri rootPathForTitlePhotoString = Uri.fromFile(getContext().getExternalFilesDir(
 							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
 					file.renameTo(new File(rootPathForTitlePhotoString.buildUpon().appendPath(namePlace).build().getPath()));
 				}
+				uri = Uri.fromFile(file).getPath();
 			}
 		return uri;
 	}

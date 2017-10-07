@@ -671,8 +671,9 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 						FirebaseStorage storage = FirebaseStorage.getInstance();
 						StorageReference storageRef = storage.getReference();
 						Uri uri = Uri.parse(rout.getUrlRoutsTrack());
+						File file = new File(uri.getPath());
 						StorageReference riversRef = storageRef.child("geojson/" + uri.getLastPathSegment());
-						UploadTask uploadTask = riversRef.putFile(uri);
+						UploadTask uploadTask = riversRef.putFile(Uri.fromFile(file));
 						uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 							@Override
 							public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -681,8 +682,9 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 							}
 						});
 						Uri uri1 = Uri.parse(rout.getUrlRout());
+						File file1 = new File(uri1.getPath());
 						StorageReference riversRef1 = storageRef.child("placeImage/" + uri1.getLastPathSegment());
-						UploadTask uploadTask1 = riversRef1.putFile(uri1);
+						UploadTask uploadTask1 = riversRef1.putFile(Uri.fromFile(file1));
 						uploadBar.setVisibility(View.VISIBLE);
 						uploadTask1.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
 							@Override
@@ -731,6 +733,7 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 						}).addOnFailureListener(new OnFailureListener() {
 							@Override
 							public void onFailure(@NonNull Exception e) {
+								Log.e("Bumar",e.toString());
 								Toast.makeText(ActionActivity.this, "Сталася помила завантаження не відбулося", Toast.LENGTH_SHORT).show();
 							}
 						});
