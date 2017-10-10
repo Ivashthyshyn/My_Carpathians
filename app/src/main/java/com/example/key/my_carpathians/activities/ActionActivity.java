@@ -31,8 +31,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.cocoahero.android.geojson.Feature;
-import com.cocoahero.android.geojson.LineString;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.ViewPagerAdapter;
 import com.example.key.my_carpathians.fragments.EditModeFragment;
@@ -79,13 +77,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -287,15 +282,9 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 	            fabChangePhotoRight.setVisibility(View.GONE);
 	            imageView.setVisibility(View.GONE);
             }
-			Uri rootPathForRoutsString;
-			if (isExternalStorageReadable()) {
-				rootPathForRoutsString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
-			}else{
-				rootPathForRoutsString = Uri.fromFile(ActionActivity.this.getFilesDir()).buildUpon().appendPath("Routs").build();
-			}
 
-            createDataPoint(rootPathForRoutsString.buildUpon().appendPath(rout.getNameRout()).build());
+
+            createDataPoint(myRout.getUrlRoutsTrack());
 
 			myPosition = rout.getPositionRout();
 			myName = rout.getNameRout();
@@ -382,12 +371,12 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 	}
 
 	@Background
-    public void createDataPoint(Uri uriRoutTrack) {
+    public void createDataPoint(String uriRoutTrack) {
        mPositionList = new ArrayList<>();
         try {
             // Load GeoJSON file
 
-            File file = new File(uriRoutTrack.getPath());
+            File file = new File(uriRoutTrack);
 	        if (file.exists()) {
 		        InputStream fileInputStream = new FileInputStream(file);
 		        BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
@@ -670,73 +659,77 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 					if (snapshot.getValue() == null) {
 						FirebaseStorage storage = FirebaseStorage.getInstance();
 						StorageReference storageRef = storage.getReference();
-						Uri uri = Uri.parse(rout.getUrlRoutsTrack());
-						File file = new File(uri.getPath());
-						StorageReference riversRef = storageRef.child("geojson/" + uri.getLastPathSegment());
-						UploadTask uploadTask = riversRef.putFile(Uri.fromFile(file));
-						uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-							@Override
-							public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-								rout.setUrlRoutsTrack(taskSnapshot.getDownloadUrl().toString());
-								Toast.makeText(ActionActivity.this, "Track saved", Toast.LENGTH_SHORT).show();
-							}
-						});
-						Uri uri1 = Uri.parse(rout.getUrlRout());
-						File file1 = new File(uri1.getPath());
-						StorageReference riversRef1 = storageRef.child("placeImage/" + uri1.getLastPathSegment());
-						UploadTask uploadTask1 = riversRef1.putFile(Uri.fromFile(file1));
-						uploadBar.setVisibility(View.VISIBLE);
-						uploadTask1.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-							@Override
-							public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-								double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-								uploadBar.setProgress((int) progress);
-								if (progress == 100.0){
-									uploadBar.setVisibility(View.GONE);
+						File file = new File(rout.getUrlRoutsTrack());
+						if (file.exists()) {
+							StorageReference riversRef = storageRef.child("geojson/" + (Uri.fromFile(file)).getLastPathSegment());
+							UploadTask uploadTask = riversRef.putFile(Uri.fromFile(file));
+							uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+								@Override
+								public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+									rout.setUrlRoutsTrack(taskSnapshot.getDownloadUrl().toString());
+									Toast.makeText(ActionActivity.this, "Track saved", Toast.LENGTH_SHORT).show();
 								}
-							}
-						});
-						uploadTask1.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-							@Override
-							public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-								// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-								Uri downloadUrl = taskSnapshot.getDownloadUrl();
-								Uri	rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
-											Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
-								rout.setUrlRout(downloadUrl.toString());
-								myRef.child("Rout").child(rout.getNameRout()).setValue(rout);
-								for (int i = 1; i <= 3; i++){
-									File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(rout.getNameRout() + String.valueOf(i)).build().getPath());
-									if (photoFile.exists()){
-										FirebaseStorage storage = FirebaseStorage.getInstance();
-										StorageReference storageRef = storage.getReference();
-										StorageReference riversRef = storageRef.child("placeImage/" + rout.getNameRout() + String.valueOf(i));
-										UploadTask uploadTask = riversRef.putFile(Uri.fromFile(photoFile));
-										uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-											@Override
-											public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-												Toast.makeText(ActionActivity.this, "  Another photo download", Toast.LENGTH_SHORT).show();
-												myRef.child("Photos").child(rout.getNameRout()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
-											}
+							});
+						}
+						File file1 = new File(rout.getUrlRout());
+						if(file1.exists()) {
 
-										})
-												.addOnFailureListener(new OnFailureListener() {
-													@Override
-													public void onFailure(@NonNull Exception e) {
-														Toast.makeText(ActionActivity.this, "Сталася помилка одна з додаткових фотографій не завантажилась", Toast.LENGTH_SHORT).show();
-													}
-												});
+							StorageReference riversRef1 = storageRef.child("placeImage/" + (Uri.fromFile(file1)).getLastPathSegment());
+							UploadTask uploadTask1 = riversRef1.putFile(Uri.fromFile(file1));
+							uploadBar.setVisibility(View.VISIBLE);
+							uploadTask1.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+								@Override
+								public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+									double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+									uploadBar.setProgress((int) progress);
+									if (progress == 100.0) {
+										uploadBar.setVisibility(View.GONE);
 									}
 								}
+							});
 
-							}
-						}).addOnFailureListener(new OnFailureListener() {
-							@Override
-							public void onFailure(@NonNull Exception e) {
-								Log.e("Bumar",e.toString());
-								Toast.makeText(ActionActivity.this, "Сталася помила завантаження не відбулося", Toast.LENGTH_SHORT).show();
-							}
-						});
+							uploadTask1.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+								@Override
+								public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+									// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+									Uri downloadUrl = taskSnapshot.getDownloadUrl();
+									Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
+											Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+									rout.setUrlRout(downloadUrl.toString());
+									myRef.child("Rout").child(rout.getNameRout()).setValue(rout);
+									for (int i = 1; i <= 3; i++) {
+										File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(rout.getNameRout() + String.valueOf(i)).build().getPath());
+										if (photoFile.exists()) {
+											FirebaseStorage storage = FirebaseStorage.getInstance();
+											StorageReference storageRef = storage.getReference();
+											StorageReference riversRef = storageRef.child("placeImage/" + rout.getNameRout() + String.valueOf(i));
+											UploadTask uploadTask = riversRef.putFile(Uri.fromFile(photoFile));
+											uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+												@Override
+												public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+													Toast.makeText(ActionActivity.this, "  Another photo download", Toast.LENGTH_SHORT).show();
+													myRef.child("Photos").child(rout.getNameRout()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
+												}
+
+											})
+													.addOnFailureListener(new OnFailureListener() {
+														@Override
+														public void onFailure(@NonNull Exception e) {
+															Toast.makeText(ActionActivity.this, "Сталася помилка одна з додаткових фотографій не завантажилась", Toast.LENGTH_SHORT).show();
+														}
+													});
+										}
+									}
+
+								}
+							}).addOnFailureListener(new OnFailureListener() {
+								@Override
+								public void onFailure(@NonNull Exception e) {
+									Log.e("Bumar", e.toString());
+									Toast.makeText(ActionActivity.this, "Сталася помила завантаження не відбулося", Toast.LENGTH_SHORT).show();
+								}
+							});
+						}
 					} else {
 						showAlreadyExistDialog("Rout");
 
@@ -934,44 +927,11 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 					hadAltitudePosition.get(i).getAltitude()));
 		}
 
-
-
 		if (hadAltitudePosition .size() > 0){
 			buildGraph(positions);
 			ObjectService objectService = new ObjectService(ActionActivity.this);
 			String outcome = objectService.saveRout(myName, null, myRout, true);
 		}
 
-		LineString lineString = new LineString();
-		lineString.setPositions(hadAltitudePosition);
-		Feature feature = new Feature();
-		try {
-			JSONObject geoJSON = new JSONObject();
-			feature.setProperties(new JSONObject());
-			feature.setGeometry(lineString);
-			feature.setIdentifier("key.my_carpathians");
-			geoJSON.put("features", new JSONArray().put(feature.toJSON()));
-			geoJSON.put("type", "FeatureCollection");
-
-			File rootPath = new File(getApplicationContext().getExternalFilesDir(
-					Environment.DIRECTORY_DOWNLOADS), "Routs");
-			if (!rootPath.exists()) {
-				rootPath.mkdirs();
-			}
-			File localFile = new File(rootPath, myName);
-			if (localFile.exists()) {
-				localFile.delete();
-			}
-			String fileUri = String.valueOf(Uri.fromFile(localFile));
-			Writer output = new BufferedWriter(new FileWriter(localFile));
-			output.write(geoJSON.toString());
-			output.close();
-			Rout mRout = new Rout();
-			mRout.setNameRout(myName);
-			mRout.setUrlRoutsTrack(fileUri);
-			createDataPoint(Uri.fromFile(localFile));
-		} catch (Exception e) {
-			Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
 		}
-	}
 }

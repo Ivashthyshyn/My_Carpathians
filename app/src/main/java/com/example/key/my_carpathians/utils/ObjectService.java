@@ -73,7 +73,7 @@ public class ObjectService {
 				if (localFile.exists()) {
 					return FILE_EXISTS;
 				} else {
-					String fileUri = String.valueOf(Uri.fromFile(localFile));
+					String fileUri =(Uri.fromFile(localFile)).getPath();
 					Writer output = new BufferedWriter(new FileWriter(localFile));
 					output.write(geoJSON.toString());
 					output.close();
@@ -134,8 +134,9 @@ public class ObjectService {
 			}
 			File localFile = new File(rootPath, name);
 			if (localFile.exists()) {
-				localFile.renameTo(new File(rootPath, rout.getNameRout()));
-                rout.setUrlRoutsTrack(Uri.fromFile(localFile).getPath());
+				File newFile  = new File(rootPath, rout.getNameRout());
+				localFile.renameTo(newFile);
+                rout.setUrlRoutsTrack(Uri.fromFile(newFile).getPath());
 
 				String mRootPathToSaveRout;
 				if (isExternalStorageWritable()) {

@@ -15,19 +15,22 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/cropToolsFrame"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:elevation="3dp"
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <LinearLayout
                 android:id="@+id/cropTools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="15"
                 android:background="?attr/colorPrimaryDark"
                 android:elevation="3dp"
                 android:orientation="horizontal"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <ImageButton
                     android:id="@+id/buttonBakCrop"
@@ -64,7 +67,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <com.theartofdev.edmodo.cropper.CropImageView
                     android:id="@+id/cropImage"
@@ -111,6 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:elevation="1dp"
             android:orientation="vertical">
 
 
@@ -129,19 +133,21 @@
                         android:id="@+id/imageTitlePhoto"
                         android:layout_width="fill_parent"
                         android:layout_height="match_parent"
-                        android:elevation="4dp"
+                        android:elevation="0dp"
                         android:scaleType="centerCrop"
                         app:srcCompat="@android:color/transparent"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
                         android:orientation="horizontal">
 
-                        <android.support.v7.widget.CardView
+                        <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_weight="1">
+                            android:layout_weight="1"
+                            android:background="@android:color/transparent">
 
                             <TextView
                                 android:id="@+id/textView8"
@@ -154,12 +160,14 @@
                                 android:id="@+id/buttonAddPhoto"
                                 android:layout_width="100dp"
                                 android:layout_height="100dp"
-                                android:layout_gravity="center"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerInParent="false"
+                                android:layout_centerVertical="true"
                                 android:layout_weight="1"
                                 android:background="@mipmap/ic_add_photo"
                                 android:scaleType="centerCrop"/>
 
-                        </android.support.v7.widget.CardView>
+                        </RelativeLayout>
 
                         <LinearLayout
                             android:id="@+id/groupMorePhoto"
@@ -167,35 +175,58 @@
                             android:layout_height="match_parent"
                             android:layout_gravity="end"
                             android:layout_weight="3"
+                            android:background="@android:color/transparent"
                             android:elevation="5dp"
                             android:orientation="vertical">
 
-                            <ImageButton
-                                android:id="@+id/imageAdd1"
+                            <android.support.v7.widget.CardView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:background="@mipmap/ic_add_photo"
-                                android:elevation="5dp"
-                                android:scaleType="centerCrop"/>
+                                android:background="@android:color/transparent">
 
-                            <ImageButton
-                                android:id="@+id/imageAdd2"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:background="@mipmap/ic_add_photo"
-                                android:elevation="5dp"
-                                android:scaleType="centerCrop"/>
+                                <ImageButton
+                                    android:id="@+id/imageAdd1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:background="@mipmap/ic_add_photo"
+                                    android:elevation="5dp"
+                                    android:scaleType="centerCrop"/>
+                            </android.support.v7.widget.CardView>
 
-                            <ImageButton
-                                android:id="@+id/imageAdd3"
+                            <android.support.v7.widget.CardView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:background="@mipmap/ic_add_photo"
-                                android:elevation="5dp"
-                                android:scaleType="centerCrop"/>
+                                android:background="@android:color/transparent">
+
+                                <ImageButton
+                                    android:id="@+id/imageAdd2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:background="@mipmap/ic_add_photo"
+                                    android:elevation="5dp"
+                                    android:scaleType="centerCrop"/>
+                            </android.support.v7.widget.CardView>
+
+                            <android.support.v7.widget.CardView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@android:color/transparent">
+
+                                <ImageButton
+                                    android:id="@+id/imageAdd3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:background="@mipmap/ic_add_photo"
+                                    android:elevation="5dp"
+                                    android:scaleType="centerCrop"/>
+                            </android.support.v7.widget.CardView>
+
                         </LinearLayout>
                     </LinearLayout>
                 </android.support.v7.widget.CardView>
@@ -338,20 +369,22 @@
         android:layout_centerHorizontal="false"
         android:layout_centerInParent="false"
         android:layout_centerVertical="false"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="bottom|right"
         android:layout_margin="10dp"
         android:background="@color/lbl_name"
         android:clickable="true"
         android:src="@drawable/com_facebook_button_like_icon_selected"
+        app:elevation="2dp"
         app:fabSize="mini"/>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabDeleteCreatedObject"
+        android:id="@+id/buttonDeleteObject"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|left"
         android:layout_margin="10dp"
         android:clickable="true"
+        app:elevation="2dp"
         app:fabSize="mini"
         app:srcCompat="@android:drawable/ic_delete"/>
 

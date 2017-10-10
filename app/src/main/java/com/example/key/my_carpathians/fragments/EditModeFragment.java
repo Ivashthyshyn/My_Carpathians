@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -115,14 +114,14 @@ public class EditModeFragment extends DialogFragment {
 	@ViewById(R.id.buttonSaveData)
 	FloatingActionButton buttonSaveData;
 
+	@ViewById(R.id.buttonDeleteObject)
+	FloatingActionButton buttonDeleteObject;
 	@ViewById(R.id.cropImage)
 	CropImageView cropImageView;
 
-	@ViewById(R.id.cropTools)
-	LinearLayout cropTools;
+	@ViewById(R.id.cropToolsFrame)
+	LinearLayout cropToolsFrame;
 
-	@ViewById(R.id.croperGroup)
-	FrameLayout croperGroup;
 
 	@ViewById(R.id.buttonBakCrop)
 	ImageButton buttonBakCrop;
@@ -194,25 +193,20 @@ public class EditModeFragment extends DialogFragment {
 				radioGroup.setVisibility(View.GONE);
 				editTextTitle.setText(mPlace.getTitlePlace());
 			}else if (mRout != null){
-				Uri rootPathForRoutsString;
-				if (isExternalStorageReadable()) {
-					rootPathForRoutsString = Uri.fromFile(getContext().getExternalFilesDir(
-							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
-				}else{
-					rootPathForRoutsString = Uri.fromFile(getContext().getFilesDir()).buildUpon().appendPath("Routs").build();
-				}
-
-				determineLength(rootPathForRoutsString.buildUpon().appendPath(mRout.getNameRout()).build().getPath());
+				determineLength(mRout.getUrlRoutsTrack());
 				radioGroup.setVisibility(View.VISIBLE);
 				for (int i = 1; i < radioGroup.getChildCount(); i++) {
 					RadioButton rButton = (RadioButton) radioGroup.getChildAt(i);
 
-					if (rButton.getVisibility() == View.VISIBLE) {
+					if (mRout.getRoutsLevel() == i) {
+						routsLevel = mRout.getRoutsLevel();
 						rButton.setChecked(true);
 					}
 				}
 				editTextTitle.setText(mRout.getTitleRout());
 			}
+
+
 		radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -239,8 +233,9 @@ public class EditModeFragment extends DialogFragment {
 			public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
 
 				progressView.setVisibility(View.INVISIBLE);
-				croperGroup.setVisibility(View.GONE);
-				cropTools.setVisibility(View.GONE);
+				cropToolsFrame.setVisibility(View.VISIBLE);
+				buttonSaveData.setVisibility(View.GONE);
+				buttonDeleteObject.setVisibility(View.GONE);
 				editGroup.setVisibility(View.VISIBLE);
 				groupMorePhoto.setVisibility(View.VISIBLE);
 
@@ -476,13 +471,16 @@ public class EditModeFragment extends DialogFragment {
 				}
 			} else if(uri != null ) {
 				File file = new File(uri);
-				boolean f = file.exists();
+				File newFile ;
 				if (file.exists()) {
 					Uri rootPathForTitlePhotoString = Uri.fromFile(getContext().getExternalFilesDir(
 							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
-					file.renameTo(new File(rootPathForTitlePhotoString.buildUpon().appendPath(namePlace).build().getPath()));
+					newFile = new File(rootPathForTitlePhotoString.buildUpon().appendPath(namePlace).build().getPath());
+					file.renameTo(newFile);
+					uri = Uri.fromFile(newFile).getPath();
+				}else {
+					uri = Uri.fromFile(file).getPath();
 				}
-				uri = Uri.fromFile(file).getPath();
 			}
 		return uri;
 	}
@@ -499,8 +497,9 @@ public class EditModeFragment extends DialogFragment {
 			Uri selectedImage = data.getData();
 			if ( selectedImage!= null) {
 				editGroup.setVisibility(View.GONE);
-				croperGroup.setVisibility(View.VISIBLE);
-				cropTools.setVisibility(View.VISIBLE);
+				cropToolsFrame.setVisibility(View.VISIBLE);
+				buttonSaveData.setVisibility(View.GONE);
+				buttonDeleteObject.setVisibility(View.GONE);
 				cropImageView.setImageUriAsync(selectedImage);
 				progressViewText.setText("Loading...");
 				progressView.setVisibility(View.VISIBLE);
@@ -511,8 +510,9 @@ public class EditModeFragment extends DialogFragment {
 	@Click(R.id.buttonBakCrop)
 	public void buttonBakCropWasClicked(){
 		cropImageView.clearImage();
-		croperGroup.setVisibility(View.GONE);
-		cropTools.setVisibility(View.GONE);
+		cropToolsFrame.setVisibility(View.GONE);
+		buttonSaveData.setVisibility(View.VISIBLE);
+		buttonDeleteObject.setVisibility(View.VISIBLE);
 		groupMorePhoto.setVisibility(View.VISIBLE);
 		editGroup.setVisibility(View.VISIBLE);
 	}
@@ -575,7 +575,7 @@ public class EditModeFragment extends DialogFragment {
 			searchPhotoInGallery();
 		}
 	}
-	@Click(R.id.fabDeleteCreatedObject)
+	@Click(R.id.buttonDeleteObject)
 	public void fabDeleteCreatedObject(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 		builder.setTitle("Deleting!");
