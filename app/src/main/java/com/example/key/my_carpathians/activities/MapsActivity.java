@@ -919,9 +919,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         View dialogView = inflater.inflate(R.layout.progres_item, null);
         RotateLoading rotateLoading = (RotateLoading)dialogView.findViewById(R.id.rotateloading);
         builder.setView(dialogView);
-        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
-            public void onDismiss(DialogInterface dialogInterface) {
+            public void onCancel(DialogInterface dialogInterface) {
                 Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
                 serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE);
                 MapsActivity.this.startService(serviceIntent);
