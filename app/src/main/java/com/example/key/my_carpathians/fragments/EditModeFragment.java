@@ -26,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.activities.StartActivity_;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
@@ -84,15 +83,12 @@ public class EditModeFragment extends DialogFragment {
 	private Rout mRout = null ;
 	private Place mPlace = null;
 	int routsLevel = 0;
-	Bitmap bitmap = null;
-	Bitmap bitmap1 = null;
-	Bitmap bitmap2 = null;
-	Bitmap bitmap3 = null;
+	String uriTitlePhoto = null;
 	String uriPhoto1 = null;
 	String uriPhoto2 = null;
 	String uriPhoto3 = null;
 	String name;
-	String uriTitlePhoto = null;
+
 	View view;
 	@ViewById(R.id.imageAdd1)
 	ImageButton imageAdd1;
@@ -158,7 +154,22 @@ public class EditModeFragment extends DialogFragment {
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setRetainInstance(true);
+		if (savedInstanceState != null){
+			mPlace = (Place)savedInstanceState.getSerializable("Place");
+			mRout = (Rout)savedInstanceState.getSerializable("Rout");
+
+					}
+
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mPlace != null) {
+			outState.putSerializable("Place", mPlace);
+		}else if (mRout != null){
+			outState.putSerializable("Rout", mRout);
+		}
 	}
 
 	@Override
@@ -170,29 +181,37 @@ public class EditModeFragment extends DialogFragment {
 
 	@AfterViews
 	void afterView(){
-			editTextName.setText(name);
-		if (uriTitlePhoto != null){
-			buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
-		}
 
-		Uri rootPathForPhotosString;
-		if (isExternalStorageReadable()) {
-			rootPathForPhotosString = Uri.fromFile(getContext().getExternalFilesDir(
-					Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
-		}else{
-			rootPathForPhotosString = Uri.fromFile(getContext().getFilesDir()).buildUpon().appendPath("Photos").build();
-		}
-			Glide
-				.with(getContext())
-				.load(rootPathForPhotosString.buildUpon().appendPath(name).build())
-				.diskCacheStrategy(DiskCacheStrategy.NONE)
-				.skipMemoryCache(true)
-				.into(imageTitlePhoto);
-			morePhotos(name);
+
 			if(mPlace != null){
+				name = mPlace.getNamePlace();
+				uriTitlePhoto = mPlace.getUrlPlace();
+				editTextName.setText(name);
+				if (uriTitlePhoto != null){
+					buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
+				}
+
 				radioGroup.setVisibility(View.GONE);
 				editTextTitle.setText(mPlace.getTitlePlace());
+				Glide
+						.with(getContext())
+						.load(mPlace.getUrlPlace())
+						.into(imageTitlePhoto);
+				morePhotos(name);
 			}else if (mRout != null){
+				name = mRout.getNameRout();
+				editTextName.setText(name);
+				uriTitlePhoto = mRout.getUrlRout();
+				if (uriTitlePhoto != null){
+					buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
+				}
+
+
+				Glide
+						.with(getContext())
+						.load(mRout.getUrlRout())
+						.into(imageTitlePhoto);
+				morePhotos(name);
 				determineLength(mRout.getUrlRoutsTrack());
 				radioGroup.setVisibility(View.VISIBLE);
 				for (int i = 1; i < radioGroup.getChildCount(); i++) {
@@ -231,32 +250,47 @@ public class EditModeFragment extends DialogFragment {
 		cropImageView.setOnCropImageCompleteListener(new CropImageView.OnCropImageCompleteListener() {
 			@Override
 			public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
-
 				progressView.setVisibility(View.INVISIBLE);
-				cropToolsFrame.setVisibility(View.VISIBLE);
-				buttonSaveData.setVisibility(View.GONE);
-				buttonDeleteObject.setVisibility(View.GONE);
+				cropToolsFrame.setVisibility(View.GONE);
+				buttonSaveData.setVisibility(View.VISIBLE);
+				buttonDeleteObject.setVisibility(View.VISIBLE);
 				editGroup.setVisibility(View.VISIBLE);
 				groupMorePhoto.setVisibility(View.VISIBLE);
 
 				switch (mPhotoSwicher){
 					case TITLE_PHOTO:
-						uriTitlePhoto = "";
-						bitmap = cropImageView.getCroppedImage();
-						imageTitlePhoto.setImageBitmap(bitmap);
+						uriTitlePhoto = savePhotoToSDCard(name, cropImageView.getCroppedImage(), null);
+						if (mPlace !=  null){
+							mPlace.setUrlPlace(uriTitlePhoto);
+						}else if(mRout != null){
+							mRout.setUrlRout(uriTitlePhoto);
+						}
+						Glide
+								.with(getContext())
+								.load(uriTitlePhoto)
+								.into(imageTitlePhoto);
 						buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
 						break;
 					case MORE_PHOTO_1:
-						bitmap1 = cropImageView.getCroppedImage();
-						imageAdd1.setImageBitmap(bitmap1);
+						uriPhoto1 = savePhotoToSDCard(name + 1, cropImageView.getCroppedImage(), null);
+						Glide
+								.with(getContext())
+								.load(uriPhoto1)
+								.into(imageAdd1);
 						break;
 					case MORE_PHOTO_2:
-						bitmap2 = cropImageView.getCroppedImage();
-						imageAdd2.setImageBitmap(bitmap2);
+						uriPhoto2 = savePhotoToSDCard(name + 2, cropImageView.getCroppedImage(), null);
+						Glide
+								.with(getContext())
+								.load(uriPhoto2)
+								.into(imageAdd2);
 						break;
 					case MORE_PHOTO_3:
-						bitmap3= cropImageView.getCroppedImage();
-						imageAdd3.setImageBitmap(bitmap3);
+						uriPhoto3 = savePhotoToSDCard(name + 3, cropImageView.getCroppedImage(), null);
+						Glide
+								.with(getContext())
+								.load(uriPhoto3)
+								.into(imageAdd3);
 						break;
 				}
 
@@ -368,17 +402,14 @@ public class EditModeFragment extends DialogFragment {
 
 	    if (rout != null){
 		    mRout = rout;
-		    name = rout.getNameRout();
-		    uriTitlePhoto = rout.getUrlRout();
 	    }else if(place != null){
 		    mPlace = place;
-		    name = place.getNamePlace();
-		    uriTitlePhoto = place.getUrlPlace();
 	    }
 	}
 	@Click(R.id.buttonAddPhoto)
 	public void buttonAddPhotoWasClicked(View view){
 		if(uriTitlePhoto != null){
+			mPhotoSwicher = TITLE_PHOTO;
 			showAlertDialog(uriTitlePhoto, true);
 		}else {
 			mPhotoSwicher = TITLE_PHOTO;
@@ -391,7 +422,10 @@ public class EditModeFragment extends DialogFragment {
 		intentFromGallery.setType("image/*");
 		startActivityForResult(intentFromGallery, GALLERY_REQUEST);
 	}
-
+	@Click(R.id.buttonCrop)
+	public void buttonCrop(){
+		cropImageView.getCroppedImageAsync();
+	}
 	@Click(R.id.buttonRotationCrop)
 	public void buttonRotationCropWasClicked(){
 		cropImageView.rotateImage(90);
@@ -415,10 +449,10 @@ public class EditModeFragment extends DialogFragment {
 				mRout.setLengthRout(mTrackLength);
 				mRout.setPositionRout(mPositionRout);
 				mRout.setRoutsLevel(routsLevel);
-				mRout.setUrlRout(savePhotoToSDCard(mRout.getNameRout(), bitmap, uriTitlePhoto));
-					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_1), bitmap1, uriPhoto1);
-					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), bitmap2, uriPhoto2);
-					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), bitmap3, uriPhoto3);
+				mRout.setUrlRout(savePhotoToSDCard(mRout.getNameRout(), null, uriTitlePhoto));
+					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_1), null, uriPhoto1);
+					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), null, uriPhoto2);
+					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), null, uriPhoto3);
 
 				ObjectService objectService = new ObjectService(getContext());
 				 String outcome = objectService.saveRout(name, null, mRout, true);
@@ -430,10 +464,10 @@ public class EditModeFragment extends DialogFragment {
 			}else if(mPlace != null) {
 				 mPlace.setNamePlace(editTextName.getText().toString());
 				 mPlace.setTitlePlace(editTextTitle.getText().toString());
-				 mPlace.setUrlPlace(savePhotoToSDCard(mPlace.getNamePlace(), bitmap, uriTitlePhoto));
-					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_1, bitmap1, uriPhoto1);
-					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_2, bitmap2, uriPhoto2);
-					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_3, bitmap3, uriPhoto3);
+				 mPlace.setUrlPlace(savePhotoToSDCard(mPlace.getNamePlace(), null, uriTitlePhoto));
+					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_1, null, uriPhoto1);
+					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_2, null, uriPhoto2);
+					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_3, null, uriPhoto3);
 
 				 ObjectService objectService = new ObjectService(getContext());
 				 String outcome =  objectService.savePlace( name, mPlace, true);
@@ -446,15 +480,17 @@ public class EditModeFragment extends DialogFragment {
 				 }
 	}
 
-	private String savePhotoToSDCard(String namePlace, Bitmap bitmap, String uri) {
+	private String savePhotoToSDCard(String name, Bitmap bitmap, String uri) {
 			if (bitmap != null) {
-				File rootPath = new File(getContext().getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS), "Photos");
-				if (!rootPath.exists()) {
-					rootPath.mkdirs();
+				Uri rootPathForPhotos;
+				if (isExternalStorageReadable()) {
+					rootPathForPhotos = Uri.fromFile(getContext().getExternalFilesDir(
+							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+				}else{
+					rootPathForPhotos = Uri.fromFile(getContext().getFilesDir()).buildUpon().appendPath("Photos").build();
 				}
 
-				File file = new File(rootPath, namePlace);
+				File file = new File(rootPathForPhotos.getPath(), name);
 				if (file.exists()) {
 					file.delete();
 				}
@@ -468,6 +504,7 @@ public class EditModeFragment extends DialogFragment {
 				} catch (IOException e) {
 					e.printStackTrace();
 					Toast.makeText(getContext(), "Photo do not saved", Toast.LENGTH_SHORT).show();
+					return null;
 				}
 			} else if(uri != null ) {
 				File file = new File(uri);
@@ -475,7 +512,7 @@ public class EditModeFragment extends DialogFragment {
 				if (file.exists()) {
 					Uri rootPathForTitlePhotoString = Uri.fromFile(getContext().getExternalFilesDir(
 							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
-					newFile = new File(rootPathForTitlePhotoString.buildUpon().appendPath(namePlace).build().getPath());
+					newFile = new File(rootPathForTitlePhotoString.buildUpon().appendPath(name).build().getPath());
 					file.renameTo(newFile);
 					uri = Uri.fromFile(newFile).getPath();
 				}else {
@@ -485,10 +522,7 @@ public class EditModeFragment extends DialogFragment {
 		return uri;
 	}
 
-	@Click(R.id.buttonCrop)
-	public void buttonCrop(){
-	cropImageView.getCroppedImageAsync();
-	}
+
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -519,6 +553,7 @@ public class EditModeFragment extends DialogFragment {
 	@Click(R.id.imageAdd1)
 	public void imageAdd1WasClicked(View view){
 		if (uriPhoto1 != null){
+			mPhotoSwicher = MORE_PHOTO_1;
 			showAlertDialog(uriPhoto1, false);
 		}else {
 			mPhotoSwicher = MORE_PHOTO_1;
@@ -560,6 +595,7 @@ public class EditModeFragment extends DialogFragment {
 	@Click(R.id.imageAdd2)
 	public void imageAdd2WasClicked(View view){
 		if (uriPhoto2 != null){
+			mPhotoSwicher = MORE_PHOTO_2;
 			showAlertDialog(uriPhoto2, false);
 		}else {
 			mPhotoSwicher = MORE_PHOTO_2;
@@ -569,6 +605,7 @@ public class EditModeFragment extends DialogFragment {
 	@Click(R.id.imageAdd3)
 	public void imageAdd3WasClicked(View view){
 		if (uriPhoto3 != null){
+			mPhotoSwicher = MORE_PHOTO_3;
 			showAlertDialog(uriPhoto3, false);
 		}else {
 			mPhotoSwicher = MORE_PHOTO_3;

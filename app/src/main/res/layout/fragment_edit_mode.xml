@@ -135,7 +135,7 @@
                         android:layout_height="match_parent"
                         android:elevation="0dp"
                         android:scaleType="centerCrop"
-                        app:srcCompat="@android:color/transparent"/>
+                        />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -298,6 +298,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:background="@color/background"
+                    android:paddingLeft="5dp"
                     android:text="Name"
                     android:textColor="@color/colorAccent"
                     android:textSize="18sp"/>
@@ -307,7 +308,8 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:background="@color/background"
-                    >
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp">
 
                     <EditText
                         android:id="@+id/editTextName"
@@ -322,6 +324,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:background="@color/background"
+                    android:paddingLeft="5dp"
                     android:text="interesting facts"
                     android:textColor="@color/colorAccent"
                     android:textSize="18sp"/>
@@ -347,7 +350,8 @@
                                 android:id="@+id/editTextTitle"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                />
+                                android:paddingLeft="5dp"
+                                android:paddingRight="5dp"/>
                         </LinearLayout>
                     </ScrollView>
 

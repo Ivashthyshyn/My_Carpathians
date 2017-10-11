@@ -113,10 +113,47 @@
                     android:progress="20"
                     android:visibility="gone"/>
 
+                <LinearLayout
+                    android:id="@+id/ratingBarrContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@android:color/transparent"
+                    android:elevation="3dp"
+                    android:orientation="horizontal"
+                    android:paddingRight="10dp"
+                    android:paddingTop="5dp">
+
+                    <RatingBar
+                        android:id="@+id/ratingBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:clickable="false"
+                        android:contextClickable="false"
+                        android:numStars="4"
+                        android:progressBackgroundTint="@color/bg_login"
+                        android:progressTint="@color/colorAccent"
+                        android:rating="3"
+                        android:stepSize="0.5"/>
+
+                    <ImageButton
+                        android:id="@+id/buttonRatingBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="7dp"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent"
+                        android:backgroundTint="@android:color/transparent"
+                        android:clickable="true"
+                        app:elevation="4dp"
+                        app:srcCompat="@drawable/ic_ok_like_hand_sign"/>
+                </LinearLayout>
+
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize">
             </android.support.v7.widget.Toolbar>
@@ -207,44 +244,5 @@
         app:fabSize="mini"
         app:layout_anchor="@id/appBarLayout"
         app:layout_anchorGravity="bottom|left"/>
-
-    <LinearLayout
-        android:id="@+id/ratingBarrContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="vertical"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp">
-
-        <RatingBar
-            android:id="@+id/ratingBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:clickable="false"
-            android:contextClickable="false"
-            android:numStars="4"
-            android:progressBackgroundTint="@color/bg_login"
-            android:progressTint="@color/colorAccent"
-            android:rating="3"
-            android:stepSize="0.5"/>
-    </LinearLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/buttonRatingBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
-        android:layout_margin="10dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:paddingLeft="20dp"
-        app:elevation="0dp"
-        app:fabSize="mini"
-        app:layout_anchor="@id/ratingBarrContainer"
-        app:layout_anchorGravity="right"
-        app:srcCompat="@drawable/ic_ok_like_hand_sign"/>
 
 </android.support.design.widget.CoordinatorLayout>
