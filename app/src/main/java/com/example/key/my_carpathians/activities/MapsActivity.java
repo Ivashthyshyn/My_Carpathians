@@ -32,6 +32,7 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -1164,6 +1165,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (mPointCounter == 0 &&  createdTrackPosition == null) {
             buttonTouchCreator.setVisibility(View.VISIBLE);
             buttonHandEditMode.setImageResource(R.drawable.hand_write_icon);
+            buttonHandEditMode.setScaleType(ImageView.ScaleType.CENTER_CROP);
             showChoseCreateObjectDialog(true);
             autoOrientationOff(true);
             toolsGPSContainer.setVisibility(View.GONE);

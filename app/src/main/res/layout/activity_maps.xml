@@ -30,86 +30,12 @@
             mapbox:mapbox_cameraZoom="12"
             mapbox:mapbox_styleUrl="mapbox://styles/vylky/cj6z0f00y2pii2rnrrshfx481">
 
-            <LinearLayout
-                android:id="@+id/toolsGPSContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/round_shape_for_tools_container_black"
-                android:gravity="center"
-                android:orientation="horizontal"
-                >
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/buttonShowMyLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:background="@drawable/round_shape_for_tools_container_black"
-                    android:scaleType="centerCrop"
-                    android:visibility="visible"
-                    app:backgroundTint="@android:color/transparent"
-                    app:fabSize="mini"
-                    app:srcCompat="@drawable/ic_my_location_24dp"/>
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/buttonRecTrack"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:background="@drawable/round_shape_for_tools_container_black"
-                    android:scaleType="centerCrop"
-                    android:visibility="gone"
-                    app:backgroundTint="@android:color/transparent"
-                    app:fabSize="mini"
-                    mapbox:srcCompat="@android:drawable/ic_menu_edit"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/toolsHandContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/round_shape_for_tools_container_black"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/buttonOnBack"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@android:color/transparent"
-                    android:scaleType="centerCrop"
-                    android:visibility="gone"
-                    app:backgroundTint="@android:color/transparent"
-                    app:fabSize="mini"
-                    app:srcCompat="@drawable/on_back"/>
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/buttonHandEditMode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:scaleType="centerCrop"
-                    app:backgroundTint="@android:color/transparent"
-                    app:fabSize="mini"
-                    app:srcCompat="@drawable/hand_icon"/>
-
-            </LinearLayout>
-
         </com.mapbox.mapboxsdk.maps.MapView>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="9"
+            android:layout_weight="14"
             android:orientation="vertical">
 
             <ProgressBar
@@ -166,6 +92,78 @@
             </LinearLayout>
 
         </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/toolsGPSContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/round_shape_for_tools_container_black"
+        android:orientation="horizontal">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/buttonShowMyLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:visibility="visible"
+            app:backgroundTint="@android:color/transparent"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_my_location_24dp"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/buttonRecTrack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:backgroundTint="@android:color/transparent"
+            app:fabSize="mini"
+            mapbox:srcCompat="@android:drawable/ic_menu_edit"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/toolsHandContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="end"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/round_shape_for_tools_container_black"
+        android:orientation="horizontal">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/buttonOnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:backgroundTint="@android:color/transparent"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/on_back"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/buttonHandEditMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            app:backgroundTint="@android:color/transparent"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/hand_icon"/>
 
     </LinearLayout>
 

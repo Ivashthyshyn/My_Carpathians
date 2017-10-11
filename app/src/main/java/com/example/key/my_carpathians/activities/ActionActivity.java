@@ -23,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -130,7 +131,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	ProgressBar uploadBar;
 
    @ViewById(R.id.toolbar)
-    Toolbar toolbar;
+   Toolbar toolbar;
 
 	@ViewById(R.id.appBarLayout)
 	AppBarLayout appBarLayout;
@@ -142,7 +143,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	@ViewById(R.id.ratingBar)
 	RatingBar ratingBar;
 	@ViewById(R.id.buttonRatingBar)
-	FloatingActionButton buttonRatingBar;
+	ImageButton buttonRatingBar;
     @ViewById(graph)
     GraphView graphView;
 	@ViewById(R.id.buttonShowOnMap)
@@ -171,7 +172,6 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		setupSizeViews();
         tabLayout.setupWithViewPager(viewPager);
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -251,13 +251,24 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 			}else{
 				rootPathForTitlePhotoString = Uri.parse(place.getUrlPlace());
 			}
+
+			File titlePhotoFile = new File(rootPathForTitlePhotoString.getPath(), myPlace.getNamePlace());
+			if (titlePhotoFile.exists()){
 				Glide
 						.with(ActionActivity.this)
-						.load(rootPathForTitlePhotoString.buildUpon().appendPath(place.getNamePlace()).build())
+						.load(titlePhotoFile)
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
 						.skipMemoryCache(true)
 						.into(imageView);
-				photoUrlList.add(0, rootPathForTitlePhotoString.toString());
+				photoUrlList.add(0, Uri.fromFile(titlePhotoFile).getPath());
+				if(photoUrlList.size() == 1){
+					fabChangePhotoRight.setVisibility(View.GONE);
+				}
+			}else{
+				fabChangePhotoLeft.setVisibility(View.GONE);
+				fabChangePhotoRight.setVisibility(View.GONE);
+			}
+
 				graphView.setVisibility(View.GONE);
 
 			getRating(place.getNamePlace());
@@ -282,9 +293,16 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 	            fabChangePhotoRight.setVisibility(View.GONE);
 	            imageView.setVisibility(View.GONE);
             }
+			Uri rootPathForRoutsString;
+			if (isExternalStorageReadable()) {
+				rootPathForRoutsString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
+						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
+			}else{
+				rootPathForRoutsString = Uri.fromFile(ActionActivity.this.getFilesDir()).buildUpon().appendPath("Routs").build();
+			}
 
 
-            createDataPoint(myRout.getUrlRoutsTrack());
+            createDataPoint(rootPathForRoutsString.buildUpon().appendPath(myRout.getNameRout()).build().getPath());
 
 			myPosition = rout.getPositionRout();
 			myName = rout.getNameRout();

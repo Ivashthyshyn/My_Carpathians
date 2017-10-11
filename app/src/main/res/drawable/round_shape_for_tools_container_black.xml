@@ -12,12 +12,9 @@
         android:right="0dp"
         android:bottom="0dp"
         />
-    <size
-        android:width="30dp"
-        android:height="30dp"
-        />
+
     <stroke
-        android:width="3dp"
-        android:color="#0D0D0D"
+        android:width="2dp"
+        android:color="#ffffff"
         />
 </shape>
