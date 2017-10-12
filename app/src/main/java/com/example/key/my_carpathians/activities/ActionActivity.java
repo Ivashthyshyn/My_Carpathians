@@ -23,7 +23,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -106,6 +105,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
     public static final String SELECTED_USER_PLACES = "selected_user_places";
+	public static final String LOGIN = "login";
 	public List<Rout> routList;
     public List<Place> placeList;
     public List<Position> pointsRout;
@@ -143,7 +143,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	@ViewById(R.id.ratingBar)
 	RatingBar ratingBar;
 	@ViewById(R.id.buttonRatingBar)
-	ImageButton buttonRatingBar;
+	FloatingActionButton buttonRatingBar;
     @ViewById(graph)
     GraphView graphView;
 	@ViewById(R.id.buttonShowOnMap)
@@ -385,7 +385,56 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 		DatabaseReference myRef = database.getReference();
 		FirebaseAuth mAuth = FirebaseAuth.getInstance();
 		myRef.child("Rating").child(myName).child(mAuth.getCurrentUser().getUid()).setValue(rating);
+	}
 
+	public void showLoginDialog() {
+		AlertDialog.Builder builder;
+		if (isOnline()) {
+			builder = new AlertDialog.Builder(this);
+			builder.setTitle("Для того щоб отримати доступ до всіх функцій програми потрібно зареєструватися");
+			builder.setMessage("Виберіть спосіб реєстраці");
+
+			builder.setPositiveButton("Зареєструватися", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int arg1) {
+				Intent intent = new Intent(ActionActivity.this, StartActivity_.class);
+					intent.putExtra(LOGIN, true );
+					startActivity(intent);
+					dialog.dismiss();
+
+				}
+			});
+			builder.setNegativeButton(" ні", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int arg1) {
+					dialog.dismiss();
+				}
+			});
+			builder.setCancelable(true);
+			builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+				dialog.dismiss();
+				}
+			});
+
+			AlertDialog alert = builder.create();
+			alert.show();
+		} else {
+			builder = new AlertDialog.Builder(this);
+			builder.setTitle("Мережа Інтернет");
+			builder.setMessage("Нажаль ви зараз ви не підключені до мережі інтернет!" +
+					" Керування автентифікацією недоступне! ");
+
+			builder.setPositiveButton("Так", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int arg1) {
+
+				}
+			});
+
+			builder.setCancelable(true);
+
+
+			AlertDialog alert = builder.create();
+			alert.show();
+		}
 	}
 
 	@Background
@@ -893,7 +942,15 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 		return connected;
 	}
 	@Click(R.id.buttonRatingBar)
-	public void  ratingBarDialog(){
+	public void  buttonRatingBarWasClicked() {
+
+		if (FirebaseAuth.getInstance().getCurrentUser() != null && !FirebaseAuth.getInstance().getCurrentUser().isAnonymous()) {
+			ratingBarDialog();
+		}else{
+			showLoginDialog();
+		}
+	}
+public void ratingBarDialog(){
 		final AlertDialog.Builder ratingDialog = new AlertDialog.Builder(this);
 
 		ratingDialog.setIcon(android.R.drawable.btn_star_big_on);
@@ -948,7 +1005,7 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 		if (hadAltitudePosition .size() > 0){
 			buildGraph(positions);
 			ObjectService objectService = new ObjectService(ActionActivity.this);
-			String outcome = objectService.saveRout(myName, null, myRout, true);
+			objectService.saveRout(myName, null, myRout, true);
 		}
 
 		}

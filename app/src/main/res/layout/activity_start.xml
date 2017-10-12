@@ -164,10 +164,12 @@
                         android:id="@+id/inputEmailLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"
+                        android:layout_alignParentBottom="false"
+                        android:layout_alignParentLeft="false"
+                        android:layout_alignParentStart="false"
                         android:layout_marginBottom="25dp"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
                         android:visibility="gone">
 
                         <EditText
@@ -185,6 +187,8 @@
                         android:id="@+id/inputPasswordLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
                         android:visibility="gone">
 
                         <EditText
@@ -204,6 +208,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_centerInParent="true"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
                         android:visibility="gone"/>
 
                     <com.facebook.login.widget.LoginButton
@@ -213,6 +219,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="left"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
                         android:layout_marginTop="5dp"
                         android:visibility="gone"/>
 
@@ -220,6 +228,8 @@
                         android:id="@+id/emailLoginButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
                         android:background="@color/colorAccent"
                         android:text="@string/btn_login"
                         android:textColor="@android:color/black"
@@ -229,6 +239,8 @@
                         android:id="@+id/buttonResetPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
                         android:layout_marginTop="20dip"
                         android:background="@null"
                         android:text="@string/btn_forgot_password"
@@ -240,6 +252,8 @@
                         android:id="@+id/buttonLogout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
                         android:background="@color/colorAccent"
                         android:text="Log Out"
                         android:visibility="gone"/>
@@ -248,6 +262,8 @@
                         android:id="@+id/buttonCreateNewAccount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
                         android:layout_marginTop="20dip"
                         android:background="@color/btn_login_bg"
                         android:text="Create new Account"
@@ -260,6 +276,8 @@
                         android:id="@+id/buttonGoogleLogout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
                         android:text="Google Log Out"
                         android:visibility="gone"/>
 
@@ -354,6 +372,42 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:visibility="gone"/>
+
+                        <TextView
+                            android:id="@+id/myOfflineMap"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="10dp"
+                            android:text="Favorites"
+                            android:textColor="@color/colorAccent"/>
+
+                        <Button
+                            android:id="@+id/buttonMapOffline"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:gravity="left|center_vertical"
+                            android:paddingStart="15dp"
+                            android:text="Map"
+                            android:textColor="@color/white"/>
+
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/listdownloadMaps"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:visibility="gone">
+
+                        </android.support.v7.widget.RecyclerView>
+
+                        <Button
+                            android:id="@+id/buttonSettungs"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:gravity="left|center_vertical"
+                            android:paddingStart="15dp"
+                            android:text="Settings"
+                            android:textColor="@color/white"/>
 
                     </LinearLayout>
                 </android.support.v4.widget.NestedScrollView>

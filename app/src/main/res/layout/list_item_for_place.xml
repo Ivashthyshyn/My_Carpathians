@@ -80,7 +80,7 @@
                     android:backgroundTint="@color/bg_login"
                     android:elevation="5dp"
                     android:isIndicator="true"
-                    android:numStars="5"
+                    android:numStars="4"
                     android:rating="1"
                     android:secondaryProgressTint="@color/colorAccent"
                     android:stepSize="0.5"/>

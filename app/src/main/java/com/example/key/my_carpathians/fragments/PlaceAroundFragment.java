@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.AroundObjectListAdapter;
@@ -28,6 +29,7 @@ public class PlaceAroundFragment extends Fragment {
 	Place place;
 	List<Place> placeList;
 	RecyclerView recyclerView;
+	TextView textTitlePlacceAround;
 	List<Place> placesAround;
 	Position position;
 	AroundObjectListAdapter recyclerAdapter;
@@ -77,6 +79,7 @@ public class PlaceAroundFragment extends Fragment {
 	                         Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_place_around, container, false);
 		recyclerView = (RecyclerView) view.findViewById(R.id.recyclerViewPlaceAround);
+		textTitlePlacceAround = (TextView)view.findViewById(R.id.textTitlePlaceAround);
 		LinearLayoutManager mLayoutManager = new LinearLayoutManager(this.getActivity());
 		Log.d("debugMode", "The application stopped after this");
 		recyclerView.setLayoutManager(mLayoutManager);
@@ -85,8 +88,12 @@ public class PlaceAroundFragment extends Fragment {
 
 	@AfterViews
 	public void afterView(){
-		recyclerAdapter = new AroundObjectListAdapter(placesAround, null);
-		recyclerView.setAdapter(recyclerAdapter);
+		if(placesAround.size() == 0) {
+			textTitlePlacceAround.setText("Поблизу немає жодних місць");
+		}else {
+			recyclerAdapter = new AroundObjectListAdapter(placesAround, null);
+			recyclerView.setAdapter(recyclerAdapter);
+		}
 	}
 
 

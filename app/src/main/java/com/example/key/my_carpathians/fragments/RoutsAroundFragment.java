@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.AroundObjectListAdapter;
@@ -31,6 +32,7 @@ public class RoutsAroundFragment extends Fragment {
 	List<Rout> routsAround;
 	View view;
 	RecyclerView recyclerView;
+	TextView textTitleRoutAround;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,7 @@ public class RoutsAroundFragment extends Fragment {
 	                         Bundle savedInstanceState) {
 		view = inflater.inflate(R.layout.fragment_routs_around, container, false);
 		recyclerView = (RecyclerView) view.findViewById(R.id.recyclerViewRoutAround);
+		textTitleRoutAround = (TextView)view.findViewById(R.id.textTitleRoutAround);
 		LinearLayoutManager mLayoutManager = new LinearLayoutManager(this.getActivity());
 		Log.d("debugMode", "The application stopped after this");
 		recyclerView.setLayoutManager(mLayoutManager);
@@ -51,8 +54,12 @@ public class RoutsAroundFragment extends Fragment {
 
 	@AfterViews
 	public void afterView(){
-		AroundObjectListAdapter recyclerAdapter = new AroundObjectListAdapter( null, routsAround);
-		recyclerView.setAdapter(recyclerAdapter);
+		if (routsAround.size() == 0){
+			textTitleRoutAround.setText("Немає жодного маршруту поруч");
+		}else {
+			AroundObjectListAdapter recyclerAdapter = new AroundObjectListAdapter(null, routsAround);
+			recyclerView.setAdapter(recyclerAdapter);
+		}
 	}
 
 

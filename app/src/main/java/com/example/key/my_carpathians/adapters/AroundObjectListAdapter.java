@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -32,6 +33,8 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 		 CheckBox checkBox;
 		 TextView textNameRout;
 		 RatingBar ratingBar;
+		TextView textLengthTrack;
+		Button buttonTypeAndLevel;
 		private Rout mRout;
 		private Place mPlace;
 		private  ClickListener mClickListener;
@@ -45,7 +48,9 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 			checkBox.setClickable(false);
 			textNameRout = (TextView) itemView.findViewById(R.id.textNameRout);
 			textNameRout.setVisibility(View.GONE);
+			textLengthTrack = (TextView)itemView.findViewById(R.id.textLenghtTrack);
 			ratingBar = (RatingBar) itemView.findViewById(R.id.ratingBar);
+			buttonTypeAndLevel =  (Button)itemView.findViewById(R.id.buttonTypeAndLevel);
 			mRout = null;
 			mPlace = null;
 			itemView.setOnClickListener(this);
@@ -86,9 +91,14 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 		if (routs != null) {
 			holder.mRout = routs.get(position);
 			holder.checkBox.setText(holder.mRout.getNameRout());
+			holder.textLengthTrack.setText(holder.mRout.getLengthRout() + "km");
+
 		}else if (places != null){
 			holder.mPlace = places.get(position);
 			holder.checkBox.setText(holder.mPlace.getNamePlace());
+			holder.textLengthTrack.setVisibility(View.GONE);
+			holder.buttonTypeAndLevel.setVisibility(View.GONE);
+
 		}
 	}
 

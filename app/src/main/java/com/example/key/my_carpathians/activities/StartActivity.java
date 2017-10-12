@@ -97,6 +97,7 @@ import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.example.key.my_carpathians.activities.ActionActivity.LOGIN;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_ROUT;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
@@ -211,42 +212,7 @@ public class StartActivity extends AppCompatActivity implements
 
             @Override
             public void onDrawerOpened(View drawerView) {
-                mUser = mAuth.getCurrentUser();
-                if (mUser == null) {
-                    showableLogInGroup(true);
-                    mTypeMode = false;
-                } else if (mUser.isAnonymous()) {
-                    updateUI("Anonymous", null);
-	                mUserUID = mUser.getUid();
-                    mTypeMode = false;
-                    showInterfaceForAnonymous();
-                    produceToolsVisibility(mTypeMode);
-                } else {
-                    if (mUser.getProviders().get(0).equals("google.com")) {
-                        produceToolsVisibility(mTypeMode);
-                        mTypeMode = true;
-                        loginGoogle();
-	                    mUserUID = mUser.getUid();
-                        updateUI(mUser.getProviderData().get(0).getDisplayName(),
-                                String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
-                        buttonGoogleLogout.setVisibility(View.VISIBLE);
-                    } else if (mUser.getProviders().get(0).equals("facebook.com")) {
-                        produceToolsVisibility(mTypeMode);
-                        mTypeMode = true;
-	                    mUserUID = mUser.getUid();
-                        loginFacebook();
-                        updateUI(mUser.getProviderData().get(0).getDisplayName(),
-                                String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
-                    } else if (mUser.getProviders().get(0).equals("password")) {
-                        produceToolsVisibility(mTypeMode);
-                        mTypeMode = true;
-	                    mUserUID = mUser.getUid();
-                        updateUI(mUser.getProviderData().get(0).getEmail(), null);
-                        buttonLogaut.setVisibility(View.VISIBLE);
-                        buttonLogaut.setText("LOG OUT");
-                    }
-                }
-                produceToolsVisibility(mTypeMode);
+                checkCurentUser();
             }
 
             @Override
@@ -259,6 +225,7 @@ public class StartActivity extends AppCompatActivity implements
 
             }
         });
+
 
         mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -350,7 +317,49 @@ public class StartActivity extends AppCompatActivity implements
 
             }
         });
+        if (getIntent().getBooleanExtra(LOGIN, false)){
+            mDrawerLayout.openDrawer(Gravity.START, true);
+            checkCurentUser();
+        }
+    }
 
+    private void checkCurentUser() {
+        mUser = mAuth.getCurrentUser();
+        if (mUser == null) {
+            showableLogInGroup(true);
+            mTypeMode = false;
+        } else if (mUser.isAnonymous()) {
+            updateUI("Anonymous", null);
+            mUserUID = mUser.getUid();
+            mTypeMode = false;
+            showInterfaceForAnonymous();
+            produceToolsVisibility(mTypeMode);
+        } else {
+            if (mUser.getProviders().get(0).equals("google.com")) {
+                produceToolsVisibility(mTypeMode);
+                mTypeMode = true;
+                loginGoogle();
+                mUserUID = mUser.getUid();
+                updateUI(mUser.getProviderData().get(0).getDisplayName(),
+                        String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
+                buttonGoogleLogout.setVisibility(View.VISIBLE);
+            } else if (mUser.getProviders().get(0).equals("facebook.com")) {
+                produceToolsVisibility(mTypeMode);
+                mTypeMode = true;
+                mUserUID = mUser.getUid();
+                loginFacebook();
+                updateUI(mUser.getProviderData().get(0).getDisplayName(),
+                        String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
+            } else if (mUser.getProviders().get(0).equals("password")) {
+                produceToolsVisibility(mTypeMode);
+                mTypeMode = true;
+                mUserUID = mUser.getUid();
+                updateUI(mUser.getProviderData().get(0).getEmail(), null);
+                buttonLogaut.setVisibility(View.VISIBLE);
+                buttonLogaut.setText("LOG OUT");
+            }
+        }
+        produceToolsVisibility(mTypeMode);
     }
 
     /* Checks if external storage is available for read and write */

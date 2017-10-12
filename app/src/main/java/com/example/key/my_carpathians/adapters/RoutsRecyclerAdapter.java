@@ -1,11 +1,7 @@
 package com.example.key.my_carpathians.adapters;
 
 import android.content.Context;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,32 +18,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfMeasurement;
-import com.mapbox.services.commons.geojson.LineString;
-import com.mapbox.services.commons.models.Position;
-import com.mapbox.services.commons.utils.TextUtils;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.math.RoundingMode;
-import java.nio.charset.Charset;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.HARD;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.LIGHT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
-import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 /**
  *
@@ -87,9 +64,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
     public void onBindViewHolder(RoutsViewHolder holder, int position) {
         holder.mRout = routs.get(position);
         holder.textNameRout.setText(holder.mRout.getNameRout());
-        LengthRout lengthRout = new LengthRout(holder.mRout.getNameRout(), holder.textLengthTrack);
-        lengthRout.doInBackground();
-
+        holder.textLengthTrack.setText(holder.mRout.getLengthRout() + "km");
         ratingRout(holder.mRout.getNameRout(), holder.ratingBar);
         switch (holder.mRout.getRoutsLevel()) {
             case LIGHT:
@@ -133,84 +108,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
     }
 
 
-    public class LengthRout extends AsyncTask<Void, Void, Void> {
-        String name;
-        TextView textView;
 
-        LengthRout(String name, TextView textView) {
-            this.textView = textView;
-            this.name = name;
-        }
-
-
-        @Override
-        protected Void doInBackground(Void... strings) {
-            List<Position> points = new ArrayList<>();
-            Uri rootPathForRoutsString;
-            if (isExternalStorageReadable()) {
-                rootPathForRoutsString = Uri.fromFile(context.getExternalFilesDir(
-                        Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
-            }else{
-                rootPathForRoutsString = Uri.fromFile(context.getFilesDir()).buildUpon().appendPath("Routs").build();
-            }
-
-            try {
-                // Load GeoJSON file
-                File file = new File(rootPathForRoutsString.buildUpon().appendPath(name).build().getPath());
-                if (file.exists()) {
-
-                    InputStream fileInputStream = new FileInputStream(file);
-                    BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
-                    StringBuilder sb = new StringBuilder();
-                    int cp;
-                    while ((cp = rd.read()) != -1) {
-                        sb.append((char) cp);
-                    }
-
-                    fileInputStream.close();
-                    // Parse JSON
-                    JSONObject json = new JSONObject(sb.toString());
-                    JSONArray features = json.getJSONArray("features");
-                    JSONObject feature = features.getJSONObject(0);
-                    JSONObject geometry = feature.getJSONObject("geometry");
-                    if (geometry != null) {
-                        String type = geometry.getString("type");
-
-                        // Our GeoJSON only has one feature: a line string
-                        if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
-
-                            // Get the Coordinates
-                            JSONArray coordinates = geometry.getJSONArray("coordinates");
-                            for (int lc = 0; lc < coordinates.length(); lc++) {
-                                JSONArray coordinate = coordinates.getJSONArray(lc);
-                                Position position = Position.fromCoordinates(coordinate.getDouble(1), coordinate.getDouble(0), coordinate.getDouble(2));
-                                points.add(position);
-                            }
-                        }
-                    }
-                }
-            } catch (Exception exception) {
-                Log.e(TAG, "Exception Loading GeoJSON: " + exception.toString());
-            }
-
-
-            if (points.size() > 0) {
-
-                LineString lineString = LineString.fromCoordinates(points);
-                double dis = 0;
-                if (points.size() > 0) {
-                    dis = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_KILOMETERS);
-                }
-                DecimalFormat df = new DecimalFormat("#.#");
-                df.setRoundingMode(RoundingMode.CEILING);
-                textView.setText(df.format(dis) + "km");
-            } else {
-                textView.setText("0");
-            }
-            return null;
-        }
-
-    }
 
 
     @Override
