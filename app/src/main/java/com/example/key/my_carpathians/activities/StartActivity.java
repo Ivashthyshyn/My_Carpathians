@@ -4,23 +4,33 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,6 +41,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter;
+import com.example.key.my_carpathians.adapters.ViewPagerAdapter;
 import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
 import com.example.key.my_carpathians.fragments.RoutsListFragment;
@@ -97,6 +108,9 @@ import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.example.key.my_carpathians.activities.ActionActivity.LOGIN;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_PLACE;
 import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_ROUT;
@@ -115,6 +129,7 @@ import static com.example.key.my_carpathians.utils.ObjectService.ERROR;
 @EActivity
 public class StartActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,CommunicatorStartActivity {
+
     public static final String PUT_EXTRA_PLACE_LIST = "place_list";
     public static final String PUT_EXTRA_ROUTS_LIST = "routs_list";
     public static final String FAVORITES_ROUTS_LIST = "favorites_user_routs";
@@ -131,6 +146,9 @@ public class StartActivity extends AppCompatActivity implements
     public ArrayList<Rout> routs = new ArrayList<>();
     public AlertDialog.Builder builder;
     private boolean connected = false;
+    private String [] mPermissionList = new String[]{
+            ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE
+            , READ_EXTERNAL_STORAGE };
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Context context = StartActivity.this;
     private SharedPreferences mSharedPreferences;
@@ -144,8 +162,8 @@ public class StartActivity extends AppCompatActivity implements
     private boolean mTypeMode = false;
     private String rootPathForRoutsString;
 
-    @ViewById(R.id.buttonFastRec)
-    Button buttonFastRec;
+    @ViewById(R.id.fabRecEditor)
+    FloatingActionButton fabRecEditor;
     @ViewById(R.id.userAcountImage)
     CircleImageView userAccountImage;
     @ViewById(R.id.facebokLoginButton)
@@ -196,35 +214,29 @@ public class StartActivity extends AppCompatActivity implements
     RecyclerView listCreatedPlaces;
     @ViewById(R.id.textViewCreated)
     TextView textViewCreated;
+	@ViewById(R.id.toolbar)
+	Toolbar toolbar;
 
-
+	@ViewById(R.id.viewpagerActionActivity)
+	ViewPager viewPager;
+	@ViewById(R.id.tabLayout)
+	TabLayout tabLayout;
+	ViewPagerAdapter adapter;
+    ActionBarDrawerToggle actionBarDrawerToggle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+
+	    setSupportActionBar(toolbar);
+	    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+	    tabLayout.setupWithViewPager(viewPager);
+	    adapter = new ViewPagerAdapter(getSupportFragmentManager());
+	    viewPager.setAdapter(adapter);
         mAuth = FirebaseAuth.getInstance();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                checkCurentUser();
-            }
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-
-            }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-
-            }
-        });
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this,mDrawerLayout,toolbar,R.string.app_name,R.string.app_name);
+        mDrawerLayout.addDrawerListener(actionBarDrawerToggle);
 
 
         mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -241,6 +253,14 @@ public class StartActivity extends AppCompatActivity implements
             }
         };
 
+
+
+        checkAllPermission();
+
+
+    }
+
+    private void getDateFromFirebace() {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
 
@@ -248,13 +268,22 @@ public class StartActivity extends AppCompatActivity implements
         myPlace.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-	            if (places.size() > 0){
-		            places.clear();
-	            }
+                if (places.size() > 0){
+                    places.clear();
+                }
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Place place = postSnapshot.getValue(Place.class);
                     places.add(place);
 
+                }
+                if (placesListFragment == null) {
+                    PlacesListFragment placesListFragment = new PlacesListFragment_();
+                    placesListFragment.setList(places);
+                    adapter.addFragment(placesListFragment, "Plase");
+                    adapter.notifyDataSetChanged();
+
+                }else{
+                    placesListFragment.setList(places);
                 }
                 if (isExternalStorageWritable()) {
                     downloadPhoto(places);
@@ -277,8 +306,9 @@ public class StartActivity extends AppCompatActivity implements
                 if (routs.size() > 0){
                     routs.clear();
                 }
+
                 if (isExternalStorageWritable()) {
-                     rootPathForRoutsString = Uri.fromFile(context.getExternalFilesDir(
+                    rootPathForRoutsString = Uri.fromFile(context.getExternalFilesDir(
                             Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build().getPath();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         Rout rout = postSnapshot.getValue(Rout.class);
@@ -287,6 +317,16 @@ public class StartActivity extends AppCompatActivity implements
                         }
                         routs.add(rout);
                     }
+                    if (routsListFragment == null) {
+                        RoutsListFragment routsListFragment = new RoutsListFragment_();
+                        routsListFragment.setList(routs);
+                        adapter.addFragment(routsListFragment, "Routs");
+                        adapter.notifyDataSetChanged();
+
+                    }else{
+                        routsListFragment.setList(routs);
+                    }
+
                 }else {
                     if (context.getFilesDir().getFreeSpace() > 10485760L){
                         rootPathForRoutsString = Uri.fromFile(context.getFilesDir()).buildUpon().appendPath("Routs").build().getPath();
@@ -296,6 +336,13 @@ public class StartActivity extends AppCompatActivity implements
                                 downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
                             }
                             routs.add(rout);
+                        }
+                        if (routsListFragment == null) {
+                            RoutsListFragment routsListFragment = new RoutsListFragment_();
+                            adapter.addFragment(routsListFragment, "Routs");
+                            routsListFragment.setList(routs);
+                        }else{
+                            routsListFragment.setList(routs);
                         }
                     }else {
                         AlertDialog.Builder noAvailableStorageDialog = new AlertDialog.Builder(StartActivity.this);
@@ -320,6 +367,99 @@ public class StartActivity extends AppCompatActivity implements
         if (getIntent().getBooleanExtra(LOGIN, false)){
             mDrawerLayout.openDrawer(Gravity.START, true);
             checkCurentUser();
+        }
+        if (viewPager.getAdapter() == null) {
+            viewPager.setAdapter(adapter);
+        }
+
+    }
+
+
+    private void checkAllPermission() {
+        List<String> mListPerm = new ArrayList<>();
+        for (int i = 0; i < mPermissionList.length; i ++){
+            if (ContextCompat.checkSelfPermission(StartActivity.this,
+                    mPermissionList[i])
+                    != PackageManager.PERMISSION_GRANTED){
+                 mListPerm.add( mPermissionList[i]);
+            } else {
+
+                if(mPermissionList[i].equals( READ_EXTERNAL_STORAGE)) {
+                    Toast.makeText(this, "" + mPermissionList[i].toString() + " is already granted.", Toast.LENGTH_SHORT).show();
+                    getDateFromFirebace();
+                }else{
+                    Toast.makeText(this, "" + mPermissionList[i].toString() + " is already granted.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+        if (mListPerm.size() > 0){
+            String[] permision = new String[mListPerm.size()];
+            for (int i = 0; i < mListPerm.size(); i++){
+                permision[i] = mListPerm.get(i);
+            }
+
+            ActivityCompat.requestPermissions(StartActivity.this, permision, 69);
+        }
+
+
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+                // If request is cancelled, the result arrays are empty.
+                if (requestCode == 69 && grantResults.length > 0){
+                    for (int i = 0; i < permissions.length; i++){
+                        if (permissions[i].equals(ACCESS_FINE_LOCATION) && grantResults[i] == PackageManager.PERMISSION_GRANTED){
+                            Toast.makeText(StartActivity.this, " You gave permission" + permissions[i], Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(StartActivity.this, " You do not gave permission " + permissions[i], Toast.LENGTH_SHORT).show();
+
+                        }
+                        if (permissions[i].equals(WRITE_EXTERNAL_STORAGE) && grantResults[i] == PackageManager.PERMISSION_GRANTED){
+                            Toast.makeText(StartActivity.this, " You gave permission" + permissions[i], Toast.LENGTH_SHORT).show();
+                            getDateFromFirebace();
+                        }else{
+                            Toast.makeText(StartActivity.this, " You gave permission" + permissions[i], Toast.LENGTH_SHORT).show();
+
+                        }
+                        if (permissions[i].equals(READ_EXTERNAL_STORAGE) && grantResults[i] == PackageManager.PERMISSION_GRANTED){
+                            Toast.makeText(StartActivity.this, " You gave permission" + permissions[i], Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(StartActivity.this, " You do not gave permission " + permissions[i], Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+
+                } else  {
+                    Toast.makeText(StartActivity.this, " You do not gave any permission ", Toast.LENGTH_SHORT).show();
+
+
+
         }
     }
 
@@ -377,12 +517,12 @@ public class StartActivity extends AppCompatActivity implements
             buttonCreatedPlaces.setVisibility(View.VISIBLE);
             buttonCreatedRouts.setVisibility(View.VISIBLE);
             textViewCreated.setVisibility(View.VISIBLE);
-            buttonFastRec.setAlpha((float) 1);
+            fabRecEditor.setAlpha((float) 1);
         }else{
             buttonCreatedPlaces.setVisibility(View.GONE);
             buttonCreatedRouts.setVisibility(View.GONE);
             textViewCreated.setVisibility(View.GONE);
-            buttonFastRec.setAlpha((float) 0.5);
+            fabRecEditor.setAlpha((float) 0.5);
         }
     }
 
@@ -476,66 +616,6 @@ public class StartActivity extends AppCompatActivity implements
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    @Click(R.id.buttonPlace)
-    void buttonPlaceWasClicked() {
-        if (places.size() != 0 & routs.size() != 0) {
-            fragmentManager = getSupportFragmentManager();
-            placesListFragment = new PlacesListFragment_();
-            android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
-                    .beginTransaction();
-            fragmentTransaction.add(R.id.drawer_layout, placesListFragment);
-            fragmentTransaction.commit();
-            placesListFragment.setList(places);
-        } else if (places.size() == 0 & !isOnline()) {
-            builder = new AlertDialog.Builder(this);
-            builder.setTitle("Мережа Інтернет");
-            builder.setMessage("Ви жодного разу після встановлення програми не підключались до мережі " +
-                    "Потрібно хочаб раз завантажити дані з інтернету.  " + "Завантаження відбувається автоматично");
-
-            builder.setPositiveButton("Так", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int arg1) {
-
-                }
-            });
-
-            builder.setCancelable(true);
-
-
-            AlertDialog alert = builder.create();
-            alert.show();
-        }
-    }
-
-    @Click(R.id.buttonRoutes)
-    void buttonRoutesWasClicked() {
-        if (routs.size() != 0 & routs.size() != 0) {
-            fragmentManager = getSupportFragmentManager();
-            routsListFragment = new RoutsListFragment_();
-            android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
-                    .beginTransaction();
-            fragmentTransaction.add(R.id.drawer_layout, routsListFragment);
-            fragmentTransaction.commit();
-            routsListFragment.setList(routs);
-        } else if (routs.size() == 0 & !isOnline()) {
-            builder = new AlertDialog.Builder(this);
-            builder.setTitle("Мережа Інтернет");
-            builder.setMessage("Ви жодного разу після встановлення програми не підключались до мережі " +
-                    "Потрібно хочаб раз завантажити дані з інтернету.  " + "Завантаження відбувається автоматично");
-
-            builder.setPositiveButton("Так", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int arg1) {
-
-                }
-            });
-
-            builder.setCancelable(true);
-
-
-            AlertDialog alert = builder.create();
-            alert.show();
         }
     }
 
@@ -840,8 +920,8 @@ public class StartActivity extends AppCompatActivity implements
 
 
 
-    @Click(R.id.buttonFastRec)
-    void buttonFastRecWasClicked() {
+    @Click(R.id.fabRecEditor)
+    void fabRecEditorWasClicked() {
         if (mTypeMode) {
             Intent intentMapActivity = new Intent(context, MapsActivity_.class);
             intentMapActivity.putExtra(PRODUCE_MODE, mTypeMode);
