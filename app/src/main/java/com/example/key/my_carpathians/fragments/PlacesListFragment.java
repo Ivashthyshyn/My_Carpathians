@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +27,8 @@ public class PlacesListFragment extends Fragment {
     LinearLayoutManager mLayoutManager;
     List<Place> mPlacesQuery;
     PlacesRecyclerAdapter recyclerAdapter;
+    private boolean mMode;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -35,13 +36,15 @@ public class PlacesListFragment extends Fragment {
         recyclerView = (RecyclerView) fragment.findViewById(R.id.recyclerViewForPlace);
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
-        recyclerAdapter = new PlacesRecyclerAdapter(mPlacesQuery);
+        recyclerAdapter = new PlacesRecyclerAdapter(mPlacesQuery, mMode);
         recyclerView.setAdapter(recyclerAdapter);
         return fragment;
     }
-    public void setList(List<Place> placeList){
+    public void setList(List<Place> placeList, boolean mode){
        this.mPlacesQuery = placeList;
+       this.mMode = mode;
         if (recyclerAdapter != null){
+	        recyclerAdapter.setList(placeList, mode);
             recyclerAdapter.notifyDataSetChanged();
         }
     }

@@ -22,9 +22,11 @@ import java.util.List;
 public class RoutsListFragment extends Fragment {
         RecyclerView recyclerView;
         LinearLayoutManager mLayoutManager;
-        List<Rout> mRoutsQuery;
+        List<Rout> mRoutsList;
     RoutsRecyclerAdapter recyclerAdapter;
-        @Nullable
+    private boolean mMode;
+
+    @Nullable
         @Override
         public View onCreateView (LayoutInflater inflater, @Nullable ViewGroup container, Bundle
         savedInstanceState){
@@ -33,14 +35,16 @@ public class RoutsListFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         Log.d("debugMode", "The application stopped after this");
         recyclerView.setLayoutManager(mLayoutManager);
-         recyclerAdapter = new RoutsRecyclerAdapter(mRoutsQuery);
+         recyclerAdapter = new RoutsRecyclerAdapter(mRoutsList, mMode);
         recyclerView.setAdapter(recyclerAdapter);
         return fragment;
     }
 
-    public void setList(List<Rout> routList) {
-        this.mRoutsQuery = routList;
+    public void setList(List<Rout> routList, boolean mode) {
+        this.mRoutsList = routList;
+        this.mMode = mode;
         if (recyclerAdapter != null){
+            recyclerAdapter.setList(routList, mode);
             recyclerAdapter.notifyDataSetChanged();
         }
     }

@@ -32,13 +32,20 @@ import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
 
 public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdapter.RoutsViewHolder> {
     public static final String PUT_EXTRA_POINTS = "put_extra_point_list";
+    private boolean mMode;
     public Context context;
     private List<Rout> routs;
 
 
-    public RoutsRecyclerAdapter(List<Rout> routList) {
+
+    public RoutsRecyclerAdapter(List<Rout> routList, boolean mode) {
         this.routs = routList;
+        this.mMode = mode;
     }
+	public void setList(List<Rout> routList, boolean mode){
+		this.routs = routList;
+        this.mMode = mode;
+	}
 
     @Override
     public RoutsRecyclerAdapter.RoutsViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
@@ -52,6 +59,15 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
                 if (routObject != null) {
                     CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
                     communicatorStartActivity.putStringNameRout(routObject.getNameRout(), ROUT);
+                }
+            }
+
+            @Override
+            public void onLongPressed(Rout mRout, View view) {
+                if (mMode){
+                    CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
+                    communicatorStartActivity.deletedFromFavoriteList(mRout.getNameRout(), ROUT);
+
                 }
             }
 
@@ -116,7 +132,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         return routs.size();
     }
 
-    public static class RoutsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class RoutsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         public static final String PUT_EXTRA_ROUT = "routName";
         public Button buttonTypeAndLevel;
         public TextView textNameRout;
@@ -135,6 +151,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             ratingBar = (RatingBar) itemView.findViewById(R.id.ratingBarSmall);
             mRout = null;
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
 
@@ -143,8 +160,16 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             mClickListener.onPressed(mRout);
         }
 
+        @Override
+        public boolean onLongClick(View view) {
+            mClickListener.onLongPressed(mRout, view);
+            return true;
+        }
+
         interface ClickListener {
             void onPressed(Rout nameRout);
+
+            void onLongPressed(Rout mRout, View view);
         }
     }
 

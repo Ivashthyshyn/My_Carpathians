@@ -34,17 +34,23 @@ import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.P
 
 public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAdapter.ViewHolder> {
     private List<Place> places;
+    private boolean mMode;
 
     /**
      * use context to intent Url
      */
     public Context context;
 
-    public PlacesRecyclerAdapter(List<Place> placeList) {
+    public PlacesRecyclerAdapter(List<Place> placeList, boolean mode) {
             this.places = placeList;
+            this.mMode = mode;
     }
+	public void setList(List<Place> placeList, boolean mode){
+		this.places = placeList;
+        this.mMode = mode;
+	}
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         public final static String PUT_EXTRA_PLACE = "placeName";
         public ImageView placeImage;
         public TextView textName;
@@ -61,13 +67,25 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
             mPlace = null;
 
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
+
+
         @Override
         public void onClick(View v) {
             mClickListener.onPressed(mPlace);
         }
+
+        @Override
+        public boolean onLongClick(View view) {
+            mClickListener.onLongPressed(mPlace, view);
+            return true;
+        }
+
         public interface ClickListener {
             void onPressed(Place namePlace);
+
+            void onLongPressed(Place mPlace, View view);
         }
     }
 
@@ -88,6 +106,15 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
                 if (placeName != null){
                     CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
                     communicatorStartActivity.putStringNamePlace(placeName.getNamePlace(), PLACE);
+
+                }
+            }
+
+            @Override
+            public void onLongPressed(Place mPlace, View view) {
+                if (mMode){
+                    CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
+                    communicatorStartActivity.deletedFromFavoriteList(mPlace.getNamePlace(), PLACE);
 
                 }
             }

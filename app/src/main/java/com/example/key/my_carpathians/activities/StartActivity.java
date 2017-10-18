@@ -103,6 +103,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -198,16 +199,13 @@ public class StartActivity extends AppCompatActivity implements
     Button buttonCreateNewAccount;
     @ViewById(R.id.buttonFavoritesPlaces)
     Button buttonFavoritesPlaces;
-    @ViewById(R.id.buttonFavoritesRouts)
-    Button buttonFavoritesRouts;
+
     @ViewById(R.id.buttonCreatedPlaces)
     Button buttonCreatedPlaces;
     @ViewById(R.id.buttonCreatedRouts)
     Button buttonCreatedRouts;
-    @ViewById(R.id.listViewPlace)
-    RecyclerView listOfPlaces;
-    @ViewById(R.id.listViewRout)
-    RecyclerView listOfRouts;
+
+
     @ViewById(R.id.listViewCreatedRouts)
     RecyclerView listCreatedRouts;
     @ViewById(R.id.listViewCreatedPlaces)
@@ -229,6 +227,7 @@ public class StartActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_start);
 
 	    setSupportActionBar(toolbar);
+        toolbar.showOverflowMenu();
 	    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	    tabLayout.setupWithViewPager(viewPager);
 	    adapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -237,9 +236,10 @@ public class StartActivity extends AppCompatActivity implements
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this,mDrawerLayout,toolbar,R.string.app_name,R.string.app_name);
         mDrawerLayout.addDrawerListener(actionBarDrawerToggle);
-
+        actionBarDrawerToggle.syncState();
 
         mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        checkCurentUser();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -278,12 +278,12 @@ public class StartActivity extends AppCompatActivity implements
                 }
                 if (placesListFragment == null) {
                     PlacesListFragment placesListFragment = new PlacesListFragment_();
-                    placesListFragment.setList(places);
+                    placesListFragment.setList(places, false);
                     adapter.addFragment(placesListFragment, "Plase");
                     adapter.notifyDataSetChanged();
 
                 }else{
-                    placesListFragment.setList(places);
+                    placesListFragment.setList(places, false);
                 }
                 if (isExternalStorageWritable()) {
                     downloadPhoto(places);
@@ -319,12 +319,12 @@ public class StartActivity extends AppCompatActivity implements
                     }
                     if (routsListFragment == null) {
                         RoutsListFragment routsListFragment = new RoutsListFragment_();
-                        routsListFragment.setList(routs);
+                        routsListFragment.setList(routs, false);
                         adapter.addFragment(routsListFragment, "Routs");
                         adapter.notifyDataSetChanged();
 
                     }else{
-                        routsListFragment.setList(routs);
+                        routsListFragment.setList(routs, false);
                     }
 
                 }else {
@@ -340,9 +340,9 @@ public class StartActivity extends AppCompatActivity implements
                         if (routsListFragment == null) {
                             RoutsListFragment routsListFragment = new RoutsListFragment_();
                             adapter.addFragment(routsListFragment, "Routs");
-                            routsListFragment.setList(routs);
+                            routsListFragment.setList(routs, false);
                         }else{
-                            routsListFragment.setList(routs);
+                            routsListFragment.setList(routs, false);
                         }
                     }else {
                         AlertDialog.Builder noAvailableStorageDialog = new AlertDialog.Builder(StartActivity.this);
@@ -629,15 +629,7 @@ public class StartActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        if (placesListFragment != null) {
-            fragmentManager.beginTransaction().remove(placesListFragment).commit();
-            placesListFragment = null;
-        } else if (routsListFragment != null) {
-            fragmentManager.beginTransaction().remove(routsListFragment).commit();
-            routsListFragment = null;
-        } else {
-            super.onBackPressed();
-        }
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -827,6 +819,49 @@ public class StartActivity extends AppCompatActivity implements
         }
     }
 
+    public void showFavoriteOrCreated(List<String> favoritesPlaces, List<String> favoritesRouts){
+        if (favoritesPlaces != null) {
+            List<Place> favoriteP = new ArrayList<>();
+            for (int i = 0; i < places.size(); i++) {
+                for (int s = 0; s < favoritesPlaces.size(); s++) {
+                    if (places.get(i).getNamePlace().equals(favoritesPlaces.get(s))) {
+                        favoriteP.add(places.get(i));
+                        break;
+                    }
+                }
+
+            }
+
+            if (favoriteP != null &&  tabLayout.getTabCount() > 0) {
+                tabLayout.getTabAt(0).setIcon(R.drawable.hand_icon);
+                PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
+                placesListFragment.setList(favoriteP, true);
+            }
+        }else {
+         //   placesListFragment.setList(new ArrayList<Place>(), true);
+        }
+        if (favoritesRouts != null) {
+            List<Rout> favoriteR = new ArrayList<>();
+            for (int i = 0; i < routs.size(); i++) {
+                for (int s = 0; s < favoritesRouts.size(); s++) {
+                    if (routs.get(i).getNameRout().equals(favoritesRouts.get(s))) {
+                        favoriteR.add(routs.get(i));
+                        break;
+                    }
+                }
+
+            }
+            if (favoriteR != null && tabLayout.getTabCount() > 1) {
+                tabLayout.getTabAt(0).setIcon(R.drawable.hand_icon);
+                RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
+                routsListFragment.setList(favoriteR, true);
+            }
+        }else {
+          //  routsListFragment.setList(new ArrayList<Rout>(), true);
+        }
+        mDrawerLayout.closeDrawer(Gravity.START);
+    }
+
     @Override
     public void deletedFromFavoriteList(final String name, final int type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -835,30 +870,36 @@ public class StartActivity extends AppCompatActivity implements
             builder.setMessage("Do You really want to delete Rout " + name + " from FavoriteList"  );
 
         }else if (type == PLACE) {
-            builder.setMessage("Do You really want to delete Place " + name );
+            builder.setMessage("Do You really want to delete Place " + name + " from FavoriteList");
         }
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (type == ROUT){
-                    ObjectService objectService = new ObjectService(StartActivity.this);
-                    String mOutcome = objectService.deleteRout(name);
-                    if(!mOutcome.equals(ERROR)){
-                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
-                        dialogInterface.dismiss();
-                    }else{
-                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
+                    Set<String> favoritesRoutsList = new HashSet<>(mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>()));
+                    favoritesRoutsList.remove(name);
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
+                    editor.apply();
+                    Toast.makeText(StartActivity.this, "Deleted Rout " + name + "from Favorites", Toast.LENGTH_LONG ).show();
+                    ArrayList<String> mListRouts = null;
+                    if (favoritesRoutsList != null  ) {
+                        mListRouts = new ArrayList<>(favoritesRoutsList);
                     }
-
+                    showFavoriteOrCreated(null ,mListRouts);
                 }else if (type == PLACE) {
-                    ObjectService objectService = new ObjectService(StartActivity.this);
-                    String mOutcome = objectService.deletePlace(name);
-                    if(!mOutcome.equals(ERROR)){
-                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
-                        dialogInterface.dismiss();
-                    }else{
-                        Toast.makeText(StartActivity.this,mOutcome,Toast.LENGTH_LONG ).show();
+                    Set<String> favoritesPlacesList = new HashSet<>(mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>()));
+                    favoritesPlacesList.remove(name);
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList);
+                    editor.apply();
+                    Toast.makeText(StartActivity.this, "Deleted Place " + name + "from Favorites", Toast.LENGTH_LONG ).show();
+                    ArrayList<String> mListPlaces = null;
+                    if (favoritesPlacesList != null  ) {
+                        mListPlaces = new ArrayList<>(favoritesPlacesList);
                     }
+                    showFavoriteOrCreated(mListPlaces, null);
+
                 }
             }
         });
@@ -1254,6 +1295,22 @@ public class StartActivity extends AppCompatActivity implements
 
     @Click(R.id.buttonFavoritesPlaces)
     void buttonFavoritesPlaces() {
+        mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Set<String> favoritesPlacesList = mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, null);
+        Set<String> favoritesRoutsList = mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, null);
+        ArrayList<String> mListRouts = null;
+        ArrayList<String> mListPlaces = null;
+        if (favoritesPlacesList != null  ) {
+            mListRouts = new ArrayList<>(favoritesRoutsList);
+        }
+        if (favoritesRoutsList != null) {
+            mListPlaces = new ArrayList<>(favoritesPlacesList);
+
+        }
+        showFavoriteOrCreated(mListPlaces, mListRouts);
+
+
+        /**
         if (listOfPlaces.getVisibility() == View.GONE) {
             mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             Set<String> favoritesPlacesList = mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, null);
@@ -1267,24 +1324,10 @@ public class StartActivity extends AppCompatActivity implements
                 listOfPlaces.setAdapter(recyclerAdapter);
             }
         }else { listOfPlaces.setVisibility(View.GONE);}
+         */
     }
 
-    @Click(R.id.buttonFavoritesRouts)
-    void buttonFavoritesRouts() {
-        if (listOfRouts.getVisibility() == View.GONE) {
-            mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> favoritesRoutsList = mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, null);
-            if (favoritesRoutsList != null) {
-                ArrayList<String> listRouts = new ArrayList<>(favoritesRoutsList);
-                listOfRouts.setVisibility(View.VISIBLE);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-                Log.d("debugMode", "The application stopped after this");
-                listOfRouts.setLayoutManager(mLayoutManager);
-                FavoritesRecyclerAdapter recyclerAdapter = new FavoritesRecyclerAdapter(StartActivity.this, listRouts, ROUT);
-                listOfRouts.setAdapter(recyclerAdapter);
-            }
-        }else{listOfRouts.setVisibility(View.GONE);}
-    }
+
 
     @Click(R.id.buttonCreatedPlaces)
     void buttonCreatedPlaces() {
