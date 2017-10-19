@@ -94,6 +94,9 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
         View mView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_for_place, parent, false);
         context = mView.getContext();
+        if (places.size() == 0){
+            
+        }
 
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         int height = metrics.heightPixels;

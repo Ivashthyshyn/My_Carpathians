@@ -44,13 +44,13 @@ public class FavoritesRecyclerAdapter extends RecyclerView.Adapter<FavoritesRecy
 			public void onPressed(String name) {
 				comunicator = (CommunicatorStartActivity)context;
 				if (type == PLACE) {
-					comunicator.putStringNamePlace(name, type);
+
 				}else if(type == MY_PLACE){
-					comunicator.putStringNamePlace(name, type);
+
 				}else if (type == ROUT){
-					comunicator.putStringNameRout(name, type);
+
 				}else if (type == MY_ROUT){
-					comunicator.putStringNameRout(name, type);
+
 				}
 			}
 
