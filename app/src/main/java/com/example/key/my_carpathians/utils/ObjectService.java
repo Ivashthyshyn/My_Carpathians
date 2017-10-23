@@ -3,7 +3,6 @@ package com.example.key.my_carpathians.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Environment;
 
 import com.cocoahero.android.geojson.Feature;
 import com.cocoahero.android.geojson.LineString;
@@ -36,23 +35,20 @@ import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_US
 public class ObjectService {
 	public static final String FILE_EXISTS = "file_exists";
 	public static final String ERROR = "error";
+	public final String rootPathString;
 	public Context context;
 
-	public ObjectService(Context context){
+	public ObjectService(Context context, String rootPathString){
+		this.rootPathString = rootPathString;
 		this.context = context;
 	}
 	public String saveRout(String name, List<com.cocoahero.android.geojson.Position> positionList, Rout rout, boolean replaceExistFile) {
 		SharedPreferences mSharedPreferences = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		if (!replaceExistFile) {
-			String mRootPathToSaveTrack;
-			if (isExternalStorageWritable()) {
-				mRootPathToSaveTrack = Uri.fromFile(context.getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build()
+
+			String mRootPathToSaveTrack = Uri.parse(rootPathString).buildUpon().appendPath("Routs").build()
 						.getPath();
-			} else {
-				mRootPathToSaveTrack = Uri.fromFile(context.getFilesDir()).buildUpon()
-						.appendPath("Routs").build().getPath();
-			}
+
 
 			try {
 				LineString lineString = new LineString();
@@ -79,15 +75,9 @@ public class ObjectService {
 					output.close();
 					rout.setUrlRoutsTrack(fileUri);
 
-					String mRootPathToSaveRout;
-					if (isExternalStorageWritable()) {
-						mRootPathToSaveRout = Uri.fromFile(context.getExternalFilesDir(
-								Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+					String mRootPathToSaveRout = Uri.parse(rootPathString).buildUpon().appendPath("Created").build()
 								.getPath();
-					} else {
-						mRootPathToSaveRout = Uri.fromFile(context.getFilesDir()).buildUpon()
-								.appendPath("Created").build().getPath();
-					}
+
 
 					File rootPath2 = new File(mRootPathToSaveRout);
 					if (!rootPath2.exists()) {
@@ -119,15 +109,8 @@ public class ObjectService {
 				return (e.getMessage());
 			}
 		} else {
-			String mRootPathToSaveTrack;
-			if (isExternalStorageWritable()) {
-				mRootPathToSaveTrack = Uri.fromFile(context.getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build()
+			String mRootPathToSaveTrack = Uri.parse(rootPathString).buildUpon().appendPath("Routs").build()
 						.getPath();
-			} else {
-				mRootPathToSaveTrack = Uri.fromFile(context.getFilesDir()).buildUpon()
-						.appendPath("Routs").build().getPath();
-			}
 			File rootPath = new File(mRootPathToSaveTrack);
 			if (!rootPath.exists()) {
 				rootPath.mkdirs();
@@ -138,16 +121,8 @@ public class ObjectService {
 				localFile.renameTo(newFile);
                 rout.setUrlRoutsTrack(Uri.fromFile(newFile).getPath());
 
-				String mRootPathToSaveRout;
-				if (isExternalStorageWritable()) {
-					mRootPathToSaveRout = Uri.fromFile(context.getExternalFilesDir(
-							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+				String mRootPathToSaveRout = Uri.parse(rootPathString).buildUpon().appendPath("Created").build()
 							.getPath();
-				} else {
-					mRootPathToSaveRout = Uri.fromFile(context.getFilesDir()).buildUpon()
-							.appendPath("Created").build().getPath();
-				}
-
 				File rootPath2 = new File(mRootPathToSaveRout);
 				if (!rootPath2.exists()) {
 					rootPath2.mkdirs();
@@ -187,15 +162,9 @@ public class ObjectService {
 	}
 	public String deleteRout(String name){
 		SharedPreferences mSharedPreferences = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		String mRootPathToSaveRout;
-		if (isExternalStorageWritable()) {
-			mRootPathToSaveRout = Uri.fromFile(context.getExternalFilesDir(
-					Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+		String mRootPathToSaveRout = Uri.parse(rootPathString).buildUpon().appendPath("Created").build()
 					.getPath();
-		} else {
-			mRootPathToSaveRout = Uri.fromFile(context.getFilesDir()).buildUpon()
-					.appendPath("Created").build().getPath();
-		}
+
 		File rootPathRout = new File(mRootPathToSaveRout);
 		if (!rootPathRout.exists()) {
 			rootPathRout.mkdirs();
@@ -203,15 +172,9 @@ public class ObjectService {
 		File localFileRout = new File(rootPathRout, name);
 		if (localFileRout.exists()) {
 			localFileRout.delete();
-			String mRootPathToSaveTrack;
-			if (isExternalStorageWritable()) {
-				mRootPathToSaveTrack = Uri.fromFile(context.getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build()
+			String mRootPathToSaveTrack = Uri.parse(rootPathString).buildUpon().appendPath("Routs").build()
 						.getPath();
-			} else {
-				mRootPathToSaveTrack = Uri.fromFile(context.getFilesDir()).buildUpon()
-						.appendPath("Routs").build().getPath();
-			}
+
 			File rootPathTrack = new File(mRootPathToSaveTrack);
 			if (!rootPathTrack.exists()) {
 				rootPathTrack.mkdirs();
@@ -224,15 +187,9 @@ public class ObjectService {
 					createdByUserTrackList.remove(name);
 				}
 				mSharedPreferences.edit().putStringSet(CREATED_BY_USER_ROUT_LIST, createdByUserTrackList).apply();
-				String mRootPathToSaveRoutPhoto;
-				if (isExternalStorageWritable()) {
-					mRootPathToSaveRoutPhoto = Uri.fromFile(context.getExternalFilesDir(
-							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photo").build()
+				String mRootPathToSaveRoutPhoto = Uri.parse(rootPathString).buildUpon().appendPath("Photo").build()
 							.getPath();
-				} else {
-					mRootPathToSaveRoutPhoto = Uri.fromFile(context.getFilesDir()).buildUpon()
-							.appendPath("Photo").build().getPath();
-				}
+
 				File rootPathRoutPhoto = new File(mRootPathToSaveRoutPhoto);
 				if (!rootPathRoutPhoto.exists()) {
 					rootPathRoutPhoto.mkdirs();
@@ -269,16 +226,8 @@ public class ObjectService {
 	public String savePlace(String name,  Place place, boolean replaceExistFile){
 		SharedPreferences mSharedPreferences = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		if (!replaceExistFile) {
-			String mRootPathToSavePlace;
-			if (isExternalStorageWritable()) {
-				mRootPathToSavePlace = Uri.fromFile(context.getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+			String mRootPathToSavePlace = Uri.parse(rootPathString).buildUpon().appendPath("Created").build()
 						.getPath();
-			} else {
-				mRootPathToSavePlace = Uri.fromFile(context.getFilesDir()).buildUpon()
-						.appendPath("Created").build().getPath();
-			}
-
 			File rootPath = new File(mRootPathToSavePlace);
 			if (!rootPath.exists()) {
 				rootPath.mkdirs();
@@ -302,16 +251,8 @@ public class ObjectService {
 				return e.getMessage();
 			}
 		}else {
-			String mRootPathToSavePlace;
-			if (isExternalStorageWritable()) {
-				mRootPathToSavePlace = Uri.fromFile(context.getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+			String mRootPathToSavePlace = Uri.parse(rootPathString).buildUpon().appendPath("Created").build()
 						.getPath();
-			} else {
-				mRootPathToSavePlace = Uri.fromFile(context.getFilesDir()).buildUpon()
-						.appendPath("Created").build().getPath();
-			}
-
 			File rootPath = new File(mRootPathToSavePlace);
 			if (!rootPath.exists()) {
 				rootPath.mkdirs();
@@ -345,16 +286,8 @@ public class ObjectService {
 	}
 	public String deletePlace(String name){
 		SharedPreferences mSharedPreferences = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		String mRootPathToSavePlace;
-		if (isExternalStorageWritable()) {
-			mRootPathToSavePlace = Uri.fromFile(context.getExternalFilesDir(
-					Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Created").build()
+		String mRootPathToSavePlace = Uri.parse(rootPathString).buildUpon().appendPath("Created").build()
 					.getPath();
-		} else {
-			mRootPathToSavePlace = Uri.fromFile(context.getFilesDir()).buildUpon()
-					.appendPath("Created").build().getPath();
-		}
-
 		File rootPath = new File(mRootPathToSavePlace);
 		if (!rootPath.exists()) {
 			rootPath.mkdirs();
@@ -371,13 +304,5 @@ public class ObjectService {
 		}else {
 			return ERROR;
 		}
-	}
-
-	public boolean isExternalStorageWritable() {
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-			return true;
-		}
-		return false;
 	}
 }

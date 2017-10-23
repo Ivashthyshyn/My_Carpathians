@@ -80,9 +80,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|right"
-                android:layout_marginRight="16dp"
+                android:layout_margin="20dp"
                 android:clickable="true"
-                android:src="@android:drawable/ic_input_add"
+                android:src="@drawable/ic_create_black_24px"
                 app:fabSize="normal"/>
 
         </android.support.design.widget.CoordinatorLayout>
@@ -306,9 +306,11 @@
                         android:orientation="vertical">
 
                         <LinearLayout
+                            android:id="@+id/buttonFavorites"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            android:padding="10dp">
 
                             <ImageView
                                 android:id="@+id/imageView5"
@@ -317,16 +319,71 @@
                                 android:layout_gravity="center"
                                 app:srcCompat="@drawable/ic_star_rate_black_18px"/>
 
-                            <Button
-                                android:id="@+id/buttonFavoritesPlaces"
+                            <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:layout_weight="1"
                                 android:background="@null"
                                 android:gravity="left|center_vertical"
-                                android:paddingStart="15dp"
+                                android:paddingLeft="10dp"
                                 android:text="Favorites"
-                                android:textColor="@color/white"/>
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/buttonCreated"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:padding="10dp">
+
+                            <ImageView
+                                android:id="@+id/imageView6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:srcCompat="@drawable/ic_create_black_24px"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:gravity="left|center_vertical"
+                                android:paddingLeft="10dp"
+                                android:text="Created"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:padding="10dp">
+
+                            <ImageView
+                                android:id="@+id/imageView7"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                app:srcCompat="@drawable/ic_map24px"/>
+
+                            <TextView
+                                android:id="@+id/buttonMapOffline"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:gravity="left|center_vertical"
+                                android:paddingLeft="10dp"
+                                android:text="OfflineMap"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -334,72 +391,17 @@
                             android:layout_height="match_parent"
                             android:orientation="horizontal">
 
-                            <ImageView
-                                android:id="@+id/imageView6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_pen"/>
-
                             <Button
-                                android:id="@+id/buttonCreatedPlaces"
+                                android:id="@+id/buttonSettungs"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:background="@null"
                                 android:gravity="left|center_vertical"
                                 android:paddingStart="15dp"
-                                android:text="Created"
+                                android:text="Settings"
                                 android:textColor="@color/white"/>
-
                         </LinearLayout>
-
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/listViewCreatedRouts"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:visibility="gone"/>
-
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/listViewCreatedPlaces"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:visibility="gone"/>
-
-                        <TextView
-                            android:id="@+id/myOfflineMap"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingStart="10dp"
-                            android:text="Favorites"
-                            android:textColor="@color/colorAccent"/>
-
-                        <Button
-                            android:id="@+id/buttonMapOffline"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@null"
-                            android:gravity="left|center_vertical"
-                            android:paddingStart="15dp"
-                            android:text="Map"
-                            android:textColor="@color/white"/>
-
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/listdownloadMaps"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:visibility="gone">
-
-                        </android.support.v7.widget.RecyclerView>
-
-                        <Button
-                            android:id="@+id/buttonSettungs"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@null"
-                            android:gravity="left|center_vertical"
-                            android:paddingStart="15dp"
-                            android:text="Settings"
-                            android:textColor="@color/white"/>
 
                     </LinearLayout>
                 </android.support.v4.widget.NestedScrollView>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.location.Location;
@@ -14,7 +15,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -89,12 +89,13 @@ import java.util.Random;
 
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
+import static com.example.key.my_carpathians.activities.StartActivity.PLACE;
+import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
-import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
-import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
+import static com.example.key.my_carpathians.activities.StartActivity.ROOT_PATH;
+import static com.example.key.my_carpathians.activities.StartActivity.ROUT;
 import static com.example.key.my_carpathians.utils.LocationService.DEFINED_LOCATION;
 import static com.example.key.my_carpathians.utils.ObjectService.FILE_EXISTS;
-import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -153,6 +154,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private ServiceConnection captureServiceConnection;
     private MapboxMap.OnMyLocationChangeListener myLocationChangeListener;
+    private SharedPreferences sharedPreferences;
+    private String mRootPathString;
 
 
     @Override
@@ -209,7 +212,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         };
-
+        sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        mRootPathString = sharedPreferences.getString(ROOT_PATH, null);
         selectUserRouts = getIntent().getStringArrayListExtra(SELECTED_USER_ROUTS);
         selectUserPlacesList = (List<Place>) getIntent().getSerializableExtra(SELECTED_USER_PLACES);
         mTypeMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
@@ -317,15 +321,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
         mapboxMap.getUiSettings().setCompassGravity(Gravity.CENTER_HORIZONTAL);
-
-        Uri rootPathForRoutsString;
-        if (isExternalStorageReadable()) {
-            rootPathForRoutsString = Uri.fromFile(MapsActivity.this.getExternalFilesDir(
-                    Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
-        }else{
-            rootPathForRoutsString = Uri.fromFile(MapsActivity.this.getFilesDir()).buildUpon().appendPath("Routs").build();
-        }
-        if (selectUserRouts != null && selectUserRouts.size() > 0) {
+        if (selectUserRouts != null && selectUserRouts.size() > 0 && mRootPathString != null) {
+            Uri rootPathForRoutsString = Uri.parse(mRootPathString).buildUpon().appendPath("Routs").build();
             for (int i = 0; i < selectUserRouts.size(); i++) {
                 String mUriString = rootPathForRoutsString.buildUpon().appendPath(selectUserRouts.get(i)).build().getPath();
                 if (mUriString != null) {
@@ -1012,7 +1009,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mPlace.setPositionPlace(new com.example.key.my_carpathians.models.Position(
                     mMarker.getPosition().getLatitude(), mMarker.getPosition().getLongitude()));
 
-            ObjectService objectService = new ObjectService(MapsActivity.this);
+            ObjectService objectService = new ObjectService(MapsActivity.this, mRootPathString);
             String outcome = objectService.savePlace(name, mPlace, false);
            if (outcome.equals(FILE_EXISTS)){
                showCreateNameDialog(0, name);
@@ -1030,7 +1027,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 createdTrackPosition = altitudeFinder.extractAltitude(pos);
             }
-            ObjectService objectService = new ObjectService(MapsActivity.this);
+            ObjectService objectService = new ObjectService(MapsActivity.this, mRootPathString);
             Rout mRout = new Rout();
             mRout.setNameRout(name);
             mRout.setPositionRout(new com.example.key.my_carpathians.models.Position(createdTrackPosition.get(0).getLatitude(),
