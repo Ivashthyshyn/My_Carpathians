@@ -22,11 +22,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -96,6 +97,7 @@ import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME
 import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
 import static com.example.key.my_carpathians.activities.StartActivity.PUT_EXTRA_PLACE_LIST;
 import static com.example.key.my_carpathians.activities.StartActivity.PUT_EXTRA_ROUTS_LIST;
+import static com.example.key.my_carpathians.activities.StartActivity.ROOT_PATH;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.PUT_EXTRA_POINTS;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
@@ -130,7 +132,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	@ViewById(R.id.uploadBar)
 	ProgressBar uploadBar;
 
-   @ViewById(R.id.toolbar)
+   @ViewById(R.id.toolBarActionActivity)
    Toolbar toolbar;
 
 	@ViewById(R.id.appBarLayout)
@@ -138,8 +140,6 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
     @ViewById(R.id.imageView)
     ImageView imageView;
-    @ViewById(R.id.textName)
-    TextView textName;
 	@ViewById(R.id.ratingBar)
 	RatingBar ratingBar;
 	@ViewById(R.id.buttonRatingBar)
@@ -165,6 +165,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	TabLayout tabLayout;
 	@ViewById(R.id.viewpager)
 	ViewPager viewPager;
+	String mRootPathString;
 
 
     @Override
@@ -172,12 +173,14 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
         setSupportActionBar(toolbar);
+	    toolbar.showOverflowMenu();
+	    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		setupSizeViews();
         tabLayout.setupWithViewPager(viewPager);
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
-
         sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        routList = (List<Rout>) getIntent().getSerializableExtra(PUT_EXTRA_ROUTS_LIST);
+	    mRootPathString = sharedPreferences.getString(ROOT_PATH, null);
+	    routList = (List<Rout>) getIntent().getSerializableExtra(PUT_EXTRA_ROUTS_LIST);
         placeList = (List<Place>) getIntent().getSerializableExtra(PUT_EXTRA_PLACE_LIST);
         pointsRout = (List<Position>)getIntent().getSerializableExtra(PUT_EXTRA_POINTS);
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
@@ -238,22 +241,14 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 				fabChangePhotoRight.setVisibility(View.GONE);
 			}
 
-			textName.setText(place.getNamePlace());
 			if (infoFragment != null) {
 				infoFragment.setData(place, rout);
 				adapter.notifyDataSetChanged();
 			}
+			if (mRootPathString != null) {
+				Uri photoUri = Uri.parse(mRootPathString);
 
-			Uri rootPathForTitlePhotoString;
-			if (isExternalStorageReadable()) {
-				rootPathForTitlePhotoString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
-			}else{
-				rootPathForTitlePhotoString = Uri.parse(place.getUrlPlace());
-			}
-
-			File titlePhotoFile = new File(rootPathForTitlePhotoString.getPath(), myPlace.getNamePlace());
-			if (titlePhotoFile.exists()){
+			File titlePhotoFile = new File(photoUri.buildUpon().appendPath("Photos").build().getPath(), myPlace.getNamePlace());
 				Glide
 						.with(ActionActivity.this)
 						.load(titlePhotoFile)
@@ -275,7 +270,6 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 			myPosition = place.getPositionPlace();
 			myName = place.getNamePlace();
 		} else if (rout != null) {
-			textName.setText(rout.getNameRout());
 			photoUrlList.add("graph");
 			getRating(rout.getNameRout());
 			if (infoFragment != null) {
@@ -293,17 +287,10 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 	            fabChangePhotoRight.setVisibility(View.GONE);
 	            imageView.setVisibility(View.GONE);
             }
-			Uri rootPathForRoutsString;
-			if (isExternalStorageReadable()) {
-				rootPathForRoutsString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build();
-			}else{
-				rootPathForRoutsString = Uri.fromFile(ActionActivity.this.getFilesDir()).buildUpon().appendPath("Routs").build();
-			}
-
-
-            createDataPoint(rootPathForRoutsString.buildUpon().appendPath(myRout.getNameRout()).build().getPath());
-
+            if (mRootPathString != null){
+	            Uri uriRootRout = Uri.parse(mRootPathString);
+	            createDataPoint(uriRootRout.buildUpon().appendPath("Routs").appendPath(myRout.getNameRout()).build().getPath());
+            }
 			myPosition = rout.getPositionRout();
 			myName = rout.getNameRout();
 		}
@@ -319,9 +306,8 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 	}
 
 	private void morePhotos(String name) {
-		if (mProdusedMode && isExternalStorageReadable() ){
-				Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+		if (mProdusedMode ){
+				Uri rootPathForPhotosString =  Uri.parse(mRootPathString).buildUpon().appendPath("Photos").build();
 			for (int i = 1; i <= 3; i++) {
 				File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(name + String.valueOf(i)).build().getPath());
 				if (photoFile.exists()) {
@@ -840,7 +826,7 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 			    .beginTransaction();
         editFragment = new EditModeFragment_();
 	    fragmentTransaction.add(R.id.actionActivityContainer, editFragment);
-        editFragment.setData(myRout, myPlace);
+        editFragment.setData(myRout, myPlace, mRootPathString);
 	    fragmentTransaction.commit();
 
     }
@@ -876,7 +862,6 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 					.with(ActionActivity.this)
 					.load(photoUrlList.get(mItemUrlList))
 					.into(imageView);
-
 
 		}else if (mItemUrlList == 0 && photoUrlList.get(0).equals("graph")) {
 			fabChangePhotoRight.setVisibility(View.VISIBLE);
@@ -1004,9 +989,20 @@ public void ratingBarDialog(){
 
 		if (hadAltitudePosition .size() > 0){
 			buildGraph(positions);
-			ObjectService objectService = new ObjectService(ActionActivity.this);
+			ObjectService objectService = new ObjectService(ActionActivity.this, mRootPathString);
 			objectService.saveRout(myName, null, myRout, true);
 		}
 
-		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_action_activity, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		return super.onOptionsItemSelected(item);
+	}
 }

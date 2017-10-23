@@ -148,7 +148,7 @@ public class EditModeFragment extends DialogFragment {
 
 	@ViewById(R.id.groupMorePhoto)
 	LinearLayout groupMorePhoto;
-
+	private String rootPathString;
 
 
 	@Override
@@ -398,8 +398,8 @@ public class EditModeFragment extends DialogFragment {
 			}
 
 	}
-    public void setData(Rout rout, Place place){
-
+    public void setData(Rout rout, Place place, String rootPathString){
+	this.rootPathString = rootPathString;
 	    if (rout != null){
 		    mRout = rout;
 	    }else if(place != null){
@@ -454,7 +454,7 @@ public class EditModeFragment extends DialogFragment {
 					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), null, uriPhoto2);
 					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), null, uriPhoto3);
 
-				ObjectService objectService = new ObjectService(getContext());
+				ObjectService objectService = new ObjectService(getContext(), rootPathString);
 				 String outcome = objectService.saveRout(name, null, mRout, true);
 				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
 				 if (outcome.equals("Rout saved")) {
@@ -469,7 +469,7 @@ public class EditModeFragment extends DialogFragment {
 					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_2, null, uriPhoto2);
 					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_3, null, uriPhoto3);
 
-				 ObjectService objectService = new ObjectService(getContext());
+				 ObjectService objectService = new ObjectService(getContext(), rootPathString);
 				 String outcome =  objectService.savePlace( name, mPlace, true);
 				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
 				 if (outcome.equals("Place saved")) {
@@ -626,7 +626,7 @@ public class EditModeFragment extends DialogFragment {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
 				if (mRout != null){
-					ObjectService objectService = new ObjectService(getContext());
+					ObjectService objectService = new ObjectService(getContext(), rootPathString);
 					String mOutcome = objectService.deleteRout(mRout.getNameRout());
 					if(!mOutcome.equals(ERROR)){
 						Toast.makeText(getContext(),mOutcome,Toast.LENGTH_LONG ).show();
@@ -638,7 +638,7 @@ public class EditModeFragment extends DialogFragment {
 					}
 
 				}else if (mPlace != null) {
-					ObjectService objectService = new ObjectService(getContext());
+					ObjectService objectService = new ObjectService(getContext(), rootPathString);
 					String mOutcome = objectService.deletePlace(mPlace.getNamePlace());
 					if(!mOutcome.equals(ERROR)){
 						Toast.makeText(getContext(),mOutcome,Toast.LENGTH_LONG ).show();

@@ -10,6 +10,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -23,8 +24,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -34,13 +33,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
-import com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter;
 import com.example.key.my_carpathians.adapters.ViewPagerAdapter;
 import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
@@ -113,10 +112,6 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.example.key.my_carpathians.activities.ActionActivity.LOGIN;
-import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_PLACE;
-import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.MY_ROUT;
-import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
-import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
@@ -140,6 +135,9 @@ public class StartActivity extends AppCompatActivity implements
     private static final int RC_SIGN_IN = 9001;
     private static final String TAG = "StartActivity";
     public static final String PRODUCE_MODE = "manufacturer_mode";
+    public static final int ROUT = 1;
+    public static final int PLACE = 0;
+    public static final String ROOT_PATH = "root_path";
     public FragmentManager fragmentManager;
     public PlacesListFragment placesListFragment;
     public RoutsListFragment routsListFragment;
@@ -161,7 +159,7 @@ public class StartActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
     private String mUserUID;
     private boolean mTypeMode = false;
-    private String rootPathForRoutsString;
+    private Uri rootPath;
 
     @ViewById(R.id.fabRecEditor)
     FloatingActionButton fabRecEditor;
@@ -197,20 +195,12 @@ public class StartActivity extends AppCompatActivity implements
     Button buttonResetPassword;
     @ViewById(R.id.buttonCreateNewAccount)
     Button buttonCreateNewAccount;
-    @ViewById(R.id.buttonFavoritesPlaces)
-    Button buttonFavoritesPlaces;
-
-    @ViewById(R.id.buttonCreatedPlaces)
-    Button buttonCreatedPlaces;
-
-    @ViewById(R.id.listViewCreatedRouts)
-    RecyclerView listCreatedRouts;
-    @ViewById(R.id.listViewCreatedPlaces)
-    RecyclerView listCreatedPlaces;
-
+    @ViewById(R.id.buttonFavorites)
+    LinearLayout buttonFavorites;
+    @ViewById(R.id.buttonCreated)
+    LinearLayout buttonCreated;
 	@ViewById(R.id.toolbar)
 	Toolbar toolbar;
-
 	@ViewById(R.id.viewpagerActionActivity)
 	ViewPager viewPager;
 	@ViewById(R.id.tabLayout)
@@ -230,18 +220,21 @@ public class StartActivity extends AppCompatActivity implements
 	    viewPager.setAdapter(adapter);
         mAuth = FirebaseAuth.getInstance();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this,mDrawerLayout,toolbar,R.string.app_name,R.string.app_name){
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout){
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if (state == PLACE){
+                    RoutsListFragment placesListFragment = (RoutsListFragment) adapter.getItem(ROUT);
+                    placesListFragment.dismissActionMode();
+                }else if(state == ROUT){
+                    PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(PLACE);
+                    placesListFragment.dismissActionMode();
+                }
 
             }
+        });
 
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-
-            }
-        };
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this,mDrawerLayout,toolbar,R.string.app_name,R.string.app_name);
         mDrawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
 
@@ -261,13 +254,15 @@ public class StartActivity extends AppCompatActivity implements
         };
 
 
-
-        checkAllPermission();
-
+        if (mSharedPreferences.getString(ROOT_PATH, null) == null) {
+            checkAllPermission();
+        }else{
+            rootPath =Uri.parse(mSharedPreferences.getString(ROOT_PATH, null));
+            getDateFromFirebace();
+        }
 
     }
-
-    private void getDateFromFirebace() {
+    public void getDateFromFirebace() {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
 
@@ -286,7 +281,7 @@ public class StartActivity extends AppCompatActivity implements
                 if ( tabLayout.getTabCount() == 0) {
                     PlacesListFragment placesListFragment = new PlacesListFragment_();
                     placesListFragment.setList(places, false);
-                    adapter.addFragment(placesListFragment, "Plase");
+                    adapter.addFragment(placesListFragment, "Place");
                     adapter.notifyDataSetChanged();
 
                 }else{
@@ -294,12 +289,8 @@ public class StartActivity extends AppCompatActivity implements
                         PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
                         placesListFragment.setList(places, false);
                 }
-                if (isExternalStorageWritable()) {
-                    downloadPhoto(places);
-                }else{
-                    Toast.makeText(StartActivity.this, " External Storage does not exist +/n"+"Photos do not downloaded",Toast.LENGTH_LONG).show();
+                downloadPhoto(places);
 
-                }
             }
 
             @Override
@@ -315,59 +306,26 @@ public class StartActivity extends AppCompatActivity implements
                 if (routs.size() > 0){
                     routs.clear();
                 }
-
-                if (isExternalStorageWritable()) {
-                    rootPathForRoutsString = Uri.fromFile(context.getExternalFilesDir(
-                            Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Routs").build().getPath();
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        Rout rout = postSnapshot.getValue(Rout.class);
-                        if (isOnline()) {
-                            downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
-                        }
-                        routs.add(rout);
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Rout rout = postSnapshot.getValue(Rout.class);
+                    if (isOnline()) {
+                        downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
                     }
-                    if ( tabLayout.getTabCount() == 1) {
-                        RoutsListFragment routsListFragment = new RoutsListFragment_();
-                        routsListFragment.setList(routs, false);
-                        adapter.addFragment(routsListFragment, "Routs");
-                        adapter.notifyDataSetChanged();
-
-                    }else{
-                        tabLayout.getTabAt(1).setIcon(null);
-                        RoutsListFragment routsListFragment = (RoutsListFragment_) adapter.getItem(1);
-                        routsListFragment.setList(routs, false);
-                    }
-
-                }else {
-                    if (context.getFilesDir().getFreeSpace() > 10485760L){
-                        rootPathForRoutsString = Uri.fromFile(context.getFilesDir()).buildUpon().appendPath("Routs").build().getPath();
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            Rout rout = postSnapshot.getValue(Rout.class);
-                            if (isOnline()) {
-                                downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
-                            }
-                            routs.add(rout);
-                        }
-                        if (routsListFragment == null) {
-                            RoutsListFragment routsListFragment = new RoutsListFragment_();
-                            adapter.addFragment(routsListFragment, "Routs");
-                            routsListFragment.setList(routs, false);
-                        }else{
-                            routsListFragment.setList(routs, false);
-                        }
-                    }else {
-                        AlertDialog.Builder noAvailableStorageDialog = new AlertDialog.Builder(StartActivity.this);
-                        noAvailableStorageDialog.setTitle("Save Data");
-                        noAvailableStorageDialog.setMessage("External memory is not available! \n" +
-                                "And in the interior storage  is not enough free space.\n" + " You can not use this program in ofline");
-                        noAvailableStorageDialog.setPositiveButton("Oк", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                            }
-                        });
-                    }
+                    routs.add(rout);
                 }
+                if ( tabLayout.getTabCount() == 1) {
+                    RoutsListFragment routsListFragment = new RoutsListFragment_();
+                    routsListFragment.setList(routs, false);
+                    adapter.addFragment(routsListFragment, "Routs");
+                    adapter.notifyDataSetChanged();
+
+                }else{
+                    tabLayout.getTabAt(1).setIcon(null);
+                    RoutsListFragment routsListFragment = (RoutsListFragment_) adapter.getItem(1);
+                    routsListFragment.setList(routs, false);
+                }
+
+
             }
 
             @Override
@@ -396,8 +354,35 @@ public class StartActivity extends AppCompatActivity implements
             } else {
 
                 if(mPermissionList[i].equals( READ_EXTERNAL_STORAGE)) {
-                    Toast.makeText(this, "" + mPermissionList[i].toString() + " is already granted.", Toast.LENGTH_SHORT).show();
-                    getDateFromFirebace();
+                    if (isExternalStorageWritable() ) {
+                        rootPath = Uri.fromFile(context.getExternalFilesDir(
+                                Environment.DIRECTORY_DOWNLOADS));
+
+                        mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
+                    }else{
+                        if (context.getFilesDir().getFreeSpace() > 1250000L){
+
+                            rootPath = Uri.fromFile(context.getDir("my_carpathians", Context.MODE_PRIVATE));
+                            downloadPhoto(places);
+                            mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
+                        }else{
+                            AlertDialog.Builder noAvailableStorageDialog = new AlertDialog.Builder(StartActivity.this);
+                            noAvailableStorageDialog.setTitle("Save Data");
+                            noAvailableStorageDialog.setMessage("External memory is not available! \n" +
+                                    "And in the interior storage  is not enough free space.\n" + " You can not use this program in ofline");
+                            noAvailableStorageDialog.setPositiveButton("Oк", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Intent settingsIntent = new Intent(Settings.ACTION_APPLICATION_SETTINGS);
+                                    startActivity(settingsIntent);
+                                }
+
+                            });
+                            AlertDialog alertDialog = builder.create();
+                            alertDialog.show();
+                        }
+                    }
+
                 }else{
                     Toast.makeText(this, "" + mPermissionList[i].toString() + " is already granted.", Toast.LENGTH_SHORT).show();
                 }
@@ -425,28 +410,8 @@ public class StartActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                // User chose the "Settings" item, show the app settings UI...
-                return true;
-
-            case R.id.remove:
-                // User chose the "Favorite" action, mark the current item
-                // as a favorite...
-                return true;
-            case R.id.action_sort:
-                // User chose the "Favorite" action, mark the current item
-                // as a favorite...
-                return true;
-            case R.id.action_edit:
-                // User chose the "Favorite" action, mark the current item
-                // as a favorite...
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-        }
+
     }
 
 
@@ -461,19 +426,48 @@ public class StartActivity extends AppCompatActivity implements
                             Toast.makeText(StartActivity.this, " You gave permission" + permissions[i], Toast.LENGTH_SHORT).show();
                         }else{
                             Toast.makeText(StartActivity.this, " You do not gave permission " + permissions[i], Toast.LENGTH_SHORT).show();
-
                         }
-                        if (permissions[i].equals(WRITE_EXTERNAL_STORAGE) && grantResults[i] == PackageManager.PERMISSION_GRANTED){
-                            Toast.makeText(StartActivity.this, " You gave permission" + permissions[i], Toast.LENGTH_SHORT).show();
-                            getDateFromFirebace();
-                        }else{
-                            Toast.makeText(StartActivity.this, " You gave permission" + permissions[i], Toast.LENGTH_SHORT).show();
+                        if (permissions[i].equals(WRITE_EXTERNAL_STORAGE)){
 
+                            if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                                rootPath = Uri.fromFile(context.getExternalFilesDir(
+                                        Environment.DIRECTORY_DOWNLOADS));
+
+                                mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
+                                getDateFromFirebace();
+                            } else {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                                builder.setTitle("Download Data!");
+                                builder.setMessage("You do not gave permission to download data to External Storage! Save data to Internal storage& ");
+                                builder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        rootPath = Uri.fromFile(context.getDir("my_carpathians", Context.MODE_PRIVATE));
+                                        downloadPhoto(places);
+                                        mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
+                                        getDateFromFirebace();
+                                        dialogInterface.dismiss();
+                                    }
+                                });
+                                builder.setNegativeButton("permission", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        checkAllPermission();
+                                        dialogInterface.dismiss();
+                                    }
+                                });
+                                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialogInterface) {
+
+                                    }
+                                });
+                                AlertDialog alertDialog = builder.create();
+                                alertDialog.show();
+                            }
                         }
                         if (permissions[i].equals(READ_EXTERNAL_STORAGE) && grantResults[i] == PackageManager.PERMISSION_GRANTED){
-                            Toast.makeText(StartActivity.this, " You gave permission" + permissions[i], Toast.LENGTH_SHORT).show();
                         }else{
-                            Toast.makeText(StartActivity.this, " You do not gave permission " + permissions[i], Toast.LENGTH_SHORT).show();
 
                         }
                     }
@@ -491,6 +485,7 @@ public class StartActivity extends AppCompatActivity implements
         if (mUser == null) {
             showableLogInGroup(true);
             mTypeMode = false;
+            showLoginDialog();
         } else if (mUser.isAnonymous()) {
             updateUI("Anonymous", null);
             mUserUID = mUser.getUid();
@@ -537,10 +532,10 @@ public class StartActivity extends AppCompatActivity implements
 
     private void produceToolsVisibility(boolean mTypeMode) {
         if(mTypeMode){
-            buttonCreatedPlaces.setVisibility(View.VISIBLE);
+            buttonCreated.setVisibility(View.VISIBLE);
             fabRecEditor.setAlpha((float) 1);
         }else{
-            buttonCreatedPlaces.setVisibility(View.GONE);
+            buttonCreated.setVisibility(View.GONE);
             fabRecEditor.setAlpha((float) 0.5);
         }
     }
@@ -570,7 +565,7 @@ public class StartActivity extends AppCompatActivity implements
 
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference httpsReference = storage.getReferenceFromUrl(urlRoutsTrack);
-        File rootPath = new File(rootPathForRoutsString);
+        File rootPath = new File(this.rootPath.buildUpon().appendPath("Routs").build().getPath());
         if (!rootPath.exists()) {
             rootPath.mkdirs();
         }
@@ -597,8 +592,7 @@ public class StartActivity extends AppCompatActivity implements
             try {
                 URL url = new URL(placeList.get(i).getUrlPlace());
 
-                File rootPath = new File(context.getExternalFilesDir(
-                        Environment.DIRECTORY_DOWNLOADS), "Photos");
+                File rootPath = new File(this.rootPath.getPath(), "Photos");
                 if (!rootPath.exists()) {
                     rootPath.mkdirs();
                 }
@@ -653,6 +647,9 @@ public class StartActivity extends AppCompatActivity implements
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
+
+
+
     }
 
 
@@ -752,89 +749,33 @@ public class StartActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void putStringNamePlace(String name, int type) {
-        if (type == MY_PLACE) {
-            File rootPath = new File(context.getExternalFilesDir(
-                    Environment.DIRECTORY_DOWNLOADS), "Created");
-            if (!rootPath.exists()) {
-                rootPath.mkdirs();
-            }
-
-            File file = new File(rootPath, name);
-            if (file.exists()) {
-                try {
-                    FileInputStream fileIn = new FileInputStream(file);
-                    ObjectInputStream objectInputStream = new ObjectInputStream(fileIn);
-                    Place place = (Place) objectInputStream.readObject();
-                    objectInputStream.close();
-                    fileIn.close();
-                    Intent intentActionActivity = new Intent(context, ActionActivity_.class);
-                    intentActionActivity.putExtra(PUT_EXTRA_PLACE, place);
-                    intentActionActivity.putExtra(PRODUCE_MODE, true);
-                    startActivity(intentActionActivity);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        } else if (type == PLACE) {
-            for (int i = 0; i < places.size(); i++) {
-                if (places.get(i).getNamePlace().equals(name)) {
-                    Intent intentActionActivity = new Intent(context, ActionActivity_.class);
-                    intentActionActivity.putExtra(PUT_EXTRA_PLACE, places.get(i));
-                    ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
-                    ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
-                    intentActionActivity.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
-                    intentActionActivity.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
-                    intentActionActivity.putExtra(PRODUCE_MODE, false);
-                    startActivity(intentActionActivity);
-                }
-            }
-
+    public void putStringNamePlace(Place place) {
+        Intent intentActionActivity = new Intent(context, ActionActivity_.class);
+        intentActionActivity.putExtra(PUT_EXTRA_PLACE, place);
+        ArrayList<Place> arrayListPlace = places;
+        ArrayList<Rout> arrayListRouts = routs;
+        intentActionActivity.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
+        intentActionActivity.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
+        if (places.contains(place)) {
+            intentActionActivity.putExtra(PRODUCE_MODE, false);
+        }else{
+            intentActionActivity.putExtra(PRODUCE_MODE, true);
         }
+        startActivity(intentActionActivity);
     }
     @Override
-    public void putStringNameRout(String name, int type) {
-        if (type == MY_ROUT){
-	        File rootPath = new File(context.getExternalFilesDir(
-			        Environment.DIRECTORY_DOWNLOADS), "Created");
-	        if (!rootPath.exists()) {
-		        rootPath.mkdirs();
-	        }
-
-		        File file = new File(rootPath, name);
-		        if (file.exists()) {
-			        try {
-				        FileInputStream fileIn = new FileInputStream(file);
-				        ObjectInputStream objectInputStream = new ObjectInputStream(fileIn);
-                        Rout rout = (Rout)objectInputStream.readObject();
-				        objectInputStream.close();
-                        fileIn.close();
-				        Intent intentActionActivity = new Intent(context, ActionActivity_.class);
-				        intentActionActivity.putExtra(PUT_EXTRA_ROUT, rout);
-				        intentActionActivity.putExtra(PRODUCE_MODE, true);
-				        startActivity(intentActionActivity);
-
-			        } catch (Exception e) {
-				        e.printStackTrace();
-			        }
-		        }
-        }else{
-        for (int i = 0; i < routs.size(); i++) {
-	        if (routs.get(i).getNameRout().equals(name)) {
+    public void putStringNameRout(Rout rout) {
 		        Intent intentActionActivity = new Intent(context, ActionActivity_.class);
-
-                ArrayList<Place> arrayListPlace = (ArrayList<Place>) places;
-                ArrayList<Rout> arrayListRouts = (ArrayList<Rout>) routs;
-                intentActionActivity.putExtra(PUT_EXTRA_PLACE_LIST, arrayListPlace);
-                intentActionActivity.putExtra(PUT_EXTRA_ROUTS_LIST, arrayListRouts);
-                intentActionActivity.putExtra(PUT_EXTRA_ROUT, routs.get(i));
-                intentActionActivity.putExtra(PRODUCE_MODE, false);
+                intentActionActivity.putExtra(PUT_EXTRA_PLACE_LIST, places);
+                intentActionActivity.putExtra(PUT_EXTRA_ROUTS_LIST, routs);
+                intentActionActivity.putExtra(PUT_EXTRA_ROUT, rout);
+        if (routs.contains(rout)) {
+            intentActionActivity.putExtra(PRODUCE_MODE, false);
+        }else{
+            intentActionActivity.putExtra(PRODUCE_MODE, true);
+        }
 		        startActivity(intentActionActivity);
-            }
-        }
 
-        }
     }
 
 
@@ -868,13 +809,13 @@ public class StartActivity extends AppCompatActivity implements
 
                 }
                 if (createdP != null &&  tabLayout.getTabCount() > 0) {
-                    tabLayout.getTabAt(0).setIcon(R.drawable.ic_star_rate_black_18px);
+                    tabLayout.getTabAt(0).setIcon(R.drawable.ic_create_black_24px);
                     PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
                     placesListFragment.setList(createdP, true);
                 }
             }else{
                 if ( tabLayout.getTabCount() > 0) {
-                    tabLayout.getTabAt(0).setIcon(R.drawable.ic_star_rate_black_18px);
+                    tabLayout.getTabAt(0).setIcon(R.drawable.ic_create_black_24px);
                     PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
                     placesListFragment.setList(new ArrayList<Place>(), true);
                 }
@@ -912,13 +853,13 @@ public class StartActivity extends AppCompatActivity implements
                     }
                 }
                 if (createdR != null && tabLayout.getTabCount() > 1) {
-                    tabLayout.getTabAt(1).setIcon(R.drawable.ic_star_rate_black_18px);
+                    tabLayout.getTabAt(1).setIcon(R.drawable.ic_create_black_24px);
                     RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
                     routsListFragment.setList(createdR, true);
                 }
             } else {
                 if (tabLayout.getTabCount() > 1) {
-                    tabLayout.getTabAt(1).setIcon(R.drawable.ic_star_rate_black_18px);
+                    tabLayout.getTabAt(1).setIcon(R.drawable.ic_create_black_24px);
                     RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
                     routsListFragment.setList(new ArrayList<Rout>(), true);
                 }
@@ -929,6 +870,7 @@ public class StartActivity extends AppCompatActivity implements
         }
         if (dialogFlag > 1){
             showFavoriteEmptyDialog("Created");
+            setDrawerState(false);
         }else {
 
             setDrawerState(false);
@@ -998,9 +940,10 @@ public class StartActivity extends AppCompatActivity implements
         }
     if (dialogFlag > 1){
         showFavoriteEmptyDialog("Favorite");
+        setDrawerState(false);
     }else {
 
-        setDrawerState(false);
+       setDrawerState(false);
     }
     }
 
@@ -1043,99 +986,60 @@ public class StartActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void deletedFromFavoriteList(final String name, final int type) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Deleting!");
-        if (type == ROUT){
-            builder.setMessage("Do You really want to delete Rout " + name + " from FavoriteList"  );
+    public void deletedFromFavoriteList(final List<String> names, final int type) {
 
-        }else if (type == PLACE) {
-            builder.setMessage("Do You really want to delete Place " + name + " from FavoriteList");
-        }
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
                 if (type == ROUT){
                     Set<String> favoritesRoutsList = new HashSet<>(mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>()));
-                    favoritesRoutsList.remove(name);
+                    favoritesRoutsList.removeAll(names);
                     SharedPreferences.Editor editor = mSharedPreferences.edit();
                     editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
                     editor.apply();
-                    Toast.makeText(StartActivity.this, "Deleted Rout " + name + "from Favorites", Toast.LENGTH_LONG ).show();
                     ArrayList<String> mListRouts = null;
                     if (favoritesRoutsList != null  ) {
                         mListRouts = new ArrayList<>(favoritesRoutsList);
                     }
-                    showFavoriteList(new ArrayList<String>() ,mListRouts);
+                    showFavoriteList(null ,mListRouts);
                 }else if (type == PLACE) {
                     Set<String> favoritesPlacesList = new HashSet<>(mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>()));
-                    favoritesPlacesList.remove(name);
+                    favoritesPlacesList.removeAll(names);
                     SharedPreferences.Editor editor = mSharedPreferences.edit();
                     editor.putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList);
                     editor.apply();
-                    Toast.makeText(StartActivity.this, "Deleted Place " + name + "from Favorites", Toast.LENGTH_LONG ).show();
                     ArrayList<String> mListPlaces = null;
                     if (favoritesPlacesList != null  ) {
                         mListPlaces = new ArrayList<>(favoritesPlacesList);
                     }
-                    showFavoriteList(mListPlaces, new ArrayList<String>());
+                    showFavoriteList(mListPlaces, null);
 
                 }
-            }
-        });
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
+
     }
 
     @Override
-    public void deletedFromCreatedList(final String name, final int type) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Deleting!");
-        if (type == MY_ROUT){
-            builder.setMessage("Do You really want to delete Rout " + name + " from FavoriteList"  );
+    public void deletedFromCreatedList(final List<String> names, final int type) {
 
-        }else if (type == MY_PLACE) {
-            builder.setMessage("Do You really want to delete Place " + name );
-        }
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (type == MY_ROUT){
-                    ObjectService objectService = new ObjectService(StartActivity.this);
-                    String mOutcome = objectService.deleteRout(name);
-                    if(!mOutcome.equals(ERROR)){
-                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
-                        dialogInterface.dismiss();
-                    }else{
-                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
+                if (type == ROUT){
+                    for (int p = 0; p < names.size(); p++) {
+                        ObjectService objectService = new ObjectService(StartActivity.this, rootPath.toString());
+                        String mOutcome = objectService.deleteRout(names.get(p));
+                        if (!mOutcome.equals(ERROR)) {
+                            Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG).show();
+                        }
                     }
-
-                }else if (type == MY_PLACE) {
-                    ObjectService objectService = new ObjectService(StartActivity.this);
-                    String mOutcome = objectService.deletePlace(name);
-                    if(!mOutcome.equals(ERROR)){
-                        Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG ).show();
-                        dialogInterface.dismiss();
-                    }else{
-                        Toast.makeText(StartActivity.this,mOutcome,Toast.LENGTH_LONG ).show();
+                }else if (type == PLACE) {
+                    for (int p = 0; p < names.size(); p++) {
+                        ObjectService objectService = new ObjectService(StartActivity.this, rootPath.toString());
+                        String mOutcome = objectService.deletePlace(names.get(p));
+                        if (!mOutcome.equals(ERROR)) {
+                            Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
-        });
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
+
     }
 
 
@@ -1473,95 +1377,55 @@ public class StartActivity extends AppCompatActivity implements
 	    }
     }
 
-    @Click(R.id.buttonFavoritesPlaces)
+    @Click(R.id.buttonFavorites)
     void buttonFavoritesPlaces() {
         mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         Set<String> favoritesPlacesList = mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, null);
         Set<String> favoritesRoutsList = mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, null);
-        ArrayList<String> mListRouts = null;
-        ArrayList<String> mListPlaces = null;
-        if (favoritesPlacesList != null  ) {
-            mListRouts = new ArrayList<>(favoritesRoutsList);
-        }
-        if (favoritesRoutsList != null) {
+        ArrayList<String> mListRouts;
+        ArrayList<String> mListPlaces;
+        if (favoritesPlacesList != null && favoritesPlacesList.size() > 0  ) {
             mListPlaces = new ArrayList<>(favoritesPlacesList);
+        }else {
+            mListPlaces = new ArrayList<>();
+        }
 
+        if (favoritesRoutsList != null && favoritesRoutsList.size() > 0) {
+            mListRouts = new ArrayList<>(favoritesRoutsList);
+
+        }else {
+            mListRouts = new ArrayList<>();
         }
         showFavoriteList(mListPlaces, mListRouts);
 
-
-        /**
-        if (listOfPlaces.getVisibility() == View.GONE) {
-            mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> favoritesPlacesList = mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, null);
-            if (favoritesPlacesList != null) {
-                ArrayList<String> listPlaces = new ArrayList<>(favoritesPlacesList);
-                listOfPlaces.setVisibility(View.VISIBLE);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-                Log.d("debugMode", "The application stopped after this");
-                listOfPlaces.setLayoutManager(mLayoutManager);
-                FavoritesRecyclerAdapter recyclerAdapter = new FavoritesRecyclerAdapter(StartActivity.this, listPlaces, PLACE);
-                listOfPlaces.setAdapter(recyclerAdapter);
-            }
-        }else { listOfPlaces.setVisibility(View.GONE);}
-         */
     }
 
 
 
-    @Click(R.id.buttonCreatedPlaces)
+    @Click(R.id.buttonCreated)
     void buttonCreatedPlaces() {
-        if (listCreatedPlaces.getVisibility() == View.GONE) {
-            mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> createdByUserPlaceList = mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, null);
-            mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> createdByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, null);
-            ArrayList<String> mListRouts = null;
-            ArrayList<String> mListPlaces = null;
-            if (createdByUserPlaceList != null) {
-                mListPlaces = new ArrayList<>(createdByUserPlaceList);
-            }
-            if (createdByUserTrackList != null) {
-                mListRouts = new ArrayList<>(createdByUserTrackList);
-
-            }
-            showCreatedList(mListPlaces, mListRouts);
+        mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Set<String> createdByUserPlaceList = mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, null);
+        mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Set<String> createdByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, null);
+        ArrayList<String> mListRouts;
+        ArrayList<String> mListPlaces;
+        if (createdByUserPlaceList != null && createdByUserPlaceList.size() > 0) {
+            mListPlaces = new ArrayList<>(createdByUserPlaceList);
+        }else {
+            mListPlaces = new ArrayList<>();
         }
-            /**
-            if (createdByUserPlaceList != null) {
-                listCreatedPlaces.setVisibility(View.VISIBLE);
+        if (createdByUserTrackList != null && createdByUserTrackList.size() > 0) {
+            mListRouts = new ArrayList<>(createdByUserTrackList);
 
-                ArrayList<String> listPlaces = new ArrayList<>(createdByUserPlaceList);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-                Log.d("debugMode", "The application stopped after this");
-                listCreatedPlaces.setLayoutManager(mLayoutManager);
-                FavoritesRecyclerAdapter recyclerAdapter = new FavoritesRecyclerAdapter( StartActivity.this, listPlaces, MY_PLACE);
-                listCreatedPlaces.setAdapter(recyclerAdapter);
+        }else {
+            mListRouts = new ArrayList<>();
+        }
+        showCreatedList(mListPlaces, mListRouts);
+        }
 
-            }
-        }else{
-            listCreatedPlaces.setVisibility(View.GONE);}
-             */
-    }
 
-    void buttonCreatedRouts() {
-        if (listCreatedRouts.getVisibility() == View.GONE) {
-            mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            Set<String> createdByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, null);
 
-            if (createdByUserTrackList != null) {
-                listCreatedRouts.setVisibility(View.VISIBLE);
 
-                ArrayList<String> listTrack = new ArrayList<>(createdByUserTrackList);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-                Log.d("debugMode", "The application stopped after this");
-                listCreatedRouts.setLayoutManager(mLayoutManager);
-                FavoritesRecyclerAdapter recyclerAdapter = new FavoritesRecyclerAdapter( StartActivity.this, listTrack, MY_ROUT);
-                listCreatedRouts.setAdapter(recyclerAdapter);
-
-            }
-        }else{
-            listCreatedRouts.setVisibility(View.GONE);}
-    }
 
 }

@@ -27,8 +27,10 @@ import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC
 import static com.example.key.my_carpathians.activities.MapsActivity.ERROR_TRACK;
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_COMMANDS;
 import static com.example.key.my_carpathians.activities.MapsActivity.TO_SERVICE_TRACK_NAME;
-import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.PLACE;
-import static com.example.key.my_carpathians.adapters.FavoritesRecyclerAdapter.ROUT;
+import static com.example.key.my_carpathians.activities.StartActivity.PLACE;
+import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.activities.StartActivity.ROOT_PATH;
+import static com.example.key.my_carpathians.activities.StartActivity.ROUT;
 import static com.example.key.my_carpathians.utils.ObjectService.FILE_EXISTS;
 
 
@@ -148,12 +150,15 @@ public class LocationService extends Service implements
     }
 
     private void savePlaceToSDCard(String mNamePlace) {
+
+       String mRootPathString = getApplicationContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(ROOT_PATH, null);
+
         if (mLocation != null) {
 	        Place mPlace = new Place();
 	        mPlace.setNamePlace(mNamePlace);
 	        mPlace.setPositionPlace(new com.example.key.my_carpathians.models.
 			        Position(mLocation.getLatitude(), mLocation.getLongitude()));
-            ObjectService objectService = new ObjectService(getApplicationContext());
+            ObjectService objectService = new ObjectService(getApplicationContext(), mRootPathString);
             String outcome = objectService.savePlace(mNamePlace, mPlace, false);
             if (outcome.equals(FILE_EXISTS) & owner != null){
                 owner.messageForActivity(ROUT, mNamePlace);
@@ -164,12 +169,14 @@ public class LocationService extends Service implements
     }
 
     private void saveRoutToSDCard(String mNameRout) {
-    if (mPositionList.size() > 2) {
+        String mRootPathString = getApplicationContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(ROOT_PATH, null);
+
+        if (mPositionList.size() > 2) {
 	    Rout mRout = new Rout();
 	    mRout.setNameRout(mNameRout);
 	    mRout.setPositionRout(new com.example.key.my_carpathians.models.Position(
 	    		mPositionList.get(0).getLatitude(), mPositionList.get(0).getLongitude()));
-        ObjectService objectService = new ObjectService(getApplicationContext());
+        ObjectService objectService = new ObjectService(getApplicationContext(), mRootPathString);
         String outcome = objectService.saveRout(mNameRout, mPositionList, mRout, false);
         if (outcome.equals(FILE_EXISTS) & owner != null){
             owner.messageForActivity(ROUT, mNameRout);

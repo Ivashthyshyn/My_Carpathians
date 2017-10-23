@@ -3,6 +3,7 @@ package com.example.key.my_carpathians.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,10 +27,11 @@ import java.util.List;
 public class PlacesListFragment extends Fragment {
     RecyclerView recyclerView;
     LinearLayoutManager mLayoutManager;
-    List<Place> mPlacesQuery;
+    List<Place> placeList;
     PlacesRecyclerAdapter recyclerAdapter;
 	CardView emptyView;
     private boolean mMode;
+    private ActionMode mActionMode;
 
     @Nullable
     @Override
@@ -39,12 +41,12 @@ public class PlacesListFragment extends Fragment {
         recyclerView = (RecyclerView) fragment.findViewById(R.id.recyclerViewForPlace);
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
-        recyclerAdapter = new PlacesRecyclerAdapter(mPlacesQuery, mMode);
+        recyclerAdapter = new PlacesRecyclerAdapter(placeList, mMode);
         recyclerView.setAdapter(recyclerAdapter);
         return fragment;
     }
     public void setList(List<Place> placeList, boolean mode){
-       this.mPlacesQuery = placeList;
+       this.placeList = placeList;
        this.mMode = mode;
         if (recyclerAdapter != null & placeList != null) {
             recyclerAdapter.setList(placeList, mode);
@@ -55,6 +57,14 @@ public class PlacesListFragment extends Fragment {
                 emptyView.setVisibility(View.GONE);
             }
         }
+    }
+
+    public void dismissActionMode() {
+
+    if (recyclerAdapter.ismMode()) {
+        recyclerAdapter.removeSelection();  // remove selection
+        recyclerAdapter.setNullToActionMode();
+    }
     }
 
 }

@@ -50,7 +50,8 @@
         <activity
             android:name=".activities.ActionActivity_"
             android:label="@string/title_activity_action"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".activities.ActionActivity_"/>
         <activity
             android:name=".activities.SettingsActivity_"
             android:label="@string/title_activity_login"
