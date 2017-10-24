@@ -26,7 +26,7 @@ public class RoutsListFragment extends Fragment {
         LinearLayoutManager mLayoutManager;
         List<Rout> mRoutsList;
     RoutsRecyclerAdapter recyclerAdapter;
-    private boolean mMode;
+    private int mMode;
     CardView emptyView;
     private ActionMode mActionMode;
 
@@ -45,7 +45,7 @@ public class RoutsListFragment extends Fragment {
         return fragment;
     }
 
-    public void setList(List<Rout> routList, boolean mode) {
+    public void setList(List<Rout> routList, int mode) {
         this.mRoutsList = routList;
         this.mMode = mode;
         if (recyclerAdapter != null & routList != null){

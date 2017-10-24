@@ -3,10 +3,10 @@ package com.example.key.my_carpathians.fragments;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
@@ -61,8 +61,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
+import static com.example.key.my_carpathians.activities.StartActivity.ROOT_PATH;
 import static com.example.key.my_carpathians.utils.ObjectService.ERROR;
-import static com.mapbox.mapboxsdk.storage.FileSource.isExternalStorageReadable;
 
 /**
  .
@@ -149,6 +151,8 @@ public class EditModeFragment extends DialogFragment {
 	@ViewById(R.id.groupMorePhoto)
 	LinearLayout groupMorePhoto;
 	private String rootPathString;
+	private SharedPreferences sharedPreferences;
+	private String mRootPathString;
 
 
 	@Override
@@ -182,7 +186,8 @@ public class EditModeFragment extends DialogFragment {
 	@AfterViews
 	void afterView(){
 
-
+		sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		mRootPathString = sharedPreferences.getString(ROOT_PATH, null);
 			if(mPlace != null){
 				name = mPlace.getNamePlace();
 				uriTitlePhoto = mPlace.getUrlPlace();
@@ -259,7 +264,7 @@ public class EditModeFragment extends DialogFragment {
 
 				switch (mPhotoSwicher){
 					case TITLE_PHOTO:
-						uriTitlePhoto = savePhotoToSDCard(name, cropImageView.getCroppedImage(), null);
+						uriTitlePhoto = savePhoto(name, cropImageView.getCroppedImage(), null);
 						if (mPlace !=  null){
 							mPlace.setUrlPlace(uriTitlePhoto);
 						}else if(mRout != null){
@@ -272,21 +277,21 @@ public class EditModeFragment extends DialogFragment {
 						buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
 						break;
 					case MORE_PHOTO_1:
-						uriPhoto1 = savePhotoToSDCard(name + 1, cropImageView.getCroppedImage(), null);
+						uriPhoto1 = savePhoto(name + 1, cropImageView.getCroppedImage(), null);
 						Glide
 								.with(getContext())
 								.load(uriPhoto1)
 								.into(imageAdd1);
 						break;
 					case MORE_PHOTO_2:
-						uriPhoto2 = savePhotoToSDCard(name + 2, cropImageView.getCroppedImage(), null);
+						uriPhoto2 = savePhoto(name + 2, cropImageView.getCroppedImage(), null);
 						Glide
 								.with(getContext())
 								.load(uriPhoto2)
 								.into(imageAdd2);
 						break;
 					case MORE_PHOTO_3:
-						uriPhoto3 = savePhotoToSDCard(name + 3, cropImageView.getCroppedImage(), null);
+						uriPhoto3 = savePhoto(name + 3, cropImageView.getCroppedImage(), null);
 						Glide
 								.with(getContext())
 								.load(uriPhoto3)
@@ -373,13 +378,8 @@ public class EditModeFragment extends DialogFragment {
 	}
 
 	private void morePhotos(String name) {
-			Uri rootPathForPhotosString;
-			if (isExternalStorageReadable()) {
-				rootPathForPhotosString = Uri.fromFile(getContext().getExternalFilesDir(
-						Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
-			}else{
-				rootPathForPhotosString = Uri.fromFile(getContext().getFilesDir()).buildUpon().appendPath("Photos").build();
-			}
+			Uri rootPathForPhotosString = Uri.parse(mRootPathString).buildUpon().appendPath("Photos").build();
+
 			for (int i = 1; i <= 3; i++) {
 				File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(name + String.valueOf(i)).build().getPath());
 				if (photoFile.exists()) {
@@ -449,10 +449,10 @@ public class EditModeFragment extends DialogFragment {
 				mRout.setLengthRout(mTrackLength);
 				mRout.setPositionRout(mPositionRout);
 				mRout.setRoutsLevel(routsLevel);
-				mRout.setUrlRout(savePhotoToSDCard(mRout.getNameRout(), null, uriTitlePhoto));
-					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_1), null, uriPhoto1);
-					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), null, uriPhoto2);
-					 savePhotoToSDCard(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), null, uriPhoto3);
+				mRout.setUrlRout(savePhoto(mRout.getNameRout(), null, uriTitlePhoto));
+					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_1), null, uriPhoto1);
+					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), null, uriPhoto2);
+					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), null, uriPhoto3);
 
 				ObjectService objectService = new ObjectService(getContext(), rootPathString);
 				 String outcome = objectService.saveRout(name, null, mRout, true);
@@ -464,10 +464,10 @@ public class EditModeFragment extends DialogFragment {
 			}else if(mPlace != null) {
 				 mPlace.setNamePlace(editTextName.getText().toString());
 				 mPlace.setTitlePlace(editTextTitle.getText().toString());
-				 mPlace.setUrlPlace(savePhotoToSDCard(mPlace.getNamePlace(), null, uriTitlePhoto));
-					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_1, null, uriPhoto1);
-					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_2, null, uriPhoto2);
-					 savePhotoToSDCard(mPlace.getNamePlace() + MORE_PHOTO_3, null, uriPhoto3);
+				 mPlace.setUrlPlace(savePhoto(mPlace.getNamePlace(), null, uriTitlePhoto));
+					 savePhoto(mPlace.getNamePlace() + MORE_PHOTO_1, null, uriPhoto1);
+					 savePhoto(mPlace.getNamePlace() + MORE_PHOTO_2, null, uriPhoto2);
+					 savePhoto(mPlace.getNamePlace() + MORE_PHOTO_3, null, uriPhoto3);
 
 				 ObjectService objectService = new ObjectService(getContext(), rootPathString);
 				 String outcome =  objectService.savePlace( name, mPlace, true);
@@ -480,15 +480,10 @@ public class EditModeFragment extends DialogFragment {
 				 }
 	}
 
-	private String savePhotoToSDCard(String name, Bitmap bitmap, String uri) {
+	private String savePhoto(String name, Bitmap bitmap, String uri) {
 			if (bitmap != null) {
-				Uri rootPathForPhotos;
-				if (isExternalStorageReadable()) {
-					rootPathForPhotos = Uri.fromFile(getContext().getExternalFilesDir(
-							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
-				}else{
-					rootPathForPhotos = Uri.fromFile(getContext().getFilesDir()).buildUpon().appendPath("Photos").build();
-				}
+				Uri rootPathForPhotos = Uri.parse(mRootPathString).buildUpon().appendPath("Photos").build();
+
 
 				File file = new File(rootPathForPhotos.getPath(), name);
 				if (file.exists()) {
@@ -510,8 +505,7 @@ public class EditModeFragment extends DialogFragment {
 				File file = new File(uri);
 				File newFile ;
 				if (file.exists()) {
-					Uri rootPathForTitlePhotoString = Uri.fromFile(getContext().getExternalFilesDir(
-							Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+					Uri rootPathForTitlePhotoString = Uri.parse(mRootPathString).buildUpon().appendPath("Photos").build();
 					newFile = new File(rootPathForTitlePhotoString.buildUpon().appendPath(name).build().getPath());
 					file.renameTo(newFile);
 					uri = Uri.fromFile(newFile).getPath();

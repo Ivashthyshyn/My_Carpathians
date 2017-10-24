@@ -61,7 +61,6 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.mapbox.services.api.utils.turf.TurfConstants;
@@ -142,14 +141,11 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     ImageView imageView;
 	@ViewById(R.id.ratingBar)
 	RatingBar ratingBar;
-	@ViewById(R.id.buttonRatingBar)
-	FloatingActionButton buttonRatingBar;
+
     @ViewById(graph)
     GraphView graphView;
 	@ViewById(R.id.buttonShowOnMap)
     FloatingActionButton buttonShowOnMap;
-	@ViewById(R.id.buttonAddToFavorites)
-	FloatingActionButton buttonAddToFavorites;
 
 	@ViewById(R.id.fabChangePhotoLeft)
 	FloatingActionButton fabChangePhotoLeft;
@@ -157,18 +153,15 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	@ViewById(R.id.fabChangePhotoRight)
 	FloatingActionButton fabChangePhotoRight;
 
-	@ViewById (R.id.buttonEdit)
-	FloatingActionButton buttonEdit;
-	@ViewById(R.id.buttonPublish)
-	FloatingActionButton buttonPublish;
 	@ViewById(R.id.tabLayout)
 	TabLayout tabLayout;
 	@ViewById(R.id.viewpager)
 	ViewPager viewPager;
 	String mRootPathString;
+	private Menu menu;
 
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
@@ -186,47 +179,42 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
 	    mProdusedMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
-	    if (mProdusedMode){
-
-            infoFragment = new InfoFragment_();
-            adapter.addFragment(infoFragment, "INFO");
-            infoFragment.setData(myPlace, myRout);
-            viewPager.setAdapter(adapter);
-		    buttonAddToFavorites.setVisibility(View.GONE);
-            buttonPublish.setVisibility(View.VISIBLE);
-            viewPager.setCurrentItem(0);
-		    buttonEdit.setVisibility(View.VISIBLE);
-		    ratingBar.setVisibility(View.GONE);
-		    buttonRatingBar.setVisibility(View.GONE);
-		    setBaseInformation(myPlace, myRout);
-
-	    }else {
-
-            PlaceAroundFragment placeAroundFragment = new PlaceAroundFragment_();
-            adapter.addFragment(placeAroundFragment, "PLACE AROUND");
-
-            InfoFragment infoFragment = new InfoFragment_();
-            adapter.addFragment(infoFragment, "INFO");
-            infoFragment.setData(myPlace, myRout);
-            RoutsAroundFragment routsAroundFragment = new RoutsAroundFragment_();
-            adapter.addFragment(routsAroundFragment, "ROUT AROUND");
-
-            viewPager.setAdapter(adapter);
-		    buttonEdit.setVisibility(View.GONE);
-		    buttonPublish.setVisibility(View.GONE);
-            viewPager.setCurrentItem(1);
-            viewPager.setOffscreenPageLimit(2);
-		    setBaseInformation(myPlace, myRout);
-		    routsAroundFragment.setData(myRout, routList, myPosition);
-		    placeAroundFragment.setData(myPlace, placeList, myPosition);
-	    }
+		produsedMode();
     }
+
+	private void produsedMode() {
+		if (mProdusedMode){
+			infoFragment = new InfoFragment_();
+			adapter.addFragment(infoFragment, "INFO");
+			infoFragment.setData(myPlace, myRout);
+			viewPager.setAdapter(adapter);
+			viewPager.setCurrentItem(0);
+			ratingBar.setVisibility(View.GONE);
+			setBaseInformation(myPlace, myRout);
+
+		}else {
+			PlaceAroundFragment placeAroundFragment = new PlaceAroundFragment_();
+			adapter.addFragment(placeAroundFragment, "PLACE AROUND");
+
+			InfoFragment infoFragment = new InfoFragment_();
+			adapter.addFragment(infoFragment, "INFO");
+			infoFragment.setData(myPlace, myRout);
+			RoutsAroundFragment routsAroundFragment = new RoutsAroundFragment_();
+			adapter.addFragment(routsAroundFragment, "ROUT AROUND");
+			viewPager.setAdapter(adapter);
+			viewPager.setCurrentItem(1);
+			viewPager.setOffscreenPageLimit(2);
+			setBaseInformation(myPlace, myRout);
+			routsAroundFragment.setData(myRout, routList, myPosition);
+			placeAroundFragment.setData(myPlace, placeList, myPosition);
+		}
+	}
 
 	private void setupSizeViews() {
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		int height = metrics.heightPixels / 3;
-CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.WRAP_CONTENT, height);
+		CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.MATCH_PARENT, height);
 		appBarLayout.setLayoutParams(params);
 
 	}
@@ -295,15 +283,7 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 			myName = rout.getNameRout();
 		}
 	}
-	/* Checks if external storage is available to at least read */
-	public boolean isExternalStorageReadable() {
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state) ||
-				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-			return true;
-		}
-		return false;
-	}
+
 
 	private void morePhotos(String name) {
 		if (mProdusedMode ){
@@ -477,7 +457,7 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
    public void buildGraph(List<Position> positions){
 	    int size = positions.size();
 	    DataPoint[] values = new DataPoint[size];
-	    Integer xi = 0;
+	    Integer     xi = 0;
 	    for (int i = 1; i < size; i++) {
 		    Integer yi = (int) mPositionList.get(i).getAltitude();
 		    xi = xi + (int) TurfMeasurement.distance(mPositionList.get(i - 1), mPositionList.get(i), TurfConstants.UNIT_METERS);
@@ -488,9 +468,6 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 	    LineGraphSeries series = new LineGraphSeries<DataPoint>(values);
 	    series.setThickness(8);
 	    graphView.addSeries(series);
-	    GridLabelRenderer gridLabel = graphView.getGridLabelRenderer();
-	    gridLabel.setHorizontalAxisTitle("meters");
-	    gridLabel.setVerticalAxisTitle("meters");
 	    if(mPositionList.get(0).getAltitude() == 0 & isOnline()){
 		    downloadAltitude();
 	    }
@@ -521,41 +498,6 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
             mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
             startActivity(mapIntent);
         }
-    }
-
-
-    @Click(R.id.buttonAddToFavorites)
-    void buttonAddToFavoritesWasClicked() {
-        if (myPlace != null) {
-            selectedUserPlacesStringList.add(myPlace.getNamePlace());
-        }
-        if (myRout != null) {
-            selectedUserRouts.add(myRout.getNameRout());
-        }
-        Set<String> favoritesPlacesList = new HashSet<>(sharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>()));
-        favoritesPlacesList.addAll(selectedUserPlacesStringList);
-        Set<String> favoritesRoutsList = new HashSet<>(sharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>()));
-        favoritesRoutsList.addAll(selectedUserRouts);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList);
-        editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
-        editor.apply();
-
-        Toast.makeText(ActionActivity.this, " Add to favorites", LENGTH_LONG).show();
-
-    }
-    @Click(R.id.buttonPublish)
-    void buttonPublishWasClicked(){
-	    if (isOnline()) {
-		    if (dataIntegrityCheck(myPlace, myRout) == 0) {
-			    saveToFirebase(myPlace, myRout);
-		    }
-	    } else {
-		    showPublisherDialog("Sorry, no internet access, you will be able to post data later when " +
-				    " there is a good connection to the network ");
-
-	    }
-
     }
 
 	private void showPublisherDialog(String problem) {
@@ -804,7 +746,7 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 				.setPositiveButton("Так", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialogInterface, int i) {
-						buttonEditWasClicked();
+						editCreatedObject();
 						dialogInterface.dismiss();
 					}
 				})
@@ -819,17 +761,7 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 
 	}
 
-	@Click(R.id.buttonEdit)
-    void buttonEditWasClicked(){
-        FragmentManager fm = getSupportFragmentManager();
-	    android.support.v4.app.FragmentTransaction fragmentTransaction = fm
-			    .beginTransaction();
-        editFragment = new EditModeFragment_();
-	    fragmentTransaction.add(R.id.actionActivityContainer, editFragment);
-        editFragment.setData(myRout, myPlace, mRootPathString);
-	    fragmentTransaction.commit();
 
-    }
     @Click(R.id.fabChangePhotoRight)
     public void fabChangePhotoRightWasClicked(){
 	    mItemUrlList++;
@@ -926,15 +858,7 @@ CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(Coord
 		}
 		return connected;
 	}
-	@Click(R.id.buttonRatingBar)
-	public void  buttonRatingBarWasClicked() {
 
-		if (FirebaseAuth.getInstance().getCurrentUser() != null && !FirebaseAuth.getInstance().getCurrentUser().isAnonymous()) {
-			ratingBarDialog();
-		}else{
-			showLoginDialog();
-		}
-	}
 public void ratingBarDialog(){
 		final AlertDialog.Builder ratingDialog = new AlertDialog.Builder(this);
 
@@ -998,11 +922,82 @@ public void ratingBarDialog(){
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_action_activity, menu);
+		this.menu = menu;
+		if (mProdusedMode){
+			MenuItem actionEdit = menu.findItem(R.id.action_edit);
+			actionEdit.setVisible(true);
+			MenuItem actionPublisher = menu.findItem(R.id.action_publish);
+			actionPublisher.setVisible(true);
+			MenuItem actionAddToFavorit = menu.findItem(R.id.action_add_to_favorites);
+			actionAddToFavorit.setVisible(false);
+		}else{
+			MenuItem actionEdit = menu.findItem(R.id.action_edit);
+			actionEdit.setVisible(false);
+			MenuItem actionPublisher = menu.findItem(R.id.action_publish);
+			actionPublisher.setVisible(false);
+			MenuItem actionAddToFavorit = menu.findItem(R.id.action_add_to_favorites);
+			actionAddToFavorit.setVisible(true);
+		}
+
 		return true;
 	}
 
+	@Click(R.id.ratingBarrContainer)
+	public void ratingBarWasCklicked(){
+		if (FirebaseAuth.getInstance().getCurrentUser() != null && !FirebaseAuth.getInstance().getCurrentUser().isAnonymous()) {
+			ratingBarDialog();
+		}else{
+			showLoginDialog();
+		}
+	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		return super.onOptionsItemSelected(item);
+		switch (item.getItemId()) {
+			case R.id.action_add_to_favorites:
+				if (myPlace != null) {
+					selectedUserPlacesStringList.add(myPlace.getNamePlace());
+				}
+				if (myRout != null) {
+					selectedUserRouts.add(myRout.getNameRout());
+				}
+				Set<String> favoritesPlacesList = new HashSet<>(sharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>()));
+				favoritesPlacesList.addAll(selectedUserPlacesStringList);
+				Set<String> favoritesRoutsList = new HashSet<>(sharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>()));
+				favoritesRoutsList.addAll(selectedUserRouts);
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList);
+				editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
+				editor.apply();
+
+				Toast.makeText(ActionActivity.this, " Add to favorites", LENGTH_LONG).show();
+				return true;
+			case R.id.action_edit:
+				editCreatedObject();
+				return true;
+			case R.id.action_publish:
+				if (isOnline()) {
+					if (dataIntegrityCheck(myPlace, myRout) == 0) {
+						saveToFirebase(myPlace, myRout);
+					}
+				} else {
+					showPublisherDialog("Sorry, no internet access, you will be able to post data later when " +
+							" there is a good connection to the network ");
+
+				}
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private void editCreatedObject() {
+		FragmentManager fm = getSupportFragmentManager();
+		android.support.v4.app.FragmentTransaction fragmentTransaction = fm
+				.beginTransaction();
+		editFragment = new EditModeFragment_();
+		fragmentTransaction.add(R.id.actionActivityContainer, editFragment);
+		editFragment.setData(myRout, myPlace, mRootPathString);
+		fragmentTransaction.commit();
+
 	}
 }

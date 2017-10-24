@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.key.my_carpathians.activities.StartActivity.PLACE;
-import static com.example.key.my_carpathians.activities.StartActivity.ROUT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.HARD;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.LIGHT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
@@ -41,18 +40,18 @@ import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
 public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdapter.RoutsViewHolder> {
     public static final String PUT_EXTRA_POINTS = "put_extra_point_list";
     SparseBooleanArray mSelectedItemsIds;
-    private boolean mMode;
+    private int mMode;
     public Context context;
     private List<Rout> routs;
     private ActionMode mActionMode;
 
 
-    public RoutsRecyclerAdapter(List<Rout> routList, boolean mode) {
+    public RoutsRecyclerAdapter(List<Rout> routList, int mode) {
         this.routs = routList;
         this.mMode = mode;
         mSelectedItemsIds = new SparseBooleanArray();
     }
-	public void setList(List<Rout> routList, boolean mode){
+	public void setList(List<Rout> routList, int mode){
 		this.routs = routList;
         this.mMode = mode;
 	}
@@ -76,7 +75,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
             @Override
             public void onLongPressed(int position, Rout mRout, View view) {
-                if (mMode && mActionMode == null){
+                if (mMode > 1  && mActionMode == null){
                     onListItemSelect(position);
                     /**
                     CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
@@ -150,6 +149,8 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         return routs.size();
     }
 
+
+
     public static class RoutsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         public static final String PUT_EXTRA_ROUT = "routName";
         private int mPosition;
@@ -202,7 +203,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
         if (hasCheckedItems && mActionMode == null)
             // there are some selected items, start the actionMode
-            mActionMode = ((AppCompatActivity) context).startSupportActionMode(new ToolbarActionModeCallback(context,null, this,null, routs , ROUT));
+            mActionMode = ((AppCompatActivity) context).startSupportActionMode(new ToolbarActionModeCallback(context,null, this,null, routs , mMode));
         else if (!hasCheckedItems && mActionMode != null)
             // there no selected items, finish the actionMode
             mActionMode.finish();
@@ -213,8 +214,26 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
 
     }
+    public void deleteRoutFromCreated() {
+        SparseBooleanArray selected = getSelectedIds();//Get selected ids
+        List<String>deletedRouts = new ArrayList<>();
+        //Loop all selected ids
+        for (int i = (selected.size() - 1); i >= 0; i--) {
+            if (selected.valueAt(i)) {
+                //If current id is selected remove the item via key
+                deletedRouts.add(routs.get(i).getNameRout());
+                routs.remove(selected.keyAt(i));
+                notifyDataSetChanged();//notify adapter
+            }
+        }
+        CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
+        communicatorStartActivity.deletedFromCreatedList(deletedRouts, PLACE);
+        Toast.makeText(context, selected.size() + " item deleted.", Toast.LENGTH_SHORT).show();//Show Toast
+        mActionMode.finish();//Finish action mode after use
+
+    }
     //Delete selected rows
-    public void deleteRout() {
+    public void deleteRoutFromFavorit() {
         SparseBooleanArray selected = getSelectedIds();//Get selected ids
         List<String>deletedRouts = new ArrayList<>();
         //Loop all selected ids

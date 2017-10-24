@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/create_place"
+        android:checkable="false"
+        android:enabled="true"
+        android:title="Create Place"
+        app:showAsAction="never">
+
+    </item>
+    <item
+        android:id="@+id/create_rout"
+        android:checkable="false"
+        android:enabled="true"
+        android:title="Create Rout"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/download_region"
+        android:checkable="false"
+        android:enabled="true"
+        android:title="Create offline region"
+        app:showAsAction="never">
+
+    </item>
+
+</menu>

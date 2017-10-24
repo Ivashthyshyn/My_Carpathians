@@ -30,7 +30,7 @@ public class PlacesListFragment extends Fragment {
     List<Place> placeList;
     PlacesRecyclerAdapter recyclerAdapter;
 	CardView emptyView;
-    private boolean mMode;
+    private int mMode;
     private ActionMode mActionMode;
 
     @Nullable
@@ -45,7 +45,7 @@ public class PlacesListFragment extends Fragment {
         recyclerView.setAdapter(recyclerAdapter);
         return fragment;
     }
-    public void setList(List<Place> placeList, boolean mode){
+    public void setList(List<Place> placeList, int mode){
        this.placeList = placeList;
        this.mMode = mode;
         if (recyclerAdapter != null & placeList != null) {

@@ -22,10 +22,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -149,6 +152,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @ViewById(R.id.toolsHandContainer)
     LinearLayout toolsHandContainer;
 
+    @ViewById(R.id.toolBarMapActivity)
+    Toolbar toolbar;
     @ViewById(R.id.buttonOnBack)
     FloatingActionButton buttonTouchCreator;
 
@@ -156,19 +161,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MapboxMap.OnMyLocationChangeListener myLocationChangeListener;
     private SharedPreferences sharedPreferences;
     private String mRootPathString;
+    private Menu menu;
 
-
-    @Override
-    public void onBackPressed() {
-        if (captureServiceConnection != null){
-            Intent intent = new Intent(this, LocationService.class);
-            unbindService(captureServiceConnection);
-            MapsActivity.this.stopService(intent);
-            mapboxMap.setMyLocationEnabled(false);
-            captureServiceConnection = null;
-        }
-        super.onBackPressed();
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -223,6 +217,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // This contains the MapView in XML and needs to be called after the access token is configured.
         setContentView(R.layout.activity_maps);
+        setSupportActionBar(toolbar);
+        toolbar.showOverflowMenu();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         offlineManager = OfflineManager.getInstance(MapsActivity.this);
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -256,6 +253,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Showing Alert Message
         alertDialog.show();
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (captureServiceConnection != null){
+            Intent intent = new Intent(this, LocationService.class);
+            unbindService(captureServiceConnection);
+            MapsActivity.this.stopService(intent);
+            mapboxMap.setMyLocationEnabled(false);
+            captureServiceConnection = null;
+        }
+        super.onBackPressed();
     }
 
     private void startGPS() {
@@ -316,6 +325,69 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_map_activity, menu);
+        this.menu = menu;
+        if (mTypeMode){
+
+        }else{
+
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.create_place:
+                showCreateDialog(PLACE);
+                return true;
+            case R.id.create_rout:
+                showCreateDialog(ROUT);
+                return true;
+            case R.id.download_region:
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showCreateDialog(final int typeObject) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+
+        if (typeObject == PLACE){
+            builder.setTitle("New Place");
+            builder.setMessage("Please, Виберіть спосіб введення даних");
+        }else if (typeObject == ROUT){
+            builder.setTitle("New Rout");
+            builder.setMessage("Please, Виберіть спосіб введення даних");
+        }
+        builder.setPositiveButton("GPS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startGPS();
+                autoOrientationOff(true);
+
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("Hands", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                autoOrientationOff(true);
+                enabledHandsMode(typeObject);
+                dialog.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+    }
 
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
@@ -860,8 +932,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 if (handType) {
                     createdTrackPosition = new ArrayList<Position>();
-                    enabledHandsMode(COMMAND_REC_ROUT);
-
+                    enabledHandsMode(ROUT);
                     alert.dismiss();
                 }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
@@ -881,7 +952,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 if (handType) {
                     createdTrackPosition = new ArrayList<Position>();
-                    enabledHandsMode(COMMAND_REC_PLACE);
+                    enabledHandsMode(PLACE);
                     alert.dismiss();
                 }else {
 	                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
@@ -1187,7 +1258,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onMapClick(@NonNull LatLng point) {
                     mPointCounter++;
-                    if (type == COMMAND_REC_PLACE) {
+                    if (type == PLACE) {
                         if (mMarker == null) {
                             mMarker = mapboxMap.addMarker(new MarkerViewOptions()
                                     .position(point)
@@ -1200,7 +1271,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     .title("Intervention")
                                     .snippet("Desc inter"));
                         }
-                    }else if(type == COMMAND_REC_ROUT){
+                    }else if(type == ROUT){
                         showRecLine(point);
                     }
 

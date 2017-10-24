@@ -79,7 +79,7 @@
                     android:layout_marginRight="10dp"
                     android:elevation="5dp"
                     android:isIndicator="true"
-                    android:numStars="4"
+                    android:numStars="5"
                     android:progressBackgroundTint="#FFF"
                     android:progressTint="@color/colorAccent"
                     android:rating="1"

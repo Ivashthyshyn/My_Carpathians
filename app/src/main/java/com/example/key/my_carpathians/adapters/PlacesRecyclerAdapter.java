@@ -43,7 +43,7 @@ import static com.example.key.my_carpathians.activities.StartActivity.ROOT_PATH;
 
 public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAdapter.ViewHolder> {
     private List<Place> places;
-    private boolean mMode;
+    private int mMode;
 	SparseBooleanArray mSelectedItemsIds;
     /**
      * use context to intent Url
@@ -51,17 +51,19 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
     public Context context;
 	private ActionMode mActionMode;
 
-	public PlacesRecyclerAdapter(List<Place> placeList, boolean mode) {
+	public PlacesRecyclerAdapter(List<Place> placeList, int mode) {
             this.places = placeList;
             this.mMode = mode;
 	    mSelectedItemsIds = new SparseBooleanArray();
     }
-	public void setList(List<Place> placeList, boolean mode){
+	public void setList(List<Place> placeList, int mode){
 		this.places = placeList;
         this.mMode = mode;
 	}
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
+
+
+	public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         public final static String PUT_EXTRA_PLACE = "placeName";
         public ImageView placeImage;
         public TextView textName;
@@ -130,7 +132,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 
             @Override
             public void onLongPressed(int position, Place mPlace, View view) {
-                if (mMode && mActionMode == null) {
+                if (mMode > 1 && mActionMode == null) {
 	                onListItemSelect(position);
                 }
             }
@@ -198,7 +200,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 
 		if (hasCheckedItems && mActionMode == null)
 			// there are some selected items, start the actionMode
-			mActionMode = ((AppCompatActivity) context).startSupportActionMode(new ToolbarActionModeCallback(context,this, null,places, null , PLACE));
+			mActionMode = ((AppCompatActivity) context).startSupportActionMode(new ToolbarActionModeCallback(context,this, null,places, null , mMode));
 		else if (!hasCheckedItems && mActionMode != null)
 			// there no selected items, finish the actionMode
 			mActionMode.finish();
@@ -209,8 +211,26 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 
 
 	}
+	public void deletePlaceFromCreated() {
+		SparseBooleanArray selected = getSelectedIds();//Get selected ids
+		List<String>deletedPlace = new ArrayList<>();
+		//Loop all selected ids
+		for (int i = (selected.size() - 1); i >= 0; i--) {
+			if (selected.valueAt(i)) {
+				//If current id is selected remove the item via key
+				deletedPlace.add(places.get(i).getNamePlace());
+				places.remove(selected.keyAt(i));
+				notifyDataSetChanged();//notify adapter
+			}
+		}
+		CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
+		communicatorStartActivity.deletedFromCreatedList(deletedPlace, PLACE);
+		Toast.makeText(context, selected.size() + " item deleted.", Toast.LENGTH_SHORT).show();//Show Toast
+		mActionMode.finish();//Finish action mode after use
+
+	}
 	//Delete selected rows
-	public void deletePlace() {
+	public void deletePlaceFromFavorit() {
 		SparseBooleanArray selected = getSelectedIds();//Get selected ids
 		List<String>deletedPlace = new ArrayList<>();
 		//Loop all selected ids

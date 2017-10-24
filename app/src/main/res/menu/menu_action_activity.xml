@@ -1,11 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
-      xmlns:android="http://schemas.android.com/apk/res/android">
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".activities.ActionActivity_">
     <item
         android:id="@+id/action_add_to_favorites"
         android:checkable="false"
-        android:enabled="false"
-        android:icon="@drawable/ic_star_rate_black_18px"
+        android:enabled="true"
+        android:icon="@drawable/add_to_favorite"
         android:title="add to favorites"
+        app:showAsAction="always">
+
+    </item>
+    <item
+        android:id="@+id/action_edit"
+        android:checkable="false"
+        android:enabled="true"
+        android:icon="@drawable/ic_pen"
+        android:title="edit"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/action_publish"
+        android:checkable="false"
+        android:enabled="true"
+        android:icon="@drawable/upload"
+        android:title="publish"
         app:showAsAction="always"/>
 </menu>

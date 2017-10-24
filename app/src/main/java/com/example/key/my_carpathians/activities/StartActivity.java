@@ -138,7 +138,11 @@ public class StartActivity extends AppCompatActivity implements
     public static final int ROUT = 1;
     public static final int PLACE = 0;
     public static final String ROOT_PATH = "root_path";
-    public FragmentManager fragmentManager;
+	public static final int MY_ROUT = 5;
+	public static final int MY_PLACE = 4;
+	public static final int FA_PLACE = 2;
+	public static final int FA_ROUT = 3;
+	public FragmentManager fragmentManager;
     public PlacesListFragment placesListFragment;
     public RoutsListFragment routsListFragment;
     public ArrayList<Place> places = new ArrayList<>();
@@ -280,14 +284,14 @@ public class StartActivity extends AppCompatActivity implements
                 }
                 if ( tabLayout.getTabCount() == 0) {
                     PlacesListFragment placesListFragment = new PlacesListFragment_();
-                    placesListFragment.setList(places, false);
+                    placesListFragment.setList(places, PLACE);
                     adapter.addFragment(placesListFragment, "Place");
                     adapter.notifyDataSetChanged();
 
                 }else{
                         tabLayout.getTabAt(0).setIcon(null);
                         PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
-                        placesListFragment.setList(places, false);
+                        placesListFragment.setList(places, PLACE);
                 }
                 downloadPhoto(places);
 
@@ -315,14 +319,14 @@ public class StartActivity extends AppCompatActivity implements
                 }
                 if ( tabLayout.getTabCount() == 1) {
                     RoutsListFragment routsListFragment = new RoutsListFragment_();
-                    routsListFragment.setList(routs, false);
+                    routsListFragment.setList(routs, ROUT);
                     adapter.addFragment(routsListFragment, "Routs");
                     adapter.notifyDataSetChanged();
 
                 }else{
                     tabLayout.getTabAt(1).setIcon(null);
                     RoutsListFragment routsListFragment = (RoutsListFragment_) adapter.getItem(1);
-                    routsListFragment.setList(routs, false);
+                    routsListFragment.setList(routs, ROUT);
                 }
 
 
@@ -811,13 +815,13 @@ public class StartActivity extends AppCompatActivity implements
                 if (createdP != null &&  tabLayout.getTabCount() > 0) {
                     tabLayout.getTabAt(0).setIcon(R.drawable.ic_create_black_24px);
                     PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
-                    placesListFragment.setList(createdP, true);
+                    placesListFragment.setList(createdP, MY_PLACE);
                 }
             }else{
                 if ( tabLayout.getTabCount() > 0) {
                     tabLayout.getTabAt(0).setIcon(R.drawable.ic_create_black_24px);
                     PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
-                    placesListFragment.setList(new ArrayList<Place>(), true);
+                    placesListFragment.setList(new ArrayList<Place>(), MY_PLACE);
                 }
                 dialogFlag ++;
 
@@ -855,13 +859,13 @@ public class StartActivity extends AppCompatActivity implements
                 if (createdR != null && tabLayout.getTabCount() > 1) {
                     tabLayout.getTabAt(1).setIcon(R.drawable.ic_create_black_24px);
                     RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
-                    routsListFragment.setList(createdR, true);
+                    routsListFragment.setList(createdR, MY_ROUT);
                 }
             } else {
                 if (tabLayout.getTabCount() > 1) {
                     tabLayout.getTabAt(1).setIcon(R.drawable.ic_create_black_24px);
                     RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
-                    routsListFragment.setList(new ArrayList<Rout>(), true);
+                    routsListFragment.setList(new ArrayList<Rout>(), MY_ROUT);
                 }
                 dialogFlag ++;
             }
@@ -894,13 +898,13 @@ public class StartActivity extends AppCompatActivity implements
                 if (favoriteP != null &&  tabLayout.getTabCount() > 0) {
                     tabLayout.getTabAt(0).setIcon(R.drawable.ic_star_rate_black_18px);
                     PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
-                    placesListFragment.setList(favoriteP, true);
+                    placesListFragment.setList(favoriteP, FA_PLACE);
                 }
             }else{
                 if ( tabLayout.getTabCount() > 0) {
                     tabLayout.getTabAt(0).setIcon(R.drawable.ic_star_rate_black_18px);
                     PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
-                    placesListFragment.setList(new ArrayList<Place>(), true);
+                    placesListFragment.setList(new ArrayList<Place>(), FA_PLACE);
                 }
                 dialogFlag ++;
 
@@ -925,13 +929,13 @@ public class StartActivity extends AppCompatActivity implements
                 if (favoriteR != null && tabLayout.getTabCount() > 1) {
                     tabLayout.getTabAt(1).setIcon(R.drawable.ic_star_rate_black_18px);
                     RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
-                    routsListFragment.setList(favoriteR, true);
+                    routsListFragment.setList(favoriteR, FA_ROUT);
                 }
             } else {
                 if (tabLayout.getTabCount() > 1) {
                     tabLayout.getTabAt(1).setIcon(R.drawable.ic_star_rate_black_18px);
                     RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
-                    routsListFragment.setList(new ArrayList<Rout>(), true);
+                    routsListFragment.setList(new ArrayList<Rout>(), FA_ROUT);
                 }
                 dialogFlag ++;
             }

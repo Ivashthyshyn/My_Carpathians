@@ -15,6 +15,10 @@ import com.example.key.my_carpathians.models.Rout;
 
 import java.util.List;
 
+import static com.example.key.my_carpathians.activities.StartActivity.FA_PLACE;
+import static com.example.key.my_carpathians.activities.StartActivity.FA_ROUT;
+import static com.example.key.my_carpathians.activities.StartActivity.MY_PLACE;
+import static com.example.key.my_carpathians.activities.StartActivity.MY_ROUT;
 import static com.example.key.my_carpathians.activities.StartActivity.PLACE;
 import static com.example.key.my_carpathians.activities.StartActivity.ROUT;
 
@@ -43,7 +47,7 @@ public class ToolbarActionModeCallback implements ActionMode.Callback {
 
 	@Override
 	public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-		mode.getMenuInflater().inflate(R.menu.action_mode_menu, menu);//Inflate the menu over action mode
+		mode.getMenuInflater().inflate(R.menu.action_mode_start_activity, menu);//Inflate the menu over action mode
 		return true;
 	}
 
@@ -68,11 +72,14 @@ public class ToolbarActionModeCallback implements ActionMode.Callback {
 			case R.id.action_delete:
 
 				//Check if current action mode is from ListView Fragment or RecyclerView Fragment
-				if (mType == PLACE) {
-				placesRecyclerAdapter.deletePlace();//delete selected rows
-				} else if(mType == ROUT) {
-					//If current fragment is recycler view fragment
-				routsRecyclerAdapter.deleteRout();//delete selected rows
+				 if (mType == MY_PLACE){
+					placesRecyclerAdapter.deletePlaceFromFavorit();//delete selected rows
+				}else if (mType == MY_ROUT){
+					routsRecyclerAdapter.deleteRoutFromFavorit();//delete selected rows
+				}else if (mType == FA_PLACE){
+					 placesRecyclerAdapter.deletePlaceFromCreated();
+				}else if (mType == FA_ROUT){
+					 routsRecyclerAdapter.deleteRoutFromCreated();
 				}
 				break;
 		}

@@ -9,9 +9,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:background="@color/white"
         android:orientation="vertical">
 
         <TextView
@@ -25,73 +22,83 @@
             android:textStyle="bold"/>
 
         <LinearLayout
-            android:id="@+id/groupForRout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/textView10"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="1dp"
-                android:layout_weight="1"
-                android:background="@color/bg_login"
-                android:paddingLeft="4dp"
-                android:text="Level"
-                android:textColor="@color/black_overlay"/>
-
-            <TextView
-                android:id="@+id/textDifficultyValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="1dp"
-                android:layout_weight="1"
-                android:background="@color/bg_login"
-                android:gravity="center"
-                android:text="difficulty"
-                android:textColor="@color/colorGreenPrimary"/>
-
-            <TextView
-                android:id="@+id/textView11"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="1dp"
-                android:layout_weight="1"
-                android:background="@color/bg_login"
-                android:text="Lenght"
-                android:textColor="@color/black_overlay"/>
-
-            <TextView
-                android:id="@+id/textRoutLength"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="1dp"
-                android:layout_weight="1"
-                android:background="@color/bg_login"
-                android:gravity="right"
-                android:text="33км"/>
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/textView5"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="1dp"
-            android:background="@color/input_register_hint"
-            android:paddingLeft="4dp"
-            android:text="Info"
-            android:textColor="@color/black_overlay"/>
-
-        <TextView
-            android:id="@+id/titleText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="1dp"
-            android:background="@color/input_register_hint"
-            android:paddingLeft="4dp"
-            android:text="TextView"/>
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@color/white"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/groupForRout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:layout_weight="1"
+                    android:background="@color/bg_login"
+                    android:paddingLeft="4dp"
+                    android:text="Level"
+                    android:textColor="@color/black_overlay"/>
+
+                <TextView
+                    android:id="@+id/textDifficultyValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:layout_weight="1"
+                    android:background="@color/bg_login"
+                    android:gravity="center"
+                    android:text="difficulty"
+                    android:textColor="@color/colorGreenPrimary"/>
+
+                <TextView
+                    android:id="@+id/textView11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:layout_weight="1"
+                    android:background="@color/bg_login"
+                    android:text="Lenght"
+                    android:textColor="@color/black_overlay"/>
+
+                <TextView
+                    android:id="@+id/textRoutLength"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:layout_weight="1"
+                    android:background="@color/bg_login"
+                    android:gravity="right"
+                    android:text="33км"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:background="@color/input_register_hint"
+                android:paddingLeft="4dp"
+                android:text="Info"
+                android:textColor="@color/black_overlay"/>
+
+            <TextView
+                android:id="@+id/titleText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="1dp"
+                android:background="@color/input_register_hint"
+                android:paddingLeft="4dp"
+                android:text="TextView"/>
+        </LinearLayout>
+
     </LinearLayout>
 
 </FrameLayout>
