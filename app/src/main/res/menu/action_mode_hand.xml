@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:tools="http://schemas.android.com/tools"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item
+        android:id="@+id/action_del"
+        android:checkable="true"
+        android:enabled="true"
+        android:icon="@drawable/ic_delete_white_24px"
+        android:title="delete"
+        app:showAsAction="always"/>
+    <item
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/action_beck"
+        android:checkable="true"
+        android:enabled="true"
+        android:icon="@drawable/on_back"
+        android:title="Back"
+        app:showAsAction="always"/>
+    <item
+        android:enabled="false"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/action_save"
+        android:checkable="true"
+        android:enabled="true"
+        android:icon="@drawable/ic_done_white_24px"
+        android:title="Item"
+        app:showAsAction="never|always|withText"/>
 </menu>

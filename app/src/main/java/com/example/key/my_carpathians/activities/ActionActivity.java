@@ -942,6 +942,7 @@ public void ratingBarDialog(){
 		return true;
 	}
 
+
 	@Click(R.id.ratingBarrContainer)
 	public void ratingBarWasCklicked(){
 		if (FirebaseAuth.getInstance().getCurrentUser() != null && !FirebaseAuth.getInstance().getCurrentUser().isAnonymous()) {
