@@ -136,9 +136,9 @@
         android:layout_height="wrap_content"
         android:background="@color/tabTransparant"
         android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme">
+        >
 
-
+    </android.support.v7.widget.Toolbar>
     <LinearLayout
         android:id="@+id/toolsGPSContainer"
         android:layout_width="wrap_content"
@@ -174,7 +174,7 @@
             mapbox:srcCompat="@android:drawable/ic_menu_edit"/>
 
     </LinearLayout>
-    </android.support.v7.widget.Toolbar>
+
 
 </RelativeLayout>
 

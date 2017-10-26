@@ -42,10 +42,13 @@ import android.widget.Toast;
 
 import com.cocoahero.android.geojson.Position;
 import com.example.key.my_carpathians.R;
+import com.example.key.my_carpathians.interfaces.CommunicatorMapActivity;
 import com.example.key.my_carpathians.interfaces.ILocation;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.example.key.my_carpathians.utils.AltitudeFinder;
+import com.example.key.my_carpathians.utils.GPSActionModeCallback;
+import com.example.key.my_carpathians.utils.HandActionModeCallback;
 import com.example.key.my_carpathians.utils.LocationService;
 import com.example.key.my_carpathians.utils.ObjectService;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -101,7 +104,7 @@ import static com.example.key.my_carpathians.utils.LocationService.DEFINED_LOCAT
 import static com.example.key.my_carpathians.utils.ObjectService.FILE_EXISTS;
 
 @EActivity
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, CommunicatorMapActivity {
     public static final double PERIMETER_SIZE_TO_LATITUDE = 0.3;
     public static final double PERIMETER_SIZE_TO_LONGITUDE = 0.4;
     public static final String TO_SERVICE_COMMANDS = "service_commands";
@@ -350,6 +353,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.download_region:
 
                 return true;
+            case R.id.action_g_p_s:
+                if(mapboxMap != null && !switchCheck){
+                    checkGPSEnabled();
+                    toggleGps(true);
+                    item.setIcon(R.drawable.ic_location_disabled_24dp);
+                    switchCheck = true;
+                }else{
+                    toggleGps(false);
+                    item.setIcon(R.drawable.ic_my_location_24dp);
+                    switchCheck = false;
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -369,8 +384,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.setPositiveButton("GPS", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
                 startGPS();
+                startActionModeGPS(typeObject);
                 autoOrientationOff(true);
+                if (typeObject == PLACE){
+                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
+                    MapsActivity.this.startService(serviceIntent);
+                    autoOrientationOff(true);
+                    buttonRecTrack.setClickable(false);
+                    checkForRecButton = false;
+                    createdTrackPosition = new ArrayList<Position>();
+                    showProgressDialog();
+                }else if (typeObject == ROUT){
+                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_ROUT);
+                    MapsActivity.this.startService(serviceIntent);
+                    autoOrientationOff(true);
+                    flashingColorAnimation(true);
+                    checkForRecButton = false;
+                    createdTrackPosition = new ArrayList<Position>();
+
+                }
+
 
                 dialog.dismiss();
             }
@@ -379,13 +416,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
+                startActionModeHand(typeObject);
                 autoOrientationOff(true);
+                if (typeObject == ROUT){
+                    createdTrackPosition = new ArrayList<Position>();
+                }
                 enabledHandsMode(typeObject);
                 dialog.dismiss();
             }
         });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+
+    }
+
+    private void startActionModeGPS(int typeObject) {
+        android.support.v7.view.ActionMode gpsActionMode = ((AppCompatActivity) this).startSupportActionMode(new GPSActionModeCallback(this, typeObject));
+
+    }
+
+    private void startActionModeHand(int typeObject) {
+        android.support.v7.view.ActionMode handActionMode = ((AppCompatActivity) this).startSupportActionMode(new HandActionModeCallback(this, typeObject));
 
     }
 
@@ -804,6 +855,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    @Override
+    public void undoAction() {
+        buttonOnBackWasClicked();
+    }
+
+    @Override
+    public void saveAction() {
+        buttonTouchCreator.setVisibility(View.GONE);
+        toolsGPSContainer.setVisibility(View.VISIBLE);
+        buttonHandEditMode.setImageResource(R.drawable.hand_icon);
+        mapboxMap.setOnMapClickListener(null);
+        if (mMarker != null){
+            showCreateNameDialog(PLACE, null);
+        }else if (createdTrackPosition.size() > 2){
+            showCreateNameDialog(ROUT, null);
+        }else{
+            removeViews(null);
+        }
+    }
+
+    @Override
+    public void deleteAction() {
+        removeAll();
+    }
+
     /**
      *
      */
@@ -1181,12 +1257,43 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * This method turns off rotation of the device while recording a track, and turns on after rec.
      */
-    private void autoOrientationOff(boolean b) {
-        if (b) {
+    @Override
+    public void autoOrientationOff(boolean yes) {
+        if (yes) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         }else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         }
+    }
+
+    @Override
+    public void getLocationPosition() {
+
+    }
+
+    @Override
+    public void actionStartRecTrack() {
+
+    }
+
+    @Override
+    public void actionStopRecTrack() {
+
+    }
+
+    @Override
+    public void actionPauseRecTrack() {
+
+    }
+
+    @Override
+    public void actionSaveRecTrack() {
+
+    }
+
+    @Override
+    public void actionSaveLocation() {
+
     }
 
     private void showRecLine(LatLng latLng) {
@@ -1301,5 +1408,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
          }
 
     }
+   public void removeAll() {
+
+       int mCountPolylines = mapboxMap.getPolylines().size();
+       if (mCountPolylines > 0) {
+
+           for (int i = 0; i < mCountPolylines; i++) {
+               mapboxMap.getPolylines().get(0).remove();
+           }
+       }
+       int mCountMarkers = mapboxMap.getMarkers().size();
+       if (mCountMarkers > 0 & mMarker == null) {
+           for (int i = 0; i < mCountMarkers; i++) {
+               mapboxMap.getMarkers().get(0).remove();
+           }
+       }
+       mPointCounter = 0;
+       if (createdTrackPosition != null) {
+           createdTrackPosition.clear();
+       }
+   }
 }
 
