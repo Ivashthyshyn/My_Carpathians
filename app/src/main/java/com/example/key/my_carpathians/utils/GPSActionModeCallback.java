@@ -51,24 +51,37 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 
 		}
 		if (mType == PLACE){
-			MenuItem undoAction = menu.findItem(R.id.actionSaveRecord);
-			undoAction.setVisible(true);
-			MenuItem actionSave = menu.findItem(R.id.actionPause);
-			actionSave.setVisible(false);
-			MenuItem actionDelete =menu.findItem(R.id.actionStartRec);
-			actionDelete.setVisible(false);
+			MenuItem saveAction = menu.findItem(R.id.actionSaveRecord);
+			saveAction.setVisible(false);
+			saveAction.setEnabled(false);
+			MenuItem actionPause = menu.findItem(R.id.actionPause);
+			actionPause.setIcon(R.drawable.ic_exchange);
+			actionPause.setVisible(false);
+			actionPause.setEnabled(false);
+			MenuItem actionStartRec =menu.findItem(R.id.actionStartRec);
+			actionStartRec.setVisible(false);
+			actionStartRec.setEnabled(false);
+			CommunicatorMapActivity communicatorMapActivity = (CommunicatorMapActivity) context;
+			communicatorMapActivity.enabledProgressGPS(true);
 		}else if(mType == ROUT){
-			MenuItem undoAction = menu.findItem(R.id.actionSaveRecord);
-			undoAction.setVisible(true);
-			MenuItem actionSave = menu.findItem(R.id.actionPause);
-			actionSave.setVisible(true);
-			MenuItem actionDelete =menu.findItem(R.id.actionStartRec);
-			actionDelete.setVisible(true);
+			MenuItem saveAction = menu.findItem(R.id.actionSaveRecord);
+			saveAction.setVisible(false);
+			saveAction.setEnabled(false);
+			MenuItem actionPause = menu.findItem(R.id.actionPause);
+			actionPause.setIcon(R.drawable.ic_exchange);
+			actionPause.setVisible(false);
+			actionPause.setEnabled(false);
+			MenuItem actionStartRec =menu.findItem(R.id.actionStartRec);
+			actionStartRec.setVisible(false);
+			actionStartRec.setEnabled(false);
+			CommunicatorMapActivity communicatorMapActivity = (CommunicatorMapActivity) context;
+			communicatorMapActivity.enabledProgressGPS(true);
 		}
 
 
 		return true;
 	}
+
 
 	@Override
 	public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
@@ -77,6 +90,9 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 			switch (item.getItemId()) {
 				case R.id.actionSaveRecord:
 					communicatorMapActivity.actionSaveLocation();
+					break;
+				case R.id.actionPause:
+					communicatorMapActivity.actionRefreshLocation();
 					break;
 			}
 		}else if(mType == ROUT){
@@ -90,9 +106,6 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 				case R.id.actionPause:
 					communicatorMapActivity.deleteAction();
 					break;
-				case R.id.actionStopRec:
-					communicatorMapActivity.deleteAction();
-					break;
 			}
 		}
 		return false;
@@ -102,8 +115,10 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 	public void onDestroyActionMode(ActionMode mode) {
 		CommunicatorMapActivity communicatorMapActivity = (CommunicatorMapActivity) context;
 		if(mType == PLACE){
-			communicatorMapActivity.undoAction();
+			communicatorMapActivity.enabledProgressGPS(false);
+			communicatorMapActivity.deleteAction();
 		}else if(mType == ROUT){
+			communicatorMapActivity.enabledProgressGPS(false);
 			communicatorMapActivity.deleteAction();
 		}
 		communicatorMapActivity.autoOrientationOff(false);
