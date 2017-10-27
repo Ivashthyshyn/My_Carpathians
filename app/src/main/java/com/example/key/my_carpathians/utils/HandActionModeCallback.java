@@ -21,6 +21,7 @@ public class HandActionModeCallback implements ActionMode.Callback {
 	private Context context;
 
 	private int mType;
+	private Menu menu;
 
 
 	public HandActionModeCallback(Context context, int type) {
@@ -31,6 +32,7 @@ public class HandActionModeCallback implements ActionMode.Callback {
 	@Override
 	public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 		mode.getMenuInflater().inflate(R.menu.action_mode_hand, menu);//Inflate the menu over action mode
+		this.menu = menu;
 		return true;
 	}
 
@@ -49,21 +51,30 @@ public class HandActionModeCallback implements ActionMode.Callback {
 			menu.findItem(R.id.action_del).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
 
+
 		}
 		if (mType == PLACE){
 			MenuItem undoAction = menu.findItem(R.id.action_beck);
 			undoAction.setVisible(false);
+			undoAction.setEnabled(false);
 			MenuItem actionSave = menu.findItem(R.id.action_save);
-			actionSave.setVisible(true);
+			actionSave.setVisible(false);
+			actionSave.setEnabled(false);
 			MenuItem actionDelete =menu.findItem(R.id.action_del);
-			actionDelete.setVisible(true);
+			actionDelete.setVisible(false);
+			actionDelete.setEnabled(false);
+			mode.setTitle("make choice");
 		}else if(mType == ROUT){
 			MenuItem undoAction = menu.findItem(R.id.action_beck);
-			undoAction.setVisible(true);
+			undoAction.setVisible(false);
+			undoAction.setEnabled(false);
 			MenuItem actionSave = menu.findItem(R.id.action_save);
-			actionSave.setVisible(true);
+			actionSave.setVisible(false);
+			actionSave.setEnabled(false);
 			MenuItem actionDelete =menu.findItem(R.id.action_del);
-			actionDelete.setVisible(true);
+			actionDelete.setVisible(false);
+			actionDelete.setEnabled(false);
+			mode.setTitle("make choice");
 		}
 
 
@@ -83,6 +94,16 @@ public class HandActionModeCallback implements ActionMode.Callback {
 					break;
 				case R.id.action_del:
 					communicatorMapActivity.undoAction();
+					MenuItem undoAction = menu.findItem(R.id.action_beck);
+					undoAction.setVisible(false);
+					undoAction.setEnabled(false);
+					MenuItem actionSave = menu.findItem(R.id.action_save);
+					actionSave.setVisible(false);
+					actionSave.setEnabled(false);
+					MenuItem actionDelete =menu.findItem(R.id.action_del);
+					actionDelete.setVisible(false);
+					actionDelete.setEnabled(false);
+					mode.setTitle("make choice");
 					break;
 			}
 		}else if(mType == ROUT){
