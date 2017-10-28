@@ -15,4 +15,10 @@ public interface CommunicatorMapActivity {
 	void actionPauseRecTrack();
 	void actionSaveRecTrack();
 	void actionSaveLocation();
+
+	void enabledProgressGPS(boolean b);
+
+	void destroyActionMode();
+
+	void actionRefreshLocation();
 }

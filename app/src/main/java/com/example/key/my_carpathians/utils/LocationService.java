@@ -1,11 +1,14 @@
 package com.example.key.my_carpathians.utils;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
 import com.cocoahero.android.geojson.Position;
@@ -49,7 +52,7 @@ public class LocationService extends Service implements
 
     public static final String CREATED_BY_USER_ROUT_LIST = "created_rout_list";
     public static final int DEFINED_LOCATION = 1;
-    public static final String CREATED_BY_USER_PLACE_LIST ="created_place_list" ;
+    public static final String CREATED_BY_USER_PLACE_LIST = "created_place_list";
 
     private final IBinder myBinder = new MyLocalBinder();
 
@@ -79,6 +82,16 @@ public class LocationService extends Service implements
 
     @Override
     public void onConnected(Bundle bundle) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
@@ -139,6 +152,7 @@ public class LocationService extends Service implements
             mLocation = null;
             mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
             mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
+            mIntCommand = 0;
         }
         return START_STICKY;
     }
@@ -206,9 +220,9 @@ public class LocationService extends Service implements
             if (mIntCommand == COMMAND_REC_PLACE){
                 mLocation = location;
                 mIntCommand = 0;
-                owner.update(location, DEFINED_LOCATION);
+                owner.update(location, PLACE);
             }
-            owner.update(location, 0);
+            owner.update(location, 101);
         }else if(owner == null && mIntCommand != COMMAND_REC_ROUT){
             if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_ACTIVE)
             mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
@@ -217,7 +231,7 @@ public class LocationService extends Service implements
             mLocationRequest.setInterval(UPDATE_INTERVAL_REC);
             mLocationRequest.setFastestInterval(FASTEST_INTERVAL_REC);
             saveLocationToLocationList(location);
-            owner.update(location, 0);
+            owner.update(location, ROUT);
         }
     }
 

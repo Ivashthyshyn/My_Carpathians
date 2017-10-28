@@ -19,14 +19,13 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,10 +33,8 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.cocoahero.android.geojson.Position;
@@ -100,7 +97,6 @@ import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME
 import static com.example.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
 import static com.example.key.my_carpathians.activities.StartActivity.ROOT_PATH;
 import static com.example.key.my_carpathians.activities.StartActivity.ROUT;
-import static com.example.key.my_carpathians.utils.LocationService.DEFINED_LOCATION;
 import static com.example.key.my_carpathians.utils.ObjectService.FILE_EXISTS;
 
 @EActivity
@@ -140,31 +136,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int mPointCounter = 0;
     private Marker mMarker;
 	private boolean connected;
-    @ViewById(R.id.buttonRecTrack)
-    FloatingActionButton buttonRecTrack;
 
-    @ViewById(R.id.toolsGPSContainer)
-    LinearLayout toolsGPSContainer;
 
-    @ViewById(R.id.buttonShowMyLocation)
-    FloatingActionButton buttonShowMyLocation;
 
-    @ViewById(R.id.buttonHandEditMode)
-    FloatingActionButton buttonHandEditMode;
-
-    @ViewById(R.id.toolsHandContainer)
-    LinearLayout toolsHandContainer;
 
     @ViewById(R.id.toolBarMapActivity)
     Toolbar toolbar;
-    @ViewById(R.id.buttonOnBack)
-    FloatingActionButton buttonTouchCreator;
+
+    @ViewById(R.id.progressGPS)
+    RelativeLayout customProgresBarGPS;
+
+    @ViewById(R.id.gpsLoading)
+    RotateLoading gpsLoading;
 
     private ServiceConnection captureServiceConnection;
     private MapboxMap.OnMyLocationChangeListener myLocationChangeListener;
     private SharedPreferences sharedPreferences;
     private String mRootPathString;
     private Menu menu;
+    private ActionMode actionMode;
 
 
     @Override
@@ -173,20 +163,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         iCapture = new ILocation() {
             @Override
             public void update(Location location, int type) {
-                if (type == DEFINED_LOCATION) {
-                    alert.dismiss();
-                    showCreateNameDialog(PLACE, null);
-                }
+
                 if(location != null) {
+                    enabledProgressGPS(false);
                     myLocationChangeListener.onMyLocationChange(location);
                     mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                             new CameraPosition.Builder()
                                     .target(new LatLng(location.getLatitude(), location.getLongitude()))  // set the camera's center position
                                     .build()));
                 }
-                if (!checkForRecButton) {
-                    showRecLine(new LatLng(location.getLatitude(), location.getLongitude()));
-                }
+
+                    showRecLine(new LatLng(location.getLatitude(), location.getLongitude()), type);
+
             }
 
             @Override
@@ -260,7 +248,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBackPressed() {
-        if (captureServiceConnection != null){
+        if (captureServiceConnection != null & switchCheck){
             Intent intent = new Intent(this, LocationService.class);
             unbindService(captureServiceConnection);
             MapsActivity.this.stopService(intent);
@@ -270,22 +258,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onBackPressed();
     }
 
-    private void startGPS() {
+    private void enabledGPS(boolean b) {
 
-        if (mapboxMap != null && !switchCheck) {
+        if (b) {
             checkGPSEnabled();
-            toolsHandContainer.setVisibility(View.GONE);
             toggleGps(true);
-            buttonShowMyLocation.setImageResource(R.drawable.ic_location_disabled_24dp);
-            if (mTypeMode){
-                buttonRecTrack.setVisibility(View.VISIBLE);
-            }
+            menu.findItem(R.id.action_g_p_s).setIcon(R.drawable.ic_location_disabled_24dp);
             switchCheck = true;
-        } else if (switchCheck) {
-            toolsHandContainer.setVisibility(View.VISIBLE);
+        } else if (!b) {
             toggleGps(false);
-            buttonShowMyLocation.setImageResource(R.drawable.ic_my_location_24dp);
-            buttonRecTrack.setVisibility(View.GONE);
+            menu.findItem(R.id.action_g_p_s).setIcon(R.drawable.ic_my_location_24dp);
             switchCheck = false;
         }
     }
@@ -354,15 +336,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 return true;
             case R.id.action_g_p_s:
-                if(mapboxMap != null && !switchCheck){
+                if(mapboxMap != null & !switchCheck ){
                     checkGPSEnabled();
-                    toggleGps(true);
-                    item.setIcon(R.drawable.ic_location_disabled_24dp);
-                    switchCheck = true;
+                    enabledGPS(true);
+
                 }else{
-                    toggleGps(false);
-                    item.setIcon(R.drawable.ic_my_location_24dp);
-                    switchCheck = false;
+                    enabledGPS(false);
                 }
                 return true;
             default:
@@ -384,38 +363,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.setPositiveButton("GPS", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
-                startGPS();
                 startActionModeGPS(typeObject);
                 autoOrientationOff(true);
-                if (typeObject == PLACE){
-                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
-                    MapsActivity.this.startService(serviceIntent);
-                    autoOrientationOff(true);
-                    buttonRecTrack.setClickable(false);
-                    checkForRecButton = false;
-                    createdTrackPosition = new ArrayList<Position>();
-                    showProgressDialog();
-                }else if (typeObject == ROUT){
-                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_ROUT);
-                    MapsActivity.this.startService(serviceIntent);
-                    autoOrientationOff(true);
-                    flashingColorAnimation(true);
-                    checkForRecButton = false;
-                    createdTrackPosition = new ArrayList<Position>();
-
-                }
-
-
                 dialog.dismiss();
             }
         });
         builder.setNegativeButton("Hands", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
+                if (switchCheck){
+                    enabledGPS(false);
+                }
                 startActionModeHand(typeObject);
                 autoOrientationOff(true);
                 if (typeObject == ROUT){
@@ -431,14 +389,59 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void startActionModeGPS(int typeObject) {
-        android.support.v7.view.ActionMode gpsActionMode = ((AppCompatActivity) this).startSupportActionMode(new GPSActionModeCallback(this, typeObject));
+      actionMode = ((AppCompatActivity) this).startSupportActionMode(new GPSActionModeCallback(this, typeObject));
+      if (captureServiceConnection == null){
+         enabledGPS(true);
+      }
+        if (typeObject == PLACE){
+            Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+            serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
+            MapsActivity.this.startService(serviceIntent);
+            autoOrientationOff(true);
+            checkForRecButton = false;
 
+        }else if (typeObject == ROUT){
+            Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+            serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_ROUT);
+            MapsActivity.this.startService(serviceIntent);
+            autoOrientationOff(true);
+            flashingColorAnimation(true);
+            checkForRecButton = false;
+            createdTrackPosition = new ArrayList<Position>();
+
+        }
     }
 
     private void startActionModeHand(int typeObject) {
-        android.support.v7.view.ActionMode handActionMode = ((AppCompatActivity) this).startSupportActionMode(new HandActionModeCallback(this, typeObject));
+       actionMode = ((AppCompatActivity) this).startSupportActionMode(new HandActionModeCallback(this, typeObject));
+
 
     }
+
+    private void changeHandModeItemForPlace(int type) {
+        if (type == PLACE) {
+            MenuItem saveItem = actionMode.getMenu().findItem(R.id.action_save);
+            saveItem.setVisible(true);
+            saveItem.setEnabled(true);
+            MenuItem delItem = actionMode.getMenu().findItem(R.id.action_del);
+            delItem.setVisible(true);
+            delItem.setEnabled(true);
+            actionMode.setTitle(null);
+        }else if (type == ROUT){
+            MenuItem saveItem = actionMode.getMenu().findItem(R.id.action_save);
+            saveItem.setVisible(true);
+            saveItem.setEnabled(true);
+            MenuItem delItem = actionMode.getMenu().findItem(R.id.action_del);
+            delItem.setVisible(true);
+            delItem.setEnabled(true);
+            MenuItem undoAction = actionMode.getMenu().findItem(R.id.action_beck);
+            undoAction.setVisible(true);
+            undoAction.setEnabled(true);
+            actionMode.setTitle(null);
+        }
+    }
+
+
 
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
@@ -469,7 +472,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             lat = 48.635022;
             lng = 24.141080;
         }else {
-            toolsHandContainer.setVisibility(View.GONE);
+            //Todo need to write mode off created object
+
         }
         mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                 new CameraPosition.Builder()
@@ -738,9 +742,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (locationService != null) {
             locationService.setOwner(iCapture);
         }
-        if (switchCheck) {
-            checkGPSEnabled();
-        }
+
     }
 
     @Override
@@ -778,7 +780,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
-        outState.putBoolean("switchCheck", switchCheck);
         outState.putBoolean("checkForRecButton", checkForRecButton);
     }
 
@@ -811,11 +812,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapboxMap.setOnMyLocationChangeListener(myLocationChangeListener);
             mapboxMap.setMyLocationEnabled(true);
         }else{
-            Intent intent = new Intent(this, LocationService.class);
-            unbindService(captureServiceConnection);
-            MapsActivity.this.stopService(intent);
-            mapboxMap.setMyLocationEnabled(false);
-            captureServiceConnection = null;
+            if (captureServiceConnection != null ){
+                Intent intent = new Intent(this, LocationService.class);
+                unbindService(captureServiceConnection);
+                MapsActivity.this.stopService(intent);
+                mapboxMap.setMyLocationEnabled(false);
+                captureServiceConnection = null;
+            }
         }
     }
 
@@ -858,13 +861,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void undoAction() {
         buttonOnBackWasClicked();
+        if (createdTrackPosition != null && createdTrackPosition.size() == 0){
+            MenuItem saveItem = actionMode.getMenu().findItem(R.id.action_save);
+            saveItem.setVisible(false);
+            saveItem.setEnabled(false);
+            MenuItem delItem = actionMode.getMenu().findItem(R.id.action_del);
+            delItem.setVisible(false);
+            delItem.setEnabled(false);
+            MenuItem undoAction = actionMode.getMenu().findItem(R.id.action_beck);
+            undoAction.setVisible(false);
+            undoAction.setEnabled(false);
+            actionMode.setTitle("make choice");
+        }
     }
 
     @Override
     public void saveAction() {
-        buttonTouchCreator.setVisibility(View.GONE);
-        toolsGPSContainer.setVisibility(View.VISIBLE);
-        buttonHandEditMode.setImageResource(R.drawable.hand_icon);
         mapboxMap.setOnMapClickListener(null);
         if (mMarker != null){
             showCreateNameDialog(PLACE, null);
@@ -878,6 +890,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void deleteAction() {
         removeAll();
+        MenuItem saveItem = actionMode.getMenu().findItem(R.id.action_save);
+        saveItem.setVisible(false);
+        saveItem.setEnabled(false);
+        MenuItem delItem = actionMode.getMenu().findItem(R.id.action_del);
+        delItem.setVisible(false);
+        delItem.setEnabled(false);
+        MenuItem undoAction = actionMode.getMenu().findItem(R.id.action_beck);
+        undoAction.setVisible(false);
+        undoAction.setEnabled(false);
+        actionMode.setTitle("make choice");
     }
 
     /**
@@ -986,100 +1008,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         downloadedRegionList();
     }
 
-    @Click(R.id.buttonRecTrack)
-    void buttonRecTrackWasClicked() {
-        if (checkForRecButton) {
-            showChoseCreateObjectDialog(false);
-        } else {
-            showCreateNameDialog(ROUT, null);
-
-        }
-    }
-
-    private void showChoseCreateObjectDialog(final boolean handType) {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.alert_write_choose, null);
-        builder.setView(dialogView);
-        ImageButton imageButtonRout = (ImageButton)dialogView.findViewById(R.id.imageButtonRout);
-        imageButtonRout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (handType) {
-                    createdTrackPosition = new ArrayList<Position>();
-                    enabledHandsMode(ROUT);
-                    alert.dismiss();
-                }else {
-                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_ROUT);
-                    MapsActivity.this.startService(serviceIntent);
-                    autoOrientationOff(true);
-                    flashingColorAnimation(true);
-                    checkForRecButton = false;
-                    createdTrackPosition = new ArrayList<Position>();
-                    alert.dismiss();
-                }
-            }
-        });
-        ImageButton imageButtonPlace = (ImageButton)dialogView.findViewById(R.id.imageButtonPlace);
-        imageButtonPlace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (handType) {
-                    createdTrackPosition = new ArrayList<Position>();
-                    enabledHandsMode(PLACE);
-                    alert.dismiss();
-                }else {
-	                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-	                serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
-	                MapsActivity.this.startService(serviceIntent);
-	                autoOrientationOff(true);
-	                buttonRecTrack.setClickable(false);
-	                checkForRecButton = false;
-                    createdTrackPosition = new ArrayList<Position>();
-	                alert.dismiss();
-	                showProgressDialog();
-                }
-            }
-        });
-	    builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-		    @Override
-		    public void onCancel(DialogInterface dialogInterface) {
-			    buttonTouchCreator.setVisibility(View.GONE);
-			    buttonHandEditMode.setImageResource(R.drawable.hand_icon);
-			    mapboxMap.setOnMapClickListener(null);
-                toolsGPSContainer.setVisibility(View.VISIBLE);
-		    }
-	    });
-        alert = builder.create();
-        alert.show();
-
-    }
-
-    private void showProgressDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
-        builder.setTitle("Please wait while the system finds your placement");
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.progres_item, null);
-        RotateLoading rotateLoading = (RotateLoading)dialogView.findViewById(R.id.rotateloading);
-        builder.setView(dialogView);
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE);
-                MapsActivity.this.startService(serviceIntent);
-                autoOrientationOff(false);
-                checkForRecButton = true;
-                flashingColorAnimation(false);
-                buttonRecTrack.setClickable(true);
-            }
-        });
-        alert = builder.create();
-        rotateLoading.start();
-        alert.show();
-    }
 
 
     @UiThread
@@ -1099,10 +1027,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                if (mMarker != null || createdTrackPosition.size() > 2){
+                if (!switchCheck && mMarker != null || createdTrackPosition.size() > 2){
                     saveCreatedObject(model, nameInput.getText().toString());
 	                mPointCounter = 0;
-
+                    mapboxMap.setOnMapClickListener(null);
+                    actionMode.finish();
 
                 }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
@@ -1112,36 +1041,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     autoOrientationOff(false);
                     flashingColorAnimation(false);
                     dialog.cancel();
+                    actionMode.finish();
                 }
             }
         });
         builder.setNegativeButton("Не зберігати", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                if (mMarker != null || createdTrackPosition.size() > 2){
+                if (!switchCheck && mMarker != null || createdTrackPosition != null ){
                    removeViews("canceled by user");
+                    mapboxMap.setOnMapClickListener(null);
+                    actionMode.finish();
                 }else {
                     Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
                     serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE);
                     MapsActivity.this.startService(serviceIntent);
+                    removeViews("canceled by user");
                     autoOrientationOff(false);
                     flashingColorAnimation(false);
                     removeViews("canceled by user");
-                }
-            }
-        });
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                if (mMarker != null || createdTrackPosition.size() > 2){
-                    removeViews("canceled by user");
-                }else {
-                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_NO_SAVE);
-                    MapsActivity.this.startService(serviceIntent);
-                    autoOrientationOff(false);
-                    flashingColorAnimation(false);
-                    removeViews("canceled by user");
+                    actionMode.finish();
+
                 }
             }
         });
@@ -1235,17 +1155,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * This method turns on and turns off flashing animation for button buttonRecTrack.
      */
     private void flashingColorAnimation(boolean b) {
-        buttonRecTrack.setImageResource(android.R.drawable.ic_notification_overlay);
+
         if(b) {
             Animation mAnimation = new AlphaAnimation(1, 0);
             mAnimation.setDuration(300);
             mAnimation.setInterpolator(new LinearInterpolator());
             mAnimation.setRepeatCount(Animation.INFINITE);
             mAnimation.setRepeatMode(Animation.REVERSE);
-            buttonRecTrack.startAnimation(mAnimation);
+          //  buttonShowMyLocation.startAnimation(mAnimation);
         }else {
-            buttonRecTrack.clearAnimation();
-            buttonRecTrack.setImageResource(android.R.drawable.ic_menu_edit);
+         //   buttonShowMyLocation.clearAnimation();
+         //   buttonShowMyLocation.setImageResource(android.R.drawable.ic_menu_mylocation);
             if (recLine != null) {
                 mapboxMap.removePolyline(recLine);
                 mapboxMap.removeMarker(startMarker);
@@ -1293,34 +1213,92 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void actionSaveLocation() {
+        showCreateNameDialog(PLACE, null);
+    }
+
+    @Override
+    public void enabledProgressGPS(boolean b) {
+        if (b) {
+            customProgresBarGPS.setVisibility(View.VISIBLE);
+            gpsLoading.start();
+        }else {
+            customProgresBarGPS.setVisibility(View.GONE);
+            gpsLoading.stop();
+            visibleActionsIconForRecPlace(true);
+        }
 
     }
 
-    private void showRecLine(LatLng latLng) {
-        Position mPos = new Position(latLng.getLatitude(), latLng.getLongitude(), 0);
-        createdTrackPosition.add(mPos);
-        if (createdTrackPosition.size() == 1) {
-            IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
-            Icon iconStart = iconFactory.fromResource(R.drawable.marcer_flag_start);
-            startMarker = mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(latLng)
-                    .title("Початок"));
-        }else if(createdTrackPosition.size() > 1){
-            LatLng p1 = new LatLng(createdTrackPosition.get(createdTrackPosition.size() - 1).getLatitude(), createdTrackPosition.get(createdTrackPosition.size() - 1).getLongitude());
-            LatLng p2 = new LatLng(createdTrackPosition.get(createdTrackPosition.size() - 2).getLatitude(), createdTrackPosition.get(createdTrackPosition.size() - 2).getLongitude());
+    private void visibleActionsIconForRecPlace(boolean b) {
+
+            MenuItem itemSave = actionMode.getMenu().findItem(R.id.actionSaveRecord);
+            MenuItem itemRefresh = actionMode.getMenu().findItem(R.id.actionPause);
+            itemRefresh.setVisible(b);
+            itemSave.setVisible(b);
+            itemRefresh.setEnabled(b);
+            itemSave.setEnabled(b);
 
 
+    }
 
-            mapboxMap.addPolyline(new PolylineOptions().add(p1,p2).width(2));
-             mapboxMap.addMarker(new MarkerOptions().setPosition(latLng));
+    @Override
+    public void destroyActionMode() {
+
+    }
+
+    @Override
+    public void actionRefreshLocation() {
 
 
+        removeAll();
+        visibleActionsIconForRecPlace(false);
+        enabledProgressGPS(true);
+        Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+        serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_REC_PLACE);
+        MapsActivity.this.startService(serviceIntent);
+        autoOrientationOff(true);
+        checkForRecButton = false;
+        createdTrackPosition = new ArrayList<Position>();
+    }
+
+    private void showRecLine(LatLng latLng, int typeObject) {
+        if (typeObject == PLACE){
+            if (mMarker == null) {
+                mMarker = mapboxMap.addMarker(new MarkerViewOptions()
+                        .position(latLng)
+                        .title("Intervention")
+                        .snippet("Desc inter"));
+            }else {
+                mMarker.remove();
+                mMarker = mapboxMap.addMarker(new MarkerViewOptions()
+                        .position(latLng)
+                        .title("Intervention")
+                        .snippet("Desc inter"));
+            }
+        }else if(typeObject == ROUT) {
+            Position mPos = new Position(latLng.getLatitude(), latLng.getLongitude(), 0);
+            createdTrackPosition.add(mPos);
+            if (createdTrackPosition.size() == 1) {
+                IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
+                Icon iconStart = iconFactory.fromResource(R.drawable.marcer_flag_start);
+                startMarker = mapboxMap.addMarker(new MarkerViewOptions().icon(iconStart).position(latLng)
+                        .title("Початок"));
+            } else if (createdTrackPosition.size() > 1) {
+                LatLng p1 = new LatLng(createdTrackPosition.get(createdTrackPosition.size() - 1).getLatitude(), createdTrackPosition.get(createdTrackPosition.size() - 1).getLongitude());
+                LatLng p2 = new LatLng(createdTrackPosition.get(createdTrackPosition.size() - 2).getLatitude(), createdTrackPosition.get(createdTrackPosition.size() - 2).getLongitude());
+
+
+                mapboxMap.addPolyline(new PolylineOptions().add(p1, p2).width(2));
+                mapboxMap.addMarker(new MarkerOptions().setPosition(latLng));
+
+
+            }
         }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        switchCheck =  savedInstanceState.getBoolean("switchCheck");
         checkForRecButton = savedInstanceState.getBoolean("checkForRecButton");
     }
 
@@ -1332,54 +1310,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             showCreateNameDialog(ROUT, null);
 
         }else {
-            startGPS();
+            enabledGPS(false);
         }
     }
-    @Click(R.id.buttonHandEditMode)
-     void  buttonHandEditModeWasClicked(){
-        if (mPointCounter == 0 &&  createdTrackPosition == null) {
-            buttonTouchCreator.setVisibility(View.VISIBLE);
-            buttonHandEditMode.setImageResource(R.drawable.hand_write_icon);
-            buttonHandEditMode.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            showChoseCreateObjectDialog(true);
-            autoOrientationOff(true);
-            toolsGPSContainer.setVisibility(View.GONE);
-        }else {
-            buttonTouchCreator.setVisibility(View.GONE);
-            toolsGPSContainer.setVisibility(View.VISIBLE);
-            buttonHandEditMode.setImageResource(R.drawable.hand_icon);
-            mapboxMap.setOnMapClickListener(null);
-            if (mMarker != null){
-                showCreateNameDialog(PLACE, null);
-            }else if (createdTrackPosition.size() > 2){
-                showCreateNameDialog(ROUT, null);
-            }else{
-                removeViews(null);
-            }
 
-        }
-    }
 
     public void enabledHandsMode(final int type){
         MapboxMap.OnMapClickListener fingerTouchListener = new MapboxMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(@NonNull LatLng point) {
+                    changeHandModeItemForPlace(type);
                     mPointCounter++;
                     if (type == PLACE) {
-                        if (mMarker == null) {
-                            mMarker = mapboxMap.addMarker(new MarkerViewOptions()
-                                    .position(point)
-                                    .title("Intervention")
-                                    .snippet("Desc inter"));
-                        }else {
-                            mMarker.remove();
-                            mMarker = mapboxMap.addMarker(new MarkerViewOptions()
-                                    .position(point)
-                                    .title("Intervention")
-                                    .snippet("Desc inter"));
-                        }
+                        showRecLine(point, PLACE);
+
                     }else if(type == ROUT){
-                        showRecLine(point);
+                        showRecLine(point, ROUT);
                     }
 
                 }
@@ -1387,7 +1333,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             mapboxMap.setOnMapClickListener(fingerTouchListener);
     }
-    @Click(R.id.buttonOnBack)
+
+
+
     void  buttonOnBackWasClicked(){
         if (mapboxMap.getPolylines().size() > 0) {
                mapboxMap.getPolylines().get(mPointCounter -2).remove();
@@ -1418,7 +1366,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
            }
        }
        int mCountMarkers = mapboxMap.getMarkers().size();
-       if (mCountMarkers > 0 & mMarker == null) {
+       if (mCountMarkers > 0) {
            for (int i = 0; i < mCountMarkers; i++) {
                mapboxMap.getMarkers().get(0).remove();
            }

@@ -280,7 +280,7 @@ public class StartActivity extends AppCompatActivity implements
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Place place = postSnapshot.getValue(Place.class);
                     places.add(place);
-
+                    downloadPhoto(place);
                 }
                 if ( tabLayout.getTabCount() == 0) {
                     PlacesListFragment placesListFragment = new PlacesListFragment_();
@@ -293,7 +293,7 @@ public class StartActivity extends AppCompatActivity implements
                         PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
                         placesListFragment.setList(places, PLACE);
                 }
-                downloadPhoto(places);
+
 
             }
 
@@ -357,18 +357,19 @@ public class StartActivity extends AppCompatActivity implements
                  mListPerm.add( mPermissionList[i]);
             } else {
 
-                if(mPermissionList[i].equals( READ_EXTERNAL_STORAGE)) {
+                if(mPermissionList[i].equals( WRITE_EXTERNAL_STORAGE)) {
                     if (isExternalStorageWritable() ) {
                         rootPath = Uri.fromFile(context.getExternalFilesDir(
                                 Environment.DIRECTORY_DOWNLOADS));
 
                         mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
+                        getDateFromFirebace();
                     }else{
                         if (context.getFilesDir().getFreeSpace() > 1250000L){
 
                             rootPath = Uri.fromFile(context.getDir("my_carpathians", Context.MODE_PRIVATE));
-                            downloadPhoto(places);
                             mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
+                            getDateFromFirebace();
                         }else{
                             AlertDialog.Builder noAvailableStorageDialog = new AlertDialog.Builder(StartActivity.this);
                             noAvailableStorageDialog.setTitle("Save Data");
@@ -447,7 +448,6 @@ public class StartActivity extends AppCompatActivity implements
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         rootPath = Uri.fromFile(context.getDir("my_carpathians", Context.MODE_PRIVATE));
-                                        downloadPhoto(places);
                                         mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
                                         getDateFromFirebace();
                                         dialogInterface.dismiss();
@@ -591,10 +591,10 @@ public class StartActivity extends AppCompatActivity implements
     }
 
     @Background
-    public void downloadPhoto(List<Place> placeList) {
-        for (int i = 0; i < placeList.size(); i++) {
+    public void downloadPhoto(Place place) {
+      //  for (int i = 0; i < placeList.size(); i++) {
             try {
-                URL url = new URL(placeList.get(i).getUrlPlace());
+                URL url = new URL(place.getUrlPlace());
 
                 File rootPath = new File(this.rootPath.getPath(), "Photos");
                 if (!rootPath.exists()) {
@@ -602,7 +602,7 @@ public class StartActivity extends AppCompatActivity implements
                 }
 
 
-                File file = new File(rootPath, placeList.get(i).getNamePlace());
+                File file = new File(rootPath, place.getNamePlace());
                 if (!file.exists()) {
                     URLConnection urlConnection = url.openConnection();
                     InputStream inputStream = null;
@@ -633,7 +633,7 @@ public class StartActivity extends AppCompatActivity implements
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+
     }
 
 
