@@ -280,8 +280,9 @@ public class StartActivity extends AppCompatActivity implements
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Place place = postSnapshot.getValue(Place.class);
                     places.add(place);
-                    downloadPhoto(place);
                 }
+                downloadPhoto(places);
+
                 if ( tabLayout.getTabCount() == 0) {
                     PlacesListFragment placesListFragment = new PlacesListFragment_();
                     placesListFragment.setList(places, PLACE);
@@ -289,12 +290,10 @@ public class StartActivity extends AppCompatActivity implements
                     adapter.notifyDataSetChanged();
 
                 }else{
-                        tabLayout.getTabAt(0).setIcon(null);
-                        PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
-                        placesListFragment.setList(places, PLACE);
+                    tabLayout.getTabAt(0).setIcon(null);
+                    PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
+                    placesListFragment.setList(places, PLACE);
                 }
-
-
             }
 
             @Override
@@ -312,10 +311,10 @@ public class StartActivity extends AppCompatActivity implements
                 }
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Rout rout = postSnapshot.getValue(Rout.class);
-                    if (isOnline()) {
-                        downloadRoutToStorage(rout.getUrlRoutsTrack(), rout.getNameRout());
-                    }
                     routs.add(rout);
+                }
+                if (isOnline()) {
+                    downloadRoutToStorage(routs);
                 }
                 if ( tabLayout.getTabCount() == 1) {
                     RoutsListFragment routsListFragment = new RoutsListFragment_();
@@ -337,6 +336,8 @@ public class StartActivity extends AppCompatActivity implements
 
             }
         });
+
+
         if (getIntent().getBooleanExtra(LOGIN, false)){
             mDrawerLayout.openDrawer(Gravity.START, true);
             checkCurentUser();
@@ -361,12 +362,10 @@ public class StartActivity extends AppCompatActivity implements
                     if (isExternalStorageWritable() ) {
                         rootPath = Uri.fromFile(context.getExternalFilesDir(
                                 Environment.DIRECTORY_DOWNLOADS));
-
                         mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
                         getDateFromFirebace();
                     }else{
                         if (context.getFilesDir().getFreeSpace() > 1250000L){
-
                             rootPath = Uri.fromFile(context.getDir("my_carpathians", Context.MODE_PRIVATE));
                             mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
                             getDateFromFirebace();
@@ -437,7 +436,6 @@ public class StartActivity extends AppCompatActivity implements
                             if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                                 rootPath = Uri.fromFile(context.getExternalFilesDir(
                                         Environment.DIRECTORY_DOWNLOADS));
-
                                 mSharedPreferences.edit().putString(ROOT_PATH, rootPath.toString()).apply();
                                 getDateFromFirebace();
                             } else {
@@ -561,40 +559,39 @@ public class StartActivity extends AppCompatActivity implements
     /**
      * This method is download and save routs track to SD card in package "Rout"
      *
-     * @param urlRoutsTrack is a file address in database Storage from downloading
-     * @param nameRout      is the file name that is written to SD card
      */
     @Background
-    public void downloadRoutToStorage(String urlRoutsTrack, final String nameRout) {
+    public void downloadRoutToStorage(List<Rout> routsList) {
+        for (int i = 0; i < routsList.size(); i++) {
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference httpsReference = storage.getReferenceFromUrl(routsList.get(i).getUrlRoutsTrack());
+            File rootPath = new File(this.rootPath.buildUpon().appendPath("Routs").build().getPath());
+            if (!rootPath.exists()) {
+                rootPath.mkdirs();
+            }
+            final File localFile = new File(rootPath, routsList.get(i).getNameRout());
+            if (!localFile.exists()) {
+                httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        Log.e("firebase ", ";local tem file  created " + localFile.toString());
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
 
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference httpsReference = storage.getReferenceFromUrl(urlRoutsTrack);
-        File rootPath = new File(this.rootPath.buildUpon().appendPath("Routs").build().getPath());
-        if (!rootPath.exists()) {
-            rootPath.mkdirs();
-        }
-        final File localFile = new File(rootPath, nameRout);
-        if (!localFile.exists()) {
-            httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    Log.e("firebase ", ";local tem file  created " + localFile.toString());
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-
-                    Log.e("firebase ", ";local tem file not created " + exception.toString());
-                }
-            });
+                        Log.e("firebase ", ";local tem file not created " + exception.toString());
+                    }
+                });
+            }
         }
     }
 
     @Background
-    public void downloadPhoto(Place place) {
-      //  for (int i = 0; i < placeList.size(); i++) {
+    public void downloadPhoto(List<Place> placeList) {
+        for (int i = 0; i < placeList.size(); i++) {
             try {
-                URL url = new URL(place.getUrlPlace());
+                URL url = new URL(placeList.get(i).getUrlPlace());
 
                 File rootPath = new File(this.rootPath.getPath(), "Photos");
                 if (!rootPath.exists()) {
@@ -602,7 +599,7 @@ public class StartActivity extends AppCompatActivity implements
                 }
 
 
-                File file = new File(rootPath, place.getNamePlace());
+                File file = new File(rootPath, placeList.get(i).getNamePlace());
                 if (!file.exists()) {
                     URLConnection urlConnection = url.openConnection();
                     InputStream inputStream = null;
@@ -633,7 +630,7 @@ public class StartActivity extends AppCompatActivity implements
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
+        }
     }
 
 
