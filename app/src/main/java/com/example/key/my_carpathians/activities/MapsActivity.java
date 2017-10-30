@@ -32,9 +32,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -157,6 +154,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @ViewById(R.id.gpsLoading)
     RotateLoading gpsLoading;
+    private boolean flash = true;
+    private boolean startAnimationChecker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -1196,33 +1195,40 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		}
 		return connected;
 	}
-    /**
-     *
-     * This method turns on and turns off flashing animation for button buttonRecTrack.
-     */
-    private void flashingColorAnimation(boolean b) {
 
-        if(b) {
-            Animation mAnimation = new AlphaAnimation(1, 0);
-            mAnimation.setDuration(300);
-            mAnimation.setInterpolator(new LinearInterpolator());
-            mAnimation.setRepeatCount(Animation.INFINITE);
-            mAnimation.setRepeatMode(Animation.REVERSE);
+
+	private void enabledRecAnimation(boolean b){
+        startAnimationChecker = b;
+        startAnimation();
+    }
+
+
+
+
+    @UiThread
+    public void flashingColorAnimation() {
+        if (startAnimationChecker && flash){
             MenuItem recInd = actionMode.getMenu().findItem(R.id.recIndicator);
             recInd.setVisible(true);
-            mAnimation.setStartOffset(0);
-            recInd.getActionView().startAnimation(mAnimation);
+            recInd.getIcon().setAlpha(100);
+            flash = false;
+            startAnimation();
+        }else if ((startAnimationChecker && !flash)){
+            MenuItem recInd = actionMode.getMenu().findItem(R.id.recIndicator);
+            recInd.setVisible(true);
+            recInd.getIcon().setAlpha(0);
+            flash = true;
+            startAnimation();
         }else {
             MenuItem recInd = actionMode.getMenu().findItem(R.id.recIndicator);
             recInd.setVisible(false);
-            View recIndicator = toolbar.findViewById(R.id.recIndicator);
-            recIndicator.clearAnimation();
-            if (recLine != null) {
-                mapboxMap.removePolyline(recLine);
-                mapboxMap.removeMarker(startMarker);
-            }
+            flash = false;
         }
  
+    }
+    @Background( delay = 1000)
+    public void startAnimation() {
+        flashingColorAnimation();
     }
 
     /**
@@ -1250,6 +1256,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             MapsActivity.this.startService(serviceIntent);
             autoOrientationOff(true);
             checkForRecButton = false;
+            enabledRecAnimation(true);
             if (createdTrackPosition == null) {
                 createdTrackPosition = new ArrayList<Position>();
             }
@@ -1260,6 +1267,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_PAUSE_REC_ROUT);
             MapsActivity.this.startService(serviceIntent);
             autoOrientationOff(true);
+            enabledRecAnimation(false);
             actionMode.getMenu().findItem(R.id.actionStartRec).setIcon(android.R.drawable.ic_media_play);
             actionMode.getMenu().findItem(R.id.actionSaveRecord)
                     .setVisible(true)
@@ -1275,7 +1283,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         serviceIntent.putExtra(TO_SERVICE_COMMANDS, COMMAND_PAUSE_REC_ROUT);
         MapsActivity.this.startService(serviceIntent);
         autoOrientationOff(true);
-
+        enabledRecAnimation(false);
         actionMode.getMenu().findItem(R.id.actionStartRec).setIcon(android.R.drawable.ic_media_play);
         actionMode.getMenu().findItem(R.id.actionSaveRecord).setVisible(true);
         actionMode.getMenu().findItem(R.id.actionSaveRecord).setEnabled(true);
@@ -1338,6 +1346,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         enabledGPS(false);
                     }
                 });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
             }
     }
 
