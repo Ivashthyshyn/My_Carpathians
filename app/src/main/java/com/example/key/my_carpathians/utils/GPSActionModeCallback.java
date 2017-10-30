@@ -40,21 +40,21 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 		//So here show action menu according to SDK Levels
 		if (Build.VERSION.SDK_INT < 11) {
 			MenuItemCompat.setShowAsAction(menu.findItem(R.id.actionSaveRecord), MenuItemCompat.SHOW_AS_ACTION_NEVER);
-			MenuItemCompat.setShowAsAction(menu.findItem(R.id.actionPause), MenuItemCompat.SHOW_AS_ACTION_NEVER);
+			MenuItemCompat.setShowAsAction(menu.findItem(R.id.actionStop), MenuItemCompat.SHOW_AS_ACTION_NEVER);
 			MenuItemCompat.setShowAsAction(menu.findItem(R.id.actionStartRec), MenuItemCompat.SHOW_AS_ACTION_NEVER);
 
 		} else {
 			menu.findItem(R.id.actionSaveRecord).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-			menu.findItem(R.id.actionPause).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+			menu.findItem(R.id.actionStop).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 			menu.findItem(R.id.actionStartRec).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
+			menu.findItem(R.id.recIndicator).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
 		}
 		if (mType == PLACE){
 			MenuItem saveAction = menu.findItem(R.id.actionSaveRecord);
 			saveAction.setVisible(false);
 			saveAction.setEnabled(false);
-			MenuItem actionPause = menu.findItem(R.id.actionPause);
+			MenuItem actionPause = menu.findItem(R.id.actionStop);
 			actionPause.setIcon(R.drawable.ic_exchange);
 			actionPause.setVisible(false);
 			actionPause.setEnabled(false);
@@ -62,20 +62,23 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 			actionStartRec.setVisible(false);
 			actionStartRec.setEnabled(false);
 			CommunicatorMapActivity communicatorMapActivity = (CommunicatorMapActivity) context;
-			communicatorMapActivity.enabledProgressGPS(true);
+			communicatorMapActivity.enabledProgressGPS(true, mType);
 		}else if(mType == ROUT){
 			MenuItem saveAction = menu.findItem(R.id.actionSaveRecord);
 			saveAction.setVisible(false);
 			saveAction.setEnabled(false);
-			MenuItem actionPause = menu.findItem(R.id.actionPause);
-			actionPause.setIcon(R.drawable.ic_exchange);
+			MenuItem actionPause = menu.findItem(R.id.actionStop);
+			actionPause.setIcon(R.drawable.ic_media_stop_dark);
 			actionPause.setVisible(false);
 			actionPause.setEnabled(false);
 			MenuItem actionStartRec =menu.findItem(R.id.actionStartRec);
 			actionStartRec.setVisible(false);
 			actionStartRec.setEnabled(false);
+			MenuItem recIndicator =menu.findItem(R.id.recIndicator);
+			recIndicator.setVisible(false);
+			recIndicator.setEnabled(false);
 			CommunicatorMapActivity communicatorMapActivity = (CommunicatorMapActivity) context;
-			communicatorMapActivity.enabledProgressGPS(true);
+			communicatorMapActivity.enabledProgressGPS(true, mType);
 		}
 
 
@@ -91,7 +94,7 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 				case R.id.actionSaveRecord:
 					communicatorMapActivity.actionSaveLocation();
 					break;
-				case R.id.actionPause:
+				case R.id.actionStop:
 					communicatorMapActivity.actionRefreshLocation();
 					break;
 			}
@@ -101,10 +104,10 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 					communicatorMapActivity.actionSaveRecTrack();
 					break;
 				case R.id.actionStartRec:
-					communicatorMapActivity.undoAction();
+					communicatorMapActivity.actionStartRecTrack();
 					break;
-				case R.id.actionPause:
-					communicatorMapActivity.deleteAction();
+				case R.id.actionStop:
+					communicatorMapActivity.actionStopRecTrack();
 					break;
 			}
 		}
@@ -115,11 +118,12 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 	public void onDestroyActionMode(ActionMode mode) {
 		CommunicatorMapActivity communicatorMapActivity = (CommunicatorMapActivity) context;
 		if(mType == PLACE){
-			communicatorMapActivity.enabledProgressGPS(false);
-			communicatorMapActivity.deleteAction();
+			communicatorMapActivity.enabledProgressGPS(false, mType);
+			communicatorMapActivity.deleteActionForGPS();
+
 		}else if(mType == ROUT){
-			communicatorMapActivity.enabledProgressGPS(false);
-			communicatorMapActivity.deleteAction();
+			communicatorMapActivity.enabledProgressGPS(false, mType);
+			communicatorMapActivity.deleteActionForGPS();
 		}
 		communicatorMapActivity.autoOrientationOff(false);
 	}

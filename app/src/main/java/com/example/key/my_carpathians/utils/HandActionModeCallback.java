@@ -115,7 +115,7 @@ public class HandActionModeCallback implements ActionMode.Callback {
 					communicatorMapActivity.undoAction();
 					break;
 				case R.id.action_del:
-					communicatorMapActivity.deleteAction();
+					communicatorMapActivity.deleteActionForHand();
 					break;
 			}
 		}
@@ -128,7 +128,7 @@ public class HandActionModeCallback implements ActionMode.Callback {
 		if(mType == PLACE){
 			communicatorMapActivity.undoAction();
 		}else if(mType == ROUT){
-			communicatorMapActivity.deleteAction();
+			communicatorMapActivity.deleteActionForHand();
 		}
 		communicatorMapActivity.autoOrientationOff(false);
 	}
