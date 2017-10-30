@@ -105,19 +105,6 @@
 
     </android.support.v7.widget.Toolbar>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/buttonShowMyLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="10dp"
-        android:scaleType="centerCrop"
-        android:visibility="visible"
-        app:backgroundTint="@android:color/transparent"
-        app:fabSize="mini"
-        app:srcCompat="@drawable/ic_my_location_24dp"/>
-
     <RelativeLayout
         android:id="@+id/progressGPS"
         android:layout_width="100dp"

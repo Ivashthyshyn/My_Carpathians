@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_NO_SAVE;
+import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_PAUSE_REC_ROUT;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_PLACE;
 import static com.example.key.my_carpathians.activities.MapsActivity.COMMAND_REC_ROUT;
 import static com.example.key.my_carpathians.activities.MapsActivity.ERROR_TRACK;
@@ -232,7 +233,11 @@ public class LocationService extends Service implements
             mLocationRequest.setFastestInterval(FASTEST_INTERVAL_REC);
             saveLocationToLocationList(location);
             owner.update(location, ROUT);
-        }
+        } else if (mIntCommand == COMMAND_PAUSE_REC_ROUT) {
+           mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
+           mLocationRequest.setFastestInterval(UPDATE_INTERVAL_PASSIVE);
+           owner.update(location, ROUT);
+       }
     }
 
 

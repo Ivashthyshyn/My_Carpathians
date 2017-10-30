@@ -7,7 +7,7 @@ package com.example.key.my_carpathians.interfaces;
 public interface CommunicatorMapActivity {
 	void undoAction();
 	void saveAction();
-	void deleteAction();
+	void deleteActionForHand();
 	void autoOrientationOff(boolean on);
 	void getLocationPosition();
 	void actionStartRecTrack();
@@ -16,9 +16,9 @@ public interface CommunicatorMapActivity {
 	void actionSaveRecTrack();
 	void actionSaveLocation();
 
-	void enabledProgressGPS(boolean b);
+	void enabledProgressGPS(boolean b, int type);
 
-	void destroyActionMode();
+	void deleteActionForGPS();
 
 	void actionRefreshLocation();
 }
