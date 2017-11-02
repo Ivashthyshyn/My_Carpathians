@@ -35,7 +35,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.cocoahero.android.geojson.Position;
@@ -149,9 +148,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String mRootPathString;
     private Menu menu;
     private ActionMode actionMode;
-
-    @ViewById(R.id.seekBar)
-    SeekBar seekBar;
 
     @ViewById(R.id.toolBarMapActivity)
     Toolbar toolbar;
@@ -403,26 +399,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             actionMode = ((AppCompatActivity) this).startSupportActionMode(new OfflineRegionActionModeCallbac(this));
             autoOrientationOff(true);
             enabledHandsMode(REGION);
-            seekBar.setVisibility(View.VISIBLE);
-            seekBar.setSecondaryProgress(1);
-            seekBar.setProgress(5);
-            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    double value = progress * 0.1;
-                    updateViewRectangle(value);
-                }
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-
-                }
-            });
         }else{
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Internet connection");
@@ -447,19 +424,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void updateViewRectangle(double progress) {
-        polygonOptions.getPoints().clear();
 
-        List<LatLng> points = new ArrayList<>();
-        points.add(new LatLng(mPoint.getLatitude()+ PERIMETER_SIZE_TO_LATITUDE, mPoint.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE ));
-        points.add(new LatLng(mPoint.getLatitude()- PERIMETER_SIZE_TO_LATITUDE, mPoint.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE ));
-        points.add(new LatLng(mPoint.getLatitude()+ PERIMETER_SIZE_TO_LATITUDE, mPoint.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE ));
-        points.add(new LatLng(mPoint.getLatitude()- PERIMETER_SIZE_TO_LATITUDE, mPoint.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE ));
-
-        polygonOptions = new PolygonOptions();
-        polygonOptions.addAll(points);
-        mapboxMap.updatePolygon(p);
-    }
 
     private void showCreateDialog(final int typeObject) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1549,7 +1514,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         showRecLine(point, ROUT);
                     }else if(type == REGION){
                         mPoint = point;
-                        showRegion(point);
+
                     }
 
                 }
@@ -1558,18 +1523,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapboxMap.setOnMapClickListener(fingerTouchListener);
     }
 
-    private void showRegion(LatLng point) {
-        List<LatLng> points = new ArrayList<>();
-        points.add(new LatLng(point.getLatitude()+ PERIMETER_SIZE_TO_LATITUDE, point.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE ));
-        points.add(new LatLng(point.getLatitude()- PERIMETER_SIZE_TO_LATITUDE, point.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE ));
-        points.add(new LatLng(point.getLatitude()+ PERIMETER_SIZE_TO_LATITUDE, point.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE ));
-        points.add(new LatLng(point.getLatitude()- PERIMETER_SIZE_TO_LATITUDE, point.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE ));
-
-        polygonOptions = new PolygonOptions();
-        polygonOptions.addAll(points);
-        p  =  mapboxMap.addPolygon(polygonOptions);
-        p.setFillColor(Color.BLUE);
-    }
 
 
     void undo(){
