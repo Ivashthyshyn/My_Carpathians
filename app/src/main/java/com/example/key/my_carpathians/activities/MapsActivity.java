@@ -35,6 +35,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.cocoahero.android.geojson.Position;
@@ -48,6 +49,7 @@ import com.example.key.my_carpathians.utils.GPSActionModeCallback;
 import com.example.key.my_carpathians.utils.HandActionModeCallback;
 import com.example.key.my_carpathians.utils.LocationService;
 import com.example.key.my_carpathians.utils.ObjectService;
+import com.example.key.my_carpathians.utils.OfflineRegionActionModeCallbac;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -55,6 +57,7 @@ import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
+import com.mapbox.mapboxsdk.annotations.PolygonOptions;
 import com.mapbox.mapboxsdk.annotations.Polyline;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -113,6 +116,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final int COMMAND_PAUSE_REC_ROUT = 6;
     private static final int START = 001;
     private static final int RECK = 002;
+    private static final int REGION = 101;
     public ILocation iCapture;
     public static final String JSON_CHARSET = "UTF-8";
     public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
@@ -146,6 +150,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Menu menu;
     private ActionMode actionMode;
 
+    @ViewById(R.id.seekBar)
+    SeekBar seekBar;
+
     @ViewById(R.id.toolBarMapActivity)
     Toolbar toolbar;
 
@@ -156,6 +163,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     RotateLoading gpsLoading;
     private boolean flash = true;
     private boolean startAnimationChecker;
+    private PolygonOptions polygonOptions;
+    private LatLng mPoint;
+    private com.mapbox.mapboxsdk.annotations.Polygon p;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -372,7 +382,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 showCreateDialog(ROUT);
                 return true;
             case R.id.download_region:
-
+                startActionModOfflineRegion();
                 return true;
             case R.id.action_g_p_s:
                 if(mapboxMap != null & !switchCheck ){
@@ -385,6 +395,70 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void startActionModOfflineRegion() {
+        actionMode = ((AppCompatActivity) this).startSupportActionMode(new OfflineRegionActionModeCallbac(this));
+        if (isOnline()){
+            actionMode = ((AppCompatActivity) this).startSupportActionMode(new OfflineRegionActionModeCallbac(this));
+            autoOrientationOff(true);
+            enabledHandsMode(REGION);
+            seekBar.setVisibility(View.VISIBLE);
+            seekBar.setSecondaryProgress(1);
+            seekBar.setProgress(5);
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    double value = progress * 0.1;
+                    updateViewRectangle(value);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+        }else{
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Internet connection");
+            builder.setMessage("This action need Internet connection. Please check your connection");
+            builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.setNegativeButton("settings", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.setClassName("com.android.phone", "com.android.phone.NetworkSetting");
+                    startActivity(intent);
+                    dialog.dismiss();
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        }
+    }
+
+    private void updateViewRectangle(double progress) {
+        polygonOptions.getPoints().clear();
+
+        List<LatLng> points = new ArrayList<>();
+        points.add(new LatLng(mPoint.getLatitude()+ PERIMETER_SIZE_TO_LATITUDE, mPoint.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE ));
+        points.add(new LatLng(mPoint.getLatitude()- PERIMETER_SIZE_TO_LATITUDE, mPoint.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE ));
+        points.add(new LatLng(mPoint.getLatitude()+ PERIMETER_SIZE_TO_LATITUDE, mPoint.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE ));
+        points.add(new LatLng(mPoint.getLatitude()- PERIMETER_SIZE_TO_LATITUDE, mPoint.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE ));
+
+        polygonOptions = new PolygonOptions();
+        polygonOptions.addAll(points);
+        mapboxMap.updatePolygon(p);
     }
 
     private void showCreateDialog(final int typeObject) {
@@ -1196,7 +1270,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		return connected;
 	}
 
-
+//Todo need update this method
 	private void enabledRecAnimation(boolean b){
         startAnimationChecker = b;
         startAnimation();
@@ -1473,6 +1547,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     }else if(type == ROUT){
                         showRecLine(point, ROUT);
+                    }else if(type == REGION){
+                        mPoint = point;
+                        showRegion(point);
                     }
 
                 }
@@ -1481,6 +1558,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapboxMap.setOnMapClickListener(fingerTouchListener);
     }
 
+    private void showRegion(LatLng point) {
+        List<LatLng> points = new ArrayList<>();
+        points.add(new LatLng(point.getLatitude()+ PERIMETER_SIZE_TO_LATITUDE, point.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE ));
+        points.add(new LatLng(point.getLatitude()- PERIMETER_SIZE_TO_LATITUDE, point.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE ));
+        points.add(new LatLng(point.getLatitude()+ PERIMETER_SIZE_TO_LATITUDE, point.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE ));
+        points.add(new LatLng(point.getLatitude()- PERIMETER_SIZE_TO_LATITUDE, point.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE ));
+
+        polygonOptions = new PolygonOptions();
+        polygonOptions.addAll(points);
+        p  =  mapboxMap.addPolygon(polygonOptions);
+        p.setFillColor(Color.BLUE);
+    }
 
 
     void undo(){

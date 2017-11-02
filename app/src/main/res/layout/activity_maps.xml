@@ -9,6 +9,13 @@
     android:orientation="vertical"
     tools:context=".activities.ActionActivity">
 
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -60,7 +67,8 @@
                 android:background="@color/bg_register"
                 android:elevation="8dp"
                 android:orientation="horizontal"
-                android:paddingTop="8dp">
+                android:paddingTop="8dp"
+                android:visibility="gone">
 
                 <Button
                     android:id="@+id/buttonDownloadOfflineRegion"
