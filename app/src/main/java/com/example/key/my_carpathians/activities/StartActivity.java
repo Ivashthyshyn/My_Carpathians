@@ -155,7 +155,6 @@ public class StartActivity extends AppCompatActivity implements
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Context context = StartActivity.this;
     private SharedPreferences mSharedPreferences;
-    private DrawerLayout mDrawerLayout;
     private FirebaseUser mFirebaseUser;
     private CallbackManager mCallbackManager;
     private FirebaseUser mUser;
@@ -209,7 +208,11 @@ public class StartActivity extends AppCompatActivity implements
 	ViewPager viewPager;
 	@ViewById(R.id.tabLayout)
 	TabLayout tabLayout;
+    @ViewById(R.id.drawer_layout)
+    DrawerLayout mDrawerLayout;
+
 	ViewPagerAdapter adapter;
+
     ActionBarDrawerToggle actionBarDrawerToggle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,7 +226,6 @@ public class StartActivity extends AppCompatActivity implements
 	    adapter = new ViewPagerAdapter(getSupportFragmentManager());
 	    viewPager.setAdapter(adapter);
         mAuth = FirebaseAuth.getInstance();
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout){
             @Override
             public void onPageScrollStateChanged(int state) {
@@ -327,8 +329,6 @@ public class StartActivity extends AppCompatActivity implements
                     RoutsListFragment routsListFragment = (RoutsListFragment_) adapter.getItem(1);
                     routsListFragment.setList(routs, ROUT);
                 }
-
-
             }
 
             @Override
@@ -1225,7 +1225,7 @@ public class StartActivity extends AppCompatActivity implements
             } else {
                 // Google Sign In failed, update UI appropriately
                 // [START_EXCLUDE]
-                updateUI(null, null);
+                showableLogInGroup(true);
                 // [END_EXCLUDE]
             }
         }

@@ -21,7 +21,7 @@ import org.androidannotations.annotations.EFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LATITUDE;
+import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_OFFLINE_REGION;
 import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LONGITUDE;
 
 @EFragment
@@ -60,8 +60,8 @@ public class PlaceAroundFragment extends Fragment {
 			double lng = mPlace.getPositionPlace().getLongitude();
 			if (position.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE > lng
 					&& position.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE < lng
-					&& position.getLatitude() + PERIMETER_SIZE_TO_LATITUDE > lat
-					&& position.getLatitude() - PERIMETER_SIZE_TO_LATITUDE < lat
+					&& position.getLatitude() + PERIMETER_SIZE_TO_OFFLINE_REGION > lat
+					&& position.getLatitude() - PERIMETER_SIZE_TO_OFFLINE_REGION < lat
 					&& !myName.equals(mPlace.getNamePlace())) {
 				placesAround.add(mPlace);
 				placesAroundName.add(mPlace.getNamePlace());

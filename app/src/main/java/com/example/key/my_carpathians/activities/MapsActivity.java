@@ -35,6 +35,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.cocoahero.android.geojson.Position;
@@ -104,7 +105,7 @@ import static com.example.key.my_carpathians.utils.ObjectService.FILE_EXISTS;
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, CommunicatorMapActivity {
-    public static final double PERIMETER_SIZE_TO_LATITUDE = 0.3;
+    public static final double PERIMETER_SIZE_TO_OFFLINE_REGION = 0.3;
     public static final double PERIMETER_SIZE_TO_LONGITUDE = 0.4;
     public static final String TO_SERVICE_COMMANDS = "service_commands";
     public static final int COMMAND_REC_ROUT = 4;
@@ -149,6 +150,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Menu menu;
     private ActionMode actionMode;
 
+    @ViewById(R.id.seekBar)
+    SeekBar seekBar;
+
     @ViewById(R.id.toolBarMapActivity)
     Toolbar toolbar;
 
@@ -162,6 +166,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PolygonOptions polygonOptions;
     private LatLng mPoint;
     private com.mapbox.mapboxsdk.annotations.Polygon p;
+    private double perimeterValue;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -360,11 +365,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_map_activity, menu);
         this.menu = menu;
-        if (mTypeMode){
-
-        }else{
-
-        }
         return true;
     }
 
@@ -394,11 +394,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void startActionModOfflineRegion() {
-        actionMode = ((AppCompatActivity) this).startSupportActionMode(new OfflineRegionActionModeCallbac(this));
         if (isOnline()){
-            actionMode = ((AppCompatActivity) this).startSupportActionMode(new OfflineRegionActionModeCallbac(this));
-            autoOrientationOff(true);
-            enabledHandsMode(REGION);
+            if (mTypeMode){
+                actionMode = ((AppCompatActivity) this).startSupportActionMode(new OfflineRegionActionModeCallbac(this));
+                autoOrientationOff(true);
+                enabledHandsMode(REGION);
+                actionMode.setTitle("New Region");
+                actionMode.setSubtitle("tab to select");
+            }else{
+                downloadRegionDialog(PERIMETER_SIZE_TO_OFFLINE_REGION);
+            }
+
 
         }else{
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -419,11 +425,65 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     dialog.dismiss();
                 }
             });
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
+             builder.create().show();
         }
     }
+	private void showRegion(LatLng point) {
+        seekBar.setVisibility(View.VISIBLE);
+        seekBar.setSecondaryProgress(1);
+        seekBar.setProgress(1);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                updateViewRectangle(progress);
+            }
 
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        mapboxMap.setOnMapClickListener(null);
+        actionMode.setSubtitle(null);
+        actionMode.getMenu().findItem(R.id.actionDownload).setVisible(true);
+        actionMode.getMenu().findItem(R.id.actactionDellRegion).setVisible(true);
+		List<LatLng> points = new ArrayList<>();
+        mPoint = point;
+        perimeterValue = 0.08;
+        points.add(new LatLng(point.getLatitude()+ perimeterValue, point.getLongitude() - perimeterValue ));
+        points.add(new LatLng(point.getLatitude()- perimeterValue, point.getLongitude() - perimeterValue ));
+        points.add(new LatLng(point.getLatitude()- perimeterValue, point.getLongitude() + perimeterValue ));
+        points.add(new LatLng(point.getLatitude()+ perimeterValue, point.getLongitude() + perimeterValue ));
+
+		polygonOptions = new PolygonOptions();
+		polygonOptions.addAll(points);
+		polygonOptions.fillColor(Color.parseColor("#3bb2b0"));
+        polygonOptions.alpha(0.4f);
+		p  =  mapboxMap.addPolygon(polygonOptions);
+	}
+
+
+    private void updateViewRectangle(double progress) {
+           progress = progress/100 * 0.3;
+            perimeterValue = 0.08 + progress;
+            List<LatLng> points = new ArrayList<>();
+            points.add(new LatLng(mPoint.getLatitude() + perimeterValue, mPoint.getLongitude() - perimeterValue));
+            points.add(new LatLng(mPoint.getLatitude() - perimeterValue, mPoint.getLongitude() - perimeterValue));
+            points.add(new LatLng(mPoint.getLatitude() - perimeterValue, mPoint.getLongitude() + perimeterValue));
+            points.add(new LatLng(mPoint.getLatitude() + perimeterValue, mPoint.getLongitude() + perimeterValue));
+            mapboxMap.removePolygon(p);
+            polygonOptions = new PolygonOptions();
+            polygonOptions.addAll(points);
+            polygonOptions.fillColor(Color.parseColor("#3bb2b0"));
+            polygonOptions.alpha(0.4f);
+            p = mapboxMap.addPolygon(polygonOptions);
+            mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(10 - (progress * 5)));
+    }
 
 
     private void showCreateDialog(final int typeObject) {
@@ -523,6 +583,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
+        mPoint = new LatLng();
         mapboxMap.getUiSettings().setCompassGravity(Gravity.CENTER_HORIZONTAL);
         if (selectUserRouts != null && selectUserRouts.size() > 0 && mRootPathString != null) {
             Uri rootPathForRoutsString = Uri.parse(mRootPathString).buildUpon().appendPath("Routs").build();
@@ -535,33 +596,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         if (selectUserPlacesList != null && selectUserPlacesList.size() > 0) {
             for (int i = 0; i < selectUserPlacesList.size(); i++) {
-                lat = selectUserPlacesList.get(i).getPositionPlace().getLatitude();
-                lng = selectUserPlacesList.get(i).getPositionPlace().getLongitude();
-                if (lat != 0 && lng != 0) {
+                mPoint.setLatitude(selectUserPlacesList.get(i).getPositionPlace().getLatitude());
+                mPoint.setLongitude(selectUserPlacesList.get(i).getPositionPlace().getLongitude());
+                if (mPoint != null) {
                     IconFactory iconFactory = IconFactory.getInstance(MapsActivity.this);
                     Icon icon = iconFactory.fromResource(R.drawable.marcer);
-                    mapboxMap.addMarker(new MarkerViewOptions().icon(icon).position(new LatLng(lat, lng)));
+                    mapboxMap.addMarker(new MarkerViewOptions().icon(icon).position(mPoint));
 
                 }
             }
         }
         if (mTypeMode) {
-            lat = 48.635022;
-            lng = 24.141080;
+            mPoint.setLatitude(48.635022);
+            mPoint.setLongitude(24.141080);
         }else {
             //Todo need to write mode off created object
 
         }
         mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                 new CameraPosition.Builder()
-                        .target(new LatLng(lat, lng))  // set the camera's center position
+                        .target(mPoint)  // set the camera's center position
                         .zoom(10)  // set the camera's zoom level
                         .tilt(20)  // set the camera's tilt
                         .build()));
+
     }
 
     // This method show download dialog
-    private void downloadRegionDialog() {
+    private void downloadRegionDialog(final double perimeterValue ) {
         // Set up download interaction. Display a dialog
         // when the user clicks download button and require
         // a user-provided region name
@@ -585,7 +647,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             Toast.makeText(MapsActivity.this, getString(R.string.dialog_toast), Toast.LENGTH_SHORT).show();
                         } else {
                             // Begin download process
-                            downloadOfflineRegion(regionName);
+                            downloadOfflineRegion(regionName, perimeterValue);
                         }
                     }
                 })
@@ -724,13 +786,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // This method creates and loads the offline region visible on the screen
-    private void downloadOfflineRegion(final String regionName) {
+    private void downloadOfflineRegion(final String regionName , double perimeterValue ) {
         // Create a bounding box for the offline region
         LatLngBounds latLngBounds = new LatLngBounds.Builder()
-                .include(new LatLng(lat + PERIMETER_SIZE_TO_LATITUDE,
-                        lng + PERIMETER_SIZE_TO_LONGITUDE)) // Northeast
-                .include(new LatLng(lat - PERIMETER_SIZE_TO_LATITUDE,
-                        lng - PERIMETER_SIZE_TO_LONGITUDE)) // Southwest
+                .include(new LatLng(mPoint.getLatitude() + perimeterValue,
+                        mPoint.getLongitude() + perimeterValue)) // Northeast
+                .include(new LatLng(mPoint.getLatitude() - perimeterValue,
+                        mPoint.getLongitude() - perimeterValue)) // Southwest
                 .build();
         // Define the offline region
         OfflineTilePyramidRegionDefinition definition = new OfflineTilePyramidRegionDefinition(
@@ -1084,10 +1146,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    @Click(R.id.buttonDownloadOfflineRegion)
-    void buttonDownloadOfflineRegion() {
-        downloadRegionDialog();
-    }
+
 
     @Click(R.id.buttonShowListRegion)
     void buttonShowListRegion() {
@@ -1283,8 +1342,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void getLocationPosition() {
-
+    public void actionDelRegion() {
+        removeAll();
+        actionMode.getMenu().findItem(R.id.actactionDellRegion).setVisible(false);
+        actionMode.getMenu().findItem(R.id.actionDownload).setVisible(false);
+        actionMode.setSubtitle("tab to select");
+        enabledHandsMode(REGION);
     }
 
     @Override
@@ -1331,7 +1394,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void actionPauseRecTrack() {
+    public void actionDownloadRegion() {
+        downloadRegionDialog(perimeterValue);
 
     }
 
@@ -1456,7 +1520,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void showRecLine(LatLng latLng, int typeObject) {
-            if (typeObject == PLACE) {
+            if (typeObject == PLACE | typeObject == REGION) {
                 if (mMarker == null) {
                     mMarker = mapboxMap.addMarker(new MarkerViewOptions()
                             .position(latLng)
@@ -1469,8 +1533,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .title("Intervention")
                             .snippet("Desc inter"));
                 }
+                if( typeObject == REGION){
+                showRegion(latLng);
+                }
+
             } else if (typeObject == ROUT) {
-                if (!checkForRecButton) {
+
                 Position mPos = new Position(latLng.getLatitude(), latLng.getLongitude(), 0);
                 createdTrackPosition.add(mPos);
                 if (createdTrackPosition.size() == 1) {
@@ -1487,8 +1555,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mapboxMap.addMarker(new MarkerOptions().setPosition(latLng));
 
 
-                }
-                if (createdTrackPosition.size() > 0) {
+                if (createdTrackPosition.size() > 0 && !checkForRecButton) {
                     visibleActionsIconForRecRout(RECK);
                 }
             }
@@ -1512,9 +1579,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     }else if(type == ROUT){
                         showRecLine(point, ROUT);
-                    }else if(type == REGION){
-                        mPoint = point;
-
+                    }else if(type == REGION);{
+                        showRecLine(point, REGION);
                     }
 
                 }
@@ -1563,6 +1629,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
        mPointCounter = 0;
        if (createdTrackPosition != null) {
            createdTrackPosition.clear();
+       }
+       if (p != null){
+           mapboxMap.removePolygon(p);
+           polygonOptions = null;
        }
    }
 }

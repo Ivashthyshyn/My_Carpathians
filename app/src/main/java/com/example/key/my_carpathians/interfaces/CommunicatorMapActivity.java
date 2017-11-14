@@ -9,10 +9,10 @@ public interface CommunicatorMapActivity {
 	void saveAction();
 	void deleteActionForHand();
 	void autoOrientationOff(boolean on);
-	void getLocationPosition();
+	void actionDelRegion();
 	void actionStartRecTrack();
 	void actionStopRecTrack();
-	void actionPauseRecTrack();
+	void actionDownloadRegion();
 	void actionSaveRecTrack();
 	void actionSaveLocation();
 

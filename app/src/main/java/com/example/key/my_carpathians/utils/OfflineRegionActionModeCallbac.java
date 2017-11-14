@@ -53,7 +53,10 @@ public class OfflineRegionActionModeCallbac implements ActionMode.Callback {
 
 			switch (item.getItemId()) {
 				case R.id.actionDownload:
-					communicatorMapActivity.actionSaveLocation();
+					communicatorMapActivity.actionDownloadRegion();
+					break;
+				case R.id.actactionDellRegion:
+					communicatorMapActivity.actionDelRegion();
 					break;
 			}
 

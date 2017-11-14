@@ -33,7 +33,7 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.example.key.my_carpathians"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -97,7 +97,7 @@ dependencies {
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.5.+'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
-    compile 'com.victor:lib:1.0.4'
+    implementation 'com.victor:lib:1.0.4'
 
     implementation 'com.android.support:mediarouter-v7:25.4.0'
 }

@@ -9,28 +9,48 @@
     android:orientation="vertical"
     tools:context=".activities.ActionActivity">
 
+    <com.mapbox.mapboxsdk.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentTop="false"
+        android:layout_centerHorizontal="false"
+        android:layout_centerVertical="false"
+        mapbox:mapbox_cameraTargetLat="49.11053"
+        mapbox:mapbox_cameraTargetLng="24.30765"
+        mapbox:mapbox_cameraZoom="12"
+        mapbox:mapbox_styleUrl="mapbox://styles/vylky/cj6z0f00y2pii2rnrrshfx481">
+
+    </com.mapbox.mapboxsdk.maps.MapView>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolBarMapActivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/tabTransparant"
+        android:minHeight="?attr/actionBarSize"
+        >
+
+    </android.support.v7.widget.Toolbar>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:elevation="4dp"
+        android:visibility="gone"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
-        <com.mapbox.mapboxsdk.maps.MapView
-            android:id="@+id/mapView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="false"
-            android:layout_centerVertical="false"
-            android:layout_weight="1"
-            android:elevation="4dp"
-            mapbox:mapbox_cameraTargetLat="49.11053"
-            mapbox:mapbox_cameraTargetLng="24.30765"
-            mapbox:mapbox_cameraZoom="12"
-            mapbox:mapbox_styleUrl="mapbox://styles/vylky/cj6z0f00y2pii2rnrrshfx481">
-
-        </com.mapbox.mapboxsdk.maps.MapView>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -38,18 +58,6 @@
             android:layout_weight="14"
             android:orientation="vertical"
             android:visibility="gone">
-
-            <ProgressBar
-                android:id="@+id/progress_bar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="25dp"
-                android:layout_centerHorizontal="true"
-                android:layout_centerInParent="true"
-                android:layout_weight="1"
-                android:paddingLeft="25dp"
-                android:paddingRight="25dp"
-                android:visibility="gone"/>
 
             <LinearLayout
                 android:id="@+id/bottom_navigation"
@@ -62,7 +70,7 @@
                 android:elevation="8dp"
                 android:orientation="horizontal"
                 android:paddingTop="8dp"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <Button
                     android:id="@+id/buttonDownloadOfflineRegion"
@@ -97,16 +105,6 @@
 
     </LinearLayout>
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolBarMapActivity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/tabTransparant"
-        android:minHeight="?attr/actionBarSize"
-        >
-
-    </android.support.v7.widget.Toolbar>
-
     <RelativeLayout
         android:id="@+id/progressGPS"
         android:layout_width="100dp"
@@ -138,6 +136,17 @@
             app:loading_width="5dp"/>
 
     </RelativeLayout>
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="39dp"
+        android:layout_marginRight="39dp"
+        android:visibility="gone"/>
 
 
 </RelativeLayout>
