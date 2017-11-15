@@ -3,6 +3,14 @@
       xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/recIndicator"
+        android:icon="@drawable/red_shape"
+        android:title="Item"
+        android:visible="false"
+        app:showAsAction="always"/>
+    <item
+        app:showAsAction="never|always"/>
+    <item
         android:id="@+id/actionStartRec"
         android:icon="@android:drawable/ic_media_play"
         android:title="Rec"
@@ -13,20 +21,13 @@
         android:id="@+id/actionStop"
         android:icon="@drawable/ic_media_stop_light"
         android:title="Pause"
-        app:showAsAction="always"/>
-    <item
+        android:visible="false"
         app:showAsAction="always"/>
     <item
         android:id="@+id/actionSaveRecord"
         android:checkable="false"
-        android:enabled="false"
         android:icon="@drawable/ic_done_white_24px"
         android:title="Save Record"
-        app:showAsAction="always"/>
-    <item
-        android:id="@+id/recIndicator"
-        android:icon="@drawable/red_shape"
-        android:title="Item"
         android:visible="false"
         app:showAsAction="always"/>
 </menu>

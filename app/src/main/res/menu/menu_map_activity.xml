@@ -27,8 +27,12 @@
         android:title="GPS on"
         app:showAsAction="always"/>
     <item
-        android:enabled="false"
-        app:showAsAction="always"/>
+        android:id="@+id/offline_regions"
+        android:title=" List Offline Map"/>
+    <item
+        android:id="@+id/auto_create_offline_region"
+        android:title="Create Offline Map"
+        app:showAsAction="never"/>
     <item
         android:enabled="false"
         app:showAsAction="always"/>

@@ -13,12 +13,9 @@ public interface CommunicatorMapActivity {
 	void actionStartRecTrack();
 	void actionStopRecTrack();
 	void actionDownloadRegion();
-	void actionSaveRecTrack();
 	void actionSaveLocation();
-
 	void enabledProgressGPS(boolean b, int type);
-
 	void deleteActionForGPS();
-
 	void actionRefreshLocation();
+	void deleteActionOfflineRegion();
 }

@@ -100,9 +100,6 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 			}
 		}else if(mType == ROUT){
 			switch (item.getItemId()) {
-				case R.id.actionSaveRecord:
-					communicatorMapActivity.actionSaveRecTrack();
-					break;
 				case R.id.actionStartRec:
 					communicatorMapActivity.actionStartRecTrack();
 					break;

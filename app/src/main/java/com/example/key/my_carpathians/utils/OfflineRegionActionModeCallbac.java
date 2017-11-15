@@ -66,6 +66,7 @@ public class OfflineRegionActionModeCallbac implements ActionMode.Callback {
 	@Override
 	public void onDestroyActionMode(ActionMode mode) {
 		CommunicatorMapActivity communicatorMapActivity = (CommunicatorMapActivity) context;
-		communicatorMapActivity.deleteActionForGPS();
+		communicatorMapActivity.deleteActionOfflineRegion();
+		communicatorMapActivity.autoOrientationOff(false);
 	}
 }

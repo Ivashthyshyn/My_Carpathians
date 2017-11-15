@@ -86,11 +86,16 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import com.mapbox.mapboxsdk.offline.OfflineManager;
+import com.mapbox.mapboxsdk.offline.OfflineRegion;
+import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
 
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -112,6 +117,8 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.example.key.my_carpathians.activities.ActionActivity.LOGIN;
+import static com.example.key.my_carpathians.activities.MapsActivity.JSON_CHARSET;
+import static com.example.key.my_carpathians.activities.MapsActivity.JSON_FIELD_REGION_NAME;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
@@ -142,7 +149,8 @@ public class StartActivity extends AppCompatActivity implements
 	public static final int MY_PLACE = 4;
 	public static final int FA_PLACE = 2;
 	public static final int FA_ROUT = 3;
-	public FragmentManager fragmentManager;
+    public static final String OFFLINE_MAP = "offline_map" ;
+    public FragmentManager fragmentManager;
     public PlacesListFragment placesListFragment;
     public RoutsListFragment routsListFragment;
     public ArrayList<Place> places = new ArrayList<>();
@@ -214,6 +222,9 @@ public class StartActivity extends AppCompatActivity implements
 	ViewPagerAdapter adapter;
 
     ActionBarDrawerToggle actionBarDrawerToggle;
+    private OfflineManager offlineManager;
+    private int mRegionSelected;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1425,8 +1436,119 @@ public class StartActivity extends AppCompatActivity implements
         showCreatedList(mListPlaces, mListRouts);
         }
 
+    @Click(R.id.buttonMapOffline)
+public void buttonMapOfflineWasClicked(){
+        // Build a region list when the user clicks the list button
 
+        // Reset the region selected int to 0
+        mRegionSelected = 0;
 
+        // Query the DB asynchronously
+        offlineManager.listOfflineRegions(new OfflineManager.ListOfflineRegionsCallback() {
+            @Override
+            public void onList(final OfflineRegion[] offlineRegions) {
+                // Check result. If no regions have been
+                // downloaded yet, notify user and return
+                if (offlineRegions == null || offlineRegions.length == 0) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.toast_no_regions_yet), Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
+                // Add all of the region names to a list
+                ArrayList<String> offlineRegionsNames = new ArrayList<>();
+                for (OfflineRegion offlineRegion : offlineRegions) {
+                    offlineRegionsNames.add(getRegionName(offlineRegion));
+                }
+                final CharSequence[] items = offlineRegionsNames.toArray(new CharSequence[offlineRegionsNames.size()]);
+
+                // Build a dialog containing the list of regions
+                AlertDialog dialog = new AlertDialog.Builder(StartActivity.this)
+                        .setTitle(getString(R.string.navigate_title))
+                        .setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Track which region the user selects
+                                mRegionSelected = which;
+                            }
+                        })
+                        .setPositiveButton(getString(R.string.navigate_positive_button), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                Toast.makeText(StartActivity.this, items[mRegionSelected], Toast.LENGTH_LONG).show();
+
+                                // Get the region bounds and zoom
+                                LatLngBounds bounds = ((OfflineTilePyramidRegionDefinition)
+                                        offlineRegions[mRegionSelected].getDefinition()).getBounds();
+                                double regionZoom = ((OfflineTilePyramidRegionDefinition)
+                                        offlineRegions[mRegionSelected].getDefinition()).getMinZoom();
+                                Intent mapIntent = new Intent(StartActivity.this, MapsActivity_.class);
+                                mapIntent.putExtra(OFFLINE_MAP, items[mRegionSelected] );
+                                startActivity(mapIntent);
+
+                            }
+                        })
+                        .setNeutralButton(getString(R.string.navigate_neutral_button_title), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Make progressBar indeterminate and
+                                // set it to visible to signal that
+                                // the deletion process has begun
+                                progressBar.setIndeterminate(true);
+                                progressBar.setVisibility(View.VISIBLE);
+
+                                // Begin the deletion process
+                                offlineRegions[mRegionSelected].delete(new OfflineRegion.OfflineRegionDeleteCallback() {
+                                    @Override
+                                    public void onDelete() {
+                                        // Once the region is deleted, remove the
+                                        // progressBar and display a toast
+                                        progressBar.setVisibility(View.INVISIBLE);
+                                        progressBar.setIndeterminate(false);
+                                        Toast.makeText(getApplicationContext(), getString(R.string.toast_region_deleted),
+                                                Toast.LENGTH_LONG).show();
+                                    }
+
+                                    @Override
+                                    public void onError(String error) {
+                                        progressBar.setVisibility(View.INVISIBLE);
+                                        progressBar.setIndeterminate(false);
+                                        Log.e(TAG, "Error: " + error);
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.navigate_negative_button_title), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                // When the user cancels, don't do anything.
+                                // The dialog will automatically close
+                            }
+                        }).create();
+                dialog.show();
+
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Error: " + error);
+            }
+        });
+    }
+    private String getRegionName(OfflineRegion offlineRegion) {
+        // Get the region name from the offline region metadata
+        String regionName;
+
+        try {
+            byte[] metadata = offlineRegion.getMetadata();
+            String json = new String(metadata, JSON_CHARSET);
+            JSONObject jsonObject = new JSONObject(json);
+            regionName = jsonObject.getString(JSON_FIELD_REGION_NAME);
+        } catch (Exception exception) {
+            Log.e(TAG, "Failed to decode metadata: " + exception.getMessage());
+            regionName = String.format(getString(R.string.region_name), offlineRegion.getID());
+        }
+        return regionName;
+    }
 
 }
