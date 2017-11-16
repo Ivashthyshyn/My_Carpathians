@@ -27,12 +27,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -57,13 +59,11 @@ import com.facebook.FacebookException;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -86,6 +86,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.mapboxsdk.offline.OfflineRegion;
@@ -107,6 +108,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -171,7 +173,8 @@ public class StartActivity extends AppCompatActivity implements
     private String mUserUID;
     private boolean mTypeMode = false;
     private Uri rootPath;
-
+    public ActionBarDrawerToggle actionBarDrawerToggle;
+    private int mRegionSelected;
     @ViewById(R.id.fabRecEditor)
     FloatingActionButton fabRecEditor;
     @ViewById(R.id.userAcountImage)
@@ -182,14 +185,6 @@ public class StartActivity extends AppCompatActivity implements
     Button googleLoginButton;
     @ViewById(R.id.textViewEmail)
     TextView textViewEmail;
-    @ViewById(R.id.googleButton)
-    SignInButton loginGoogle;
-    @ViewById(R.id.buttonLogout)
-    Button buttonLogaut;
-    @ViewById(R.id.buttonGoogleLogout)
-    Button buttonGoogleLogout;
-    @ViewById(R.id.facebookButton)
-    LoginButton loginFacebook;
     @ViewById(R.id.email)
     EditText inputEmail;
     @ViewById(R.id.password)
@@ -204,8 +199,6 @@ public class StartActivity extends AppCompatActivity implements
     TextInputLayout inputPasswordLayout;
     @ViewById(R.id.buttonResetPassword)
     Button buttonResetPassword;
-    @ViewById(R.id.buttonCreateNewAccount)
-    Button buttonCreateNewAccount;
     @ViewById(R.id.buttonFavorites)
     LinearLayout buttonFavorites;
     @ViewById(R.id.buttonCreated)
@@ -218,12 +211,15 @@ public class StartActivity extends AppCompatActivity implements
 	TabLayout tabLayout;
     @ViewById(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
-
+    @ViewById(R.id.settingsGroup)
+    LinearLayout settingsGroup;
+    @ViewById(R.id.buttonLogout)
+    ImageButton buttonLogout;
+    @ViewById(R.id.buttonAuthorization)
+    Button buttonAuthorization;
 	ViewPagerAdapter adapter;
+    private LoginManager facebookLoginManager;
 
-    ActionBarDrawerToggle actionBarDrawerToggle;
-    private OfflineManager offlineManager;
-    private int mRegionSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -256,14 +252,20 @@ public class StartActivity extends AppCompatActivity implements
         actionBarDrawerToggle.syncState();
 
         mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        checkCurentUser();
+        checkCurrentUser();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 mUser = firebaseAuth.getCurrentUser();
                 if (mUser != null && !mUser.isAnonymous()) {
                     mTypeMode = true;
-                } else {
+                    buttonLogout.setVisibility(View.VISIBLE);
+                } else if (mUser != null && mUser.isAnonymous()){
+                    showInterfaceForAnonymous();
+                    mTypeMode = false;
+                    buttonLogout.setVisibility(View.VISIBLE);
+                }else{
+                    showableLogInGroup(true);
                     mTypeMode = false;
                 }
 
@@ -351,7 +353,7 @@ public class StartActivity extends AppCompatActivity implements
 
         if (getIntent().getBooleanExtra(LOGIN, false)){
             mDrawerLayout.openDrawer(Gravity.START, true);
-            checkCurentUser();
+            checkCurrentUser();
         }
         if (viewPager.getAdapter() == null) {
             viewPager.setAdapter(adapter);
@@ -493,7 +495,7 @@ public class StartActivity extends AppCompatActivity implements
         }
     }
 
-    private void checkCurentUser() {
+    private void checkCurrentUser() {
         mUser = mAuth.getCurrentUser();
         if (mUser == null) {
             showableLogInGroup(true);
@@ -513,7 +515,7 @@ public class StartActivity extends AppCompatActivity implements
                 mUserUID = mUser.getUid();
                 updateUI(mUser.getProviderData().get(0).getDisplayName(),
                         String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
-                buttonGoogleLogout.setVisibility(View.VISIBLE);
+                buttonLogout.setVisibility(View.VISIBLE);
             } else if (mUser.getProviders().get(0).equals("facebook.com")) {
                 produceToolsVisibility(mTypeMode);
                 mTypeMode = true;
@@ -521,13 +523,13 @@ public class StartActivity extends AppCompatActivity implements
                 loginFacebook();
                 updateUI(mUser.getProviderData().get(0).getDisplayName(),
                         String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
+                buttonLogout.setVisibility(View.VISIBLE);
             } else if (mUser.getProviders().get(0).equals("password")) {
                 produceToolsVisibility(mTypeMode);
                 mTypeMode = true;
                 mUserUID = mUser.getUid();
                 updateUI(mUser.getProviderData().get(0).getEmail(), null);
-                buttonLogaut.setVisibility(View.VISIBLE);
-                buttonLogaut.setText("LOG OUT");
+                buttonLogout.setVisibility(View.VISIBLE);
             }
         }
         produceToolsVisibility(mTypeMode);
@@ -554,16 +556,18 @@ public class StartActivity extends AppCompatActivity implements
     }
 
     private void showInterfaceForAnonymous() {
-        buttonLogaut.setVisibility(View.VISIBLE);
-        buttonLogaut.setText("Authentication");
+
+        buttonAuthorization.setText("Authentication");
         showableLogInGroup(false);
+        buttonLogout.setVisibility(View.VISIBLE);
     }
 
     private void signOut() {
-        mAuth.signOut();
-        updateUI(null, null);
-        showableLogInGroup(true);
-
+        if(mAuth.getCurrentUser() != null) {
+            mAuth.signOut();
+            updateUI(null, null);
+            showableLogInGroup(true);
+        }
     }
 
 
@@ -1077,20 +1081,12 @@ public class StartActivity extends AppCompatActivity implements
 	    }
     }
 
-    @Click(R.id.buttonCreateNewAccount)
-    public void buttonCreateNewAccount() {
-	    if (isOnline()) {
-		    startActivity(new Intent(StartActivity.this, SignupActivity_.class));
-	    }else{
-		    showLoginDialog();
-	    }
-    }
-
     @Click(R.id.emailLoginButton)
     public void emailLoginButtonWasClicked() {
 	    if (isOnline()) {
-		    String email = inputEmail.getText().toString();
-		    final String password = inputPassword.getText().toString();
+		    final CharSequence email = inputEmail.getText();
+		    final CharSequence password = inputPassword.getText();
+
 
 		    if (TextUtils.isEmpty(email)) {
 			    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
@@ -1102,79 +1098,135 @@ public class StartActivity extends AppCompatActivity implements
 			    return;
 		    }
 
-		    //   progressBar.setVisibility(View.VISIBLE);
+		    progressBar.setVisibility(View.VISIBLE);
 
-		    //authenticate mUser
-		    mAuth.signInWithEmailAndPassword(email, password)
-				    .addOnCompleteListener(StartActivity.this, new OnCompleteListener<AuthResult>() {
-					    @Override
-					    public void onComplete(@NonNull Task<AuthResult> task) {
-						    // If sign in fails, display a message to the mUser. If sign in succeeds
-						    // the mAuth state listener will be notified and logic to handle the
-						    // signed in mUser can be handled in the listener.
-						    progressBar.setVisibility(View.GONE);
-						    if (!task.isSuccessful()) {
-							    // there was an error
-							    if (password.length() < 6) {
-								    inputPassword.setError(getString(R.string.minimum_password));
-							    } else {
-								    Toast.makeText(StartActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
-							    }
-						    } else {
-							    Intent intent = new Intent(StartActivity.this, StartActivity_.class);
-							    startActivity(intent);
-							    finish();
-						    }
-					    }
-				    });
+		    if(isValidEmail(email)) {
+                mAuth.signInWithEmailAndPassword(email.toString(), password.toString())
+                        .addOnCompleteListener(StartActivity.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                // If sign in fails, display a message to the mUser. If sign in succeeds
+                                // the mAuth state listener will be notified and logic to handle the
+                                // signed in mUser can be handled in the listener.
+                                progressBar.setVisibility(View.GONE);
+                                if (!task.isSuccessful()) {
+                                    // there was an error
+                                    if (password.length() < 6) {
+                                        inputPassword.setError(getString(R.string.minimum_password));
+                                    } else {
+                                       AlertDialog.Builder builder = new AlertDialog.Builder(StartActivity.this);
+                                       builder.setTitle("Registration!");
+                                       builder.setMessage("An account with this email address and password  does not exist! Create a new account?");
+                                       builder.setPositiveButton("Sig In", new DialogInterface.OnClickListener() {
+                                           @Override
+                                           public void onClick(DialogInterface dialog, int which) {
+                                            createNewAccount();
+                                           }
+                                       });
+                                       builder.setNegativeButton("Check password", new DialogInterface.OnClickListener() {
+                                           @Override
+                                           public void onClick(DialogInterface dialog, int which) {
+                                               dialog.dismiss();
+                                           }
+                                       });
+                                       builder.show();
+                                    }
+                                } else {
+                                    updateUI(email.toString(), null);
+                                    showableLogInGroup(false);
+
+                                }
+                            }
+                        });
+            }else{
+		       inputEmail.setError("Invalid email!");
+            }
 	    }else{
 		    showLoginDialog();
 	    }
     }
 
+    private void createNewAccount() {
+        progressBar.setVisibility(View.VISIBLE);
+        //create user
+        mAuth.createUserWithEmailAndPassword(inputEmail.getText().toString(), inputPassword.getText().toString())
+                .addOnCompleteListener(StartActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Toast.makeText(StartActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(StartActivity.this, "Authentication failed." + task.getException(),
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            updateUI(inputEmail.getText().toString(), null);
+                            showableLogInGroup(false);
+                        }
+                    }
+                });
+
+
+    }
+
+    private boolean isValidEmail(CharSequence email) {
+        if (email == null){
+            return false;
+        }else {
+            return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        }
+    }
+
     private void loginFacebook() {
 	    if(isOnline()) {
-		    loginFacebook.setVisibility(View.VISIBLE);
-	    }
-        // If using in a fragment
-        AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
-            @Override
-            protected void onCurrentAccessTokenChanged(AccessToken accessToken, AccessToken accessToken2) {
-                Log.d(TAG, "onCurrentAccessTokenChanged()");
-                if (accessToken == null) {
-                    showableLogInGroup(false);
-                    loginFacebook.setVisibility(View.VISIBLE);
-                } else if (accessToken2 == null) {
-                    LoginManager.getInstance().logOut();
-                    mAuth.signOut();
-                    showableLogInGroup(true);
+            // loginFacebook.setVisibility(View.VISIBLE);
+
+            // If using in a fragment
+            AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
+                @Override
+                protected void onCurrentAccessTokenChanged(AccessToken accessToken, AccessToken accessToken2) {
+                    Log.d(TAG, "onCurrentAccessTokenChanged()");
+                    if (accessToken == null) {
+                        showableLogInGroup(false);
+                    } else if (accessToken2 == null) {
+                        LoginManager.getInstance().logOut();
+                        mAuth.signOut();
+                        showableLogInGroup(true);
+                    }
                 }
-            }
-        };
-        mCallbackManager = CallbackManager.Factory.create();
+            };
+            mCallbackManager = CallbackManager.Factory.create();
 
-        loginFacebook.setReadPermissions("email");
-        // Callback registration
-        loginFacebook.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                Toast toast = Toast.makeText(StartActivity.this, "Logged In", Toast.LENGTH_SHORT);
-                handleFacebookAccessToken(loginResult.getAccessToken());
-                toast.show();
-            }
+            //loginFacebook.setReadPermissions("email");
+            // Callback registration
+            facebookLoginManager = LoginManager.getInstance();
+            facebookLoginManager.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+                    Toast toast = Toast.makeText(StartActivity.this, "Logged In", Toast.LENGTH_SHORT);
+                    handleFacebookAccessToken(loginResult.getAccessToken());
+                    toast.show();
+                }
 
-            @Override
-            public void onCancel() {
-                // App code
-            }
+                @Override
+                public void onCancel() {
+                    showableLogInGroup(true);
+                    updateUI(null, null);
+                }
 
-            @Override
-            public void onError(FacebookException exception) {
-                updateUI(null, null);
-            }
+                @Override
+                public void onError(FacebookException exception) {
+                    progressBar.setVisibility(View.GONE);
+                    showableLogInGroup(true);
+                    updateUI(null, null);
+                }
 
-        });
-
+            });
+        }else{
+	        showLoginDialog();
+        }
 
     }
 
@@ -1184,22 +1236,20 @@ public class StartActivity extends AppCompatActivity implements
             inputEmailLayout.setVisibility(View.VISIBLE);
             emailLoginButton.setVisibility(View.VISIBLE);
             buttonResetPassword.setVisibility(View.VISIBLE);
-            buttonCreateNewAccount.setVisibility(View.VISIBLE);
             facebookLoginButton.setVisibility(View.VISIBLE);
             googleLoginButton.setVisibility(View.VISIBLE);
-            loginFacebook.setVisibility(View.GONE);
-            loginGoogle.setVisibility(View.GONE);
-            buttonLogaut.setVisibility(View.GONE);
-            buttonGoogleLogout.setVisibility(View.GONE);
+            buttonAuthorization.setVisibility(View.GONE);
+            settingsGroup.setVisibility(View.GONE);
+            buttonLogout.setVisibility(View.GONE);
         } else {
             inputPasswordLayout.setVisibility(View.GONE);
             inputEmailLayout.setVisibility(View.GONE);
             emailLoginButton.setVisibility(View.GONE);
             buttonResetPassword.setVisibility(View.GONE);
-            buttonCreateNewAccount.setVisibility(View.GONE);
             facebookLoginButton.setVisibility(View.GONE);
             googleLoginButton.setVisibility(View.GONE);
-            buttonGoogleLogout.setVisibility(View.GONE);
+            settingsGroup.setVisibility(View.VISIBLE);
+            buttonLogout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1272,10 +1322,11 @@ public class StartActivity extends AppCompatActivity implements
                         // the mAuth state listener will be notified and logic to handle the
                         // signed in mUser can be handled in the listener.
                         if (!task.isSuccessful()) {
-
+                            progressBar.setVisibility(View.GONE);
                             //Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(StartActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+                                showableLogInGroup(true);
 
                         } else {
                             Profile profile = Profile.getCurrentProfile();
@@ -1283,12 +1334,14 @@ public class StartActivity extends AppCompatActivity implements
 	                        mUserUID = mAuth.getCurrentUser().getUid();
                             mTypeMode = true;
                             produceToolsVisibility(mTypeMode);
+                            progressBar.setVisibility(View.GONE);
                         }
                     }
                 });
     }
 
     private void signIn() {
+        progressBar.setVisibility(View.VISIBLE);
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
@@ -1305,11 +1358,10 @@ public class StartActivity extends AppCompatActivity implements
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in mUser's information
                             Log.d(TAG, "signInWithCredential:success");
-                            loginGoogle.setVisibility(View.GONE);
-                            buttonGoogleLogout.setVisibility(View.VISIBLE);
-                            updateUI(acct.getEmail(), String.valueOf(acct.getPhotoUrl()));
+                            updateUI(acct.getDisplayName(), String.valueOf(acct.getPhotoUrl()));
 							mUserUID = mAuth.getCurrentUser().getUid();
                             produceToolsVisibility(mTypeMode = true);
+                            progressBar.setVisibility(View.GONE);
 
                         } else {
                             // If sign in fails, display a message to the mUser.
@@ -1317,6 +1369,8 @@ public class StartActivity extends AppCompatActivity implements
                             Toast.makeText(StartActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                             updateUI(null, null);
+                            showableLogInGroup(true);
+                            progressBar.setVisibility(View.GONE);
                         }
                     }
                 });
@@ -1337,10 +1391,6 @@ public class StartActivity extends AppCompatActivity implements
     }
 
 
-    @Click(R.id.googleButton)
-    public void buttonGoogleLoginWasClicked() {
-        signIn();
-    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -1352,11 +1402,16 @@ public class StartActivity extends AppCompatActivity implements
     void facebookLoginButtonWasClicked() {
 	    if (isOnline()) {
 		    showableLogInGroup(false);
-		    loginFacebook.setVisibility(View.VISIBLE);
 		    loginFacebook();
+            sigInFacebook();
 	    }else{
 		    showLoginDialog();
 	    }
+    }
+
+    private void sigInFacebook() {
+        progressBar.setVisibility(View.VISIBLE);
+        facebookLoginManager.logInWithReadPermissions(StartActivity.this, Arrays.asList("public_profile", "email"));
     }
 
     @Click(R.id.googleLoginButton)
@@ -1364,7 +1419,8 @@ public class StartActivity extends AppCompatActivity implements
 	    if (isOnline()) {
 		    showableLogInGroup(false);
 		    loginGoogle();
-		    loginGoogle.setVisibility(View.VISIBLE);
+            signIn();
+		  //  loginGoogle.setVisibility(View.VISIBLE);
 	    }else{
 		    showLoginDialog();
 	    }
@@ -1372,6 +1428,27 @@ public class StartActivity extends AppCompatActivity implements
 
     @Click(R.id.buttonLogout)
     void buttonLogoutWasClicked() {
+        if (isOnline()) {
+
+            if (mUser.isAnonymous()) {
+                signOut();
+                } else {
+                if (mUser.getProviders().get(0).equals("google.com")) {
+                    googleSignOut();
+                } else if (mUser.getProviders().get(0).equals("facebook.com")) {
+                    LoginManager.getInstance().logOut();
+                    signOut();
+                } else if (mUser.getProviders().get(0).equals("password")) {
+                    signOut();
+                }
+            }
+        }else{
+            showLoginDialog();
+        }
+    }
+
+    @Click(R.id.buttonAuthorization)
+    void buttonAuthorizationWasClicked() {
 	    if (isOnline()) {
 		    signOut();
 		    showableLogInGroup(true);
@@ -1380,14 +1457,6 @@ public class StartActivity extends AppCompatActivity implements
 	    }
     }
 
-    @Click(R.id.buttonGoogleLogout)
-    void buttonGoogleLogout() {
-	    if(isOnline()) {
-		    googleSignOut();
-	    }else{
-		    showLoginDialog();
-	    }
-    }
 
     @Click(R.id.buttonFavorites)
     void buttonFavoritesPlaces() {
@@ -1442,9 +1511,9 @@ public void buttonMapOfflineWasClicked(){
 
         // Reset the region selected int to 0
         mRegionSelected = 0;
-
         // Query the DB asynchronously
-        offlineManager.listOfflineRegions(new OfflineManager.ListOfflineRegionsCallback() {
+        Mapbox.getInstance(this, getString(R.string.access_token));
+        OfflineManager.getInstance(StartActivity.this).listOfflineRegions(new OfflineManager.ListOfflineRegionsCallback() {
             @Override
             public void onList(final OfflineRegion[] offlineRegions) {
                 // Check result. If no regions have been

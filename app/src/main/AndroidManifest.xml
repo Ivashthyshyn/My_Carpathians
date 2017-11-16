@@ -47,7 +47,7 @@
             android:name=".activities.MapsActivity_"
             android:label="@string/title_activity_maps"
             android:theme="@style/AppTheme"
-            android:parentActivityName=".activities.ActionActivity_"/>
+            android:parentActivityName=".activities.StartActivity_"/>
 
         <activity
             android:name=".activities.ActionActivity_"
@@ -56,10 +56,6 @@
             android:parentActivityName=".activities.ActionActivity_"/>
         <activity
             android:name=".activities.SettingsActivity_"
-            android:label="@string/title_activity_login"
-            android:theme="@style/AppTheme"/>
-        <activity
-            android:name=".activities.SignupActivity_"
             android:label="@string/title_activity_login"
             android:theme="@style/AppTheme"/>
         <activity
