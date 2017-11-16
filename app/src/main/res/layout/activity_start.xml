@@ -261,7 +261,7 @@
                         android:background="@color/colorAccent"
                         android:text="@string/btn_login"
                         android:textColor="@android:color/black"
-                        android:visibility="visible"/>
+                        android:visibility="gone"/>
 
                     <Button
                         android:id="@+id/buttonResetPassword"
@@ -275,7 +275,7 @@
                         android:text="@string/btn_forgot_password"
                         android:textAllCaps="false"
                         android:textColor="@color/colorAccent"
-                        android:visibility="visible"/>
+                        android:visibility="gone"/>
 
                     <Button
                         android:id="@+id/buttonAuthorization"
@@ -285,7 +285,7 @@
                         android:layout_marginRight="4dp"
                         android:background="@color/colorAccent"
                         android:text="Authorization"
-                        android:visibility="visible"/>
+                        android:visibility="gone"/>
 
                 </LinearLayout>
 
@@ -384,18 +384,28 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            android:padding="10dp">
 
-                            <Button
-                                android:id="@+id/buttonSettungs"
+                            <ImageView
+                                android:id="@+id/imageView8"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                app:srcCompat="@drawable/ic_map24px"/>
+
+                            <TextView
+                                android:id="@+id/buttonSettings"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:layout_weight="1"
                                 android:background="@null"
                                 android:gravity="left|center_vertical"
-                                android:paddingStart="15dp"
+                                android:paddingLeft="10dp"
                                 android:text="Settings"
-                                android:textColor="@color/white"/>
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
                         </LinearLayout>
 
                     </LinearLayout>
