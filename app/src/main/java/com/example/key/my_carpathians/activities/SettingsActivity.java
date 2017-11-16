@@ -109,15 +109,6 @@ public class SettingsActivity extends AppCompatActivity {
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()) {
-                                                Toast.makeText(SettingsActivity.this, "Your profile is deleted:( Create a account now!", Toast.LENGTH_SHORT).show();
-                                                startActivity(new Intent(SettingsActivity.this, SignupActivity.class));
-                                                finish();
-                                                progressBar.setVisibility(View.GONE);
-                                            } else {
-                                                Toast.makeText(SettingsActivity.this, "Failed to delete your account!", Toast.LENGTH_SHORT).show();
-                                                progressBar.setVisibility(View.GONE);
-                                            }
                                         }
                                     });
                             signOut();

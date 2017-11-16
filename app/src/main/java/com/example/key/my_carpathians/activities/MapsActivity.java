@@ -617,7 +617,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     @Override
-    public void onMapReady(MapboxMap mapboxMap) {
+    public void onMapReady(final MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
         mPoint = new LatLng();
         mapboxMap.getUiSettings().setCompassGravity(Gravity.BOTTOM);
@@ -645,7 +645,47 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
         if (mOfflineRegionName != null){
-            // todo
+            offlineManager.listOfflineRegions(new OfflineManager.ListOfflineRegionsCallback() {
+                @Override
+                public void onList(final OfflineRegion[] offlineRegions) {
+                    // Check result. If no regions have been
+                    // downloaded yet, notify user and return
+                    if (offlineRegions == null || offlineRegions.length == 0) {
+                        Toast.makeText(getApplicationContext(), getString(R.string.toast_no_regions_yet), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Add all of the region names to a list
+
+                    for (OfflineRegion offlineRegion : offlineRegions) {
+                        if (mOfflineRegionName.equals(getRegionName(offlineRegion))){
+                            // Get the region bounds and zoom
+                            LatLngBounds bounds = ((OfflineTilePyramidRegionDefinition)
+                                    offlineRegion.getDefinition()).getBounds();
+                            double regionZoom = ((OfflineTilePyramidRegionDefinition)
+                                    offlineRegion.getDefinition()).getMinZoom();
+
+                            // Create new camera position
+                            CameraPosition cameraPosition = new CameraPosition.Builder()
+                                    .target(bounds.getCenter())
+                                    .zoom(regionZoom)
+                                    .build();
+
+                            enabledPerimeterOfflineRegion(bounds);
+
+                            // Move camera to new position
+                            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                            Toast.makeText(MapsActivity.this, mOfflineRegionName, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Error: " + error);
+                }
+            });
         }
         if (mTypeMode) {
             mPoint.setLatitude(48.635022);
