@@ -59,8 +59,12 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 	public void setList(List<Place> placeList, int mode){
 		this.places = placeList;
         this.mMode = mode;
+        notifyDataSetChanged();
 	}
-
+	public void setFilter(List<Place> placeList){
+		this.places = placeList;
+		notifyDataSetChanged();
+	}
 
 
 	public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
@@ -226,7 +230,8 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 		CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
 		communicatorStartActivity.deletedFromCreatedList(deletedPlace, PLACE);
 		Toast.makeText(context, selected.size() + " item deleted.", Toast.LENGTH_SHORT).show();//Show Toast
-		mActionMode.finish();//Finish action mode after use
+		mActionMode.finish();
+		setNullToActionMode();//Finish action mode after use
 
 	}
 	//Delete selected rows

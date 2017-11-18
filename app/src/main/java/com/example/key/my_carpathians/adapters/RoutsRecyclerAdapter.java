@@ -28,7 +28,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.key.my_carpathians.activities.StartActivity.PLACE;
+import static com.example.key.my_carpathians.activities.StartActivity.ROUT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.HARD;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.LIGHT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
@@ -54,6 +54,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 	public void setList(List<Rout> routList, int mode){
 		this.routs = routList;
         this.mMode = mode;
+        notifyDataSetChanged();
 	}
 
     @Override
@@ -77,10 +78,6 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             public void onLongPressed(int position, Rout mRout, View view) {
                 if (mMode > 1  && mActionMode == null){
                     onListItemSelect(position);
-                    /**
-                    CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
-                    communicatorStartActivity.deletedFromFavoriteList(mRout.getNameRout(), ROUT);
-*/
                 }
             }
 
@@ -227,7 +224,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             }
         }
         CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
-        communicatorStartActivity.deletedFromCreatedList(deletedRouts, PLACE);
+        communicatorStartActivity.deletedFromCreatedList(deletedRouts, ROUT);
         Toast.makeText(context, selected.size() + " item deleted.", Toast.LENGTH_SHORT).show();//Show Toast
         mActionMode.finish();//Finish action mode after use
 
@@ -246,7 +243,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             }
         }
         CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
-        communicatorStartActivity.deletedFromFavoriteList(deletedRouts, PLACE);
+        communicatorStartActivity.deletedFromFavoriteList(deletedRouts, ROUT);
         Toast.makeText(context, selected.size() + " item deleted.", Toast.LENGTH_SHORT).show();//Show Toast
         mActionMode.finish();//Finish action mode after use
 

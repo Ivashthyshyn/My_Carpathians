@@ -18,6 +18,7 @@ import com.example.key.my_carpathians.models.Rout;
 
 import org.androidannotations.annotations.EFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @EFragment
@@ -29,20 +30,35 @@ public class RoutsListFragment extends Fragment {
     private int mMode;
     CardView emptyView;
     private ActionMode mActionMode;
+    private List<Rout> mSearchList;
+    private View fragmentView;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
 
     @Nullable
         @Override
         public View onCreateView (LayoutInflater inflater, @Nullable ViewGroup container, Bundle
         savedInstanceState){
-        View fragment = inflater.inflate(R.layout.fragment_routs_list, container, false);
-        emptyView = (CardView)fragment.findViewById(R.id.emptyViewForRout);
-        recyclerView = (RecyclerView) fragment.findViewById(R.id.recyclerViewForRout);
+        fragmentView = inflater.inflate(R.layout.fragment_routs_list, container, false);
+        emptyView = (CardView)fragmentView.findViewById(R.id.emptyViewForRout);
+        recyclerView = (RecyclerView) fragmentView.findViewById(R.id.recyclerViewForRout);
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         Log.d("debugMode", "The application stopped after this");
         recyclerView.setLayoutManager(mLayoutManager);
-         recyclerAdapter = new RoutsRecyclerAdapter(mRoutsList, mMode);
-        recyclerView.setAdapter(recyclerAdapter);
-        return fragment;
+        createList();
+        return fragmentView;
+    }
+
+    private void createList() {
+        if (mRoutsList != null && mRoutsList.size() > 0) {
+            recyclerAdapter = new RoutsRecyclerAdapter(mRoutsList, mMode);
+            recyclerView.setAdapter(recyclerAdapter);
+
+        }
     }
 
     public void setList(List<Rout> routList, int mode) {
@@ -50,21 +66,38 @@ public class RoutsListFragment extends Fragment {
         this.mMode = mode;
         if (recyclerAdapter != null & routList != null){
             recyclerAdapter.setList(routList, mode);
-            recyclerAdapter.notifyDataSetChanged();
+            recyclerView.removeAllViews();
             if (routList.size() == 0){
                 emptyView.setVisibility(View.VISIBLE);
             }else{
                 emptyView.setVisibility(View.GONE);
             }
+        }else if(fragmentView != null){
+            createList();
         }
     }
 
 
     public void dismissActionMode() {
 
-        if (recyclerAdapter.ismMode()) {
+        if (recyclerAdapter != null && recyclerAdapter.ismMode()) {
             recyclerAdapter.removeSelection();
             recyclerAdapter.setNullToActionMode();
         }
+    }
+    public void filter(String query) {
+            if (query != null && !query.equals("")) {
+                query = query.toLowerCase();
+                mSearchList = new ArrayList<>();
+                for (Rout rout : mRoutsList) {
+                    final String text = rout.getNameRout().toLowerCase();
+                    if (text.contains(query)) {
+                        mSearchList.add(rout);
+                    }
+                }
+                recyclerAdapter.setList(mSearchList, mMode);
+            }else {
+                recyclerAdapter.setList(mRoutsList, mMode);
+            }
     }
 }
