@@ -19,11 +19,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -219,6 +221,7 @@ public class StartActivity extends AppCompatActivity implements
     Button buttonAuthorization;
 	ViewPagerAdapter adapter;
     private LoginManager facebookLoginManager;
+    private String mQuery;
 
 
     @Override
@@ -236,14 +239,23 @@ public class StartActivity extends AppCompatActivity implements
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout){
             @Override
             public void onPageScrollStateChanged(int state) {
-                if (state == PLACE){
-                    RoutsListFragment placesListFragment = (RoutsListFragment) adapter.getItem(ROUT);
-                    placesListFragment.dismissActionMode();
+
+                if (state == PLACE ){
+                    RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(ROUT);
+                    routsListFragment.dismissActionMode();
                 }else if(state == ROUT){
                     PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(PLACE);
                     placesListFragment.dismissActionMode();
                 }
-
+                if (mQuery != null) {
+                    if (tabLayout.getTabCount() != 0 && state == PLACE) {
+                        PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(PLACE);
+                        placesListFragment.filter(mQuery);
+                    } else if (tabLayout.getTabCount() != 0 && state == ROUT) {
+                        RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(ROUT);
+                        routsListFragment.filter(mQuery);
+                    }
+                }
             }
         });
 
@@ -422,15 +434,48 @@ public class StartActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem item = menu.findItem(R.id.actionSearch);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+               mQuery = newText;
+                 if (tabLayout.getTabCount() > 0 && tabLayout.getSelectedTabPosition() == PLACE) {
+               PlacesListFragment placesListFragment = (PlacesListFragment)adapter.getItem(tabLayout.getSelectedTabPosition());
+               placesListFragment.filter(newText);
+               }else if( tabLayout.getTabCount() > 0 && tabLayout.getSelectedTabPosition() == ROUT) {
+               RoutsListFragment routsListFragment = (RoutsListFragment)adapter.getItem(tabLayout.getSelectedTabPosition());
+               routsListFragment.filter(newText);
+               }
+
+                return true;
+            }
+        });
+        MenuItemCompat.setOnActionExpandListener(item, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                if (tabLayout.getTabCount() == 2) {
+                    PlacesListFragment placesListFragment = (PlacesListFragment)adapter.getItem(PLACE);
+                    placesListFragment.filter(null);
+                    RoutsListFragment routsListFragment = (RoutsListFragment)adapter.getItem(ROUT);
+                    routsListFragment.filter(null);
+                    mQuery = null;
+                }
+                return true;
+            }
+        });
         return true;
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-                return super.onOptionsItemSelected(item);
-
-    }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -1459,7 +1504,7 @@ public class StartActivity extends AppCompatActivity implements
 
 
     @Click(R.id.buttonFavorites)
-    void buttonFavoritesPlaces() {
+    void buttonFavoritesWasClicked() {
         mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         Set<String> favoritesPlacesList = mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, null);
         Set<String> favoritesRoutsList = mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, null);
@@ -1484,7 +1529,7 @@ public class StartActivity extends AppCompatActivity implements
 
 
     @Click(R.id.buttonCreated)
-    void buttonCreatedPlaces() {
+    void buttonMyCreated() {
         mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         Set<String> createdByUserPlaceList = mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, null);
         mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);

@@ -73,13 +73,13 @@ public class ToolbarActionModeCallback implements ActionMode.Callback {
 
 				//Check if current action mode is from ListView Fragment or RecyclerView Fragment
 				 if (mType == MY_PLACE){
-					placesRecyclerAdapter.deletePlaceFromFavorit();//delete selected rows
+					placesRecyclerAdapter.deletePlaceFromCreated();//delete selected rows
 				}else if (mType == MY_ROUT){
-					routsRecyclerAdapter.deleteRoutFromFavorit();//delete selected rows
+					routsRecyclerAdapter.deleteRoutFromCreated();//delete selected rows
 				}else if (mType == FA_PLACE){
-					 placesRecyclerAdapter.deletePlaceFromCreated();
+					 placesRecyclerAdapter.deletePlaceFromFavorit();
 				}else if (mType == FA_ROUT){
-					 routsRecyclerAdapter.deleteRoutFromCreated();
+					 routsRecyclerAdapter.deleteRoutFromFavorit();
 				}
 				break;
 		}
@@ -92,12 +92,13 @@ public class ToolbarActionModeCallback implements ActionMode.Callback {
 
 		//When action mode destroyed remove selected selections and set action mode to null
 		//First check current fragment action mode
-		if (mType == PLACE) {
+		if (mType == PLACE | mType == FA_PLACE | mType == MY_PLACE) {
 			placesRecyclerAdapter.removeSelection();  // remove selection
 			placesRecyclerAdapter.setNullToActionMode();//Set action mode null
-		} else if(mType == ROUT) {
+		} else if(mType == ROUT | mType == FA_ROUT | mType == MY_ROUT) {
 			routsRecyclerAdapter.removeSelection();  // remove selection
 			routsRecyclerAdapter.setNullToActionMode();//Set action mode null
+
 		}
 	}
 
