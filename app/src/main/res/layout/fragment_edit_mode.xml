@@ -11,6 +11,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
         android:background="?android:attr/colorBackground"
         android:orientation="vertical">
 
@@ -298,6 +299,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:background="@color/background"
+                    android:gravity="center"
                     android:paddingLeft="5dp"
                     android:text="Name"
                     android:textColor="@color/colorAccent"
@@ -324,6 +326,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:background="@color/background"
+                    android:gravity="center"
                     android:paddingLeft="5dp"
                     android:text="interesting facts"
                     android:textColor="@color/colorAccent"
@@ -379,17 +382,6 @@
         android:clickable="true"
         android:src="@drawable/com_facebook_button_like_icon_selected"
         app:elevation="2dp"
-        app:fabSize="mini"/>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/buttonDeleteObject"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:layout_margin="10dp"
-        android:clickable="true"
-        app:elevation="2dp"
-        app:fabSize="mini"
-        app:srcCompat="@android:drawable/ic_delete"/>
+        app:fabSize="normal"/>
 
 </android.support.design.widget.CoordinatorLayout>

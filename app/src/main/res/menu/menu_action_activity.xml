@@ -27,4 +27,10 @@
         android:icon="@drawable/upload"
         android:title="publish"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/action_del_created_object"
+        android:icon="@drawable/ic_delete_white_24px"
+        android:title="Delete"
+        android:visible="false"
+        app:showAsAction="never|always"/>
 </menu>

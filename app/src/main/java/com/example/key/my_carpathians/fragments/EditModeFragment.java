@@ -112,8 +112,6 @@ public class EditModeFragment extends DialogFragment {
 	@ViewById(R.id.buttonSaveData)
 	FloatingActionButton buttonSaveData;
 
-	@ViewById(R.id.buttonDeleteObject)
-	FloatingActionButton buttonDeleteObject;
 	@ViewById(R.id.cropImage)
 	CropImageView cropImageView;
 
@@ -185,7 +183,6 @@ public class EditModeFragment extends DialogFragment {
 
 	@AfterViews
 	void afterView(){
-
 		sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		mRootPathString = sharedPreferences.getString(ROOT_PATH, null);
 			if(mPlace != null){
@@ -258,7 +255,6 @@ public class EditModeFragment extends DialogFragment {
 				progressView.setVisibility(View.INVISIBLE);
 				cropToolsFrame.setVisibility(View.GONE);
 				buttonSaveData.setVisibility(View.VISIBLE);
-				buttonDeleteObject.setVisibility(View.VISIBLE);
 				editGroup.setVisibility(View.VISIBLE);
 				groupMorePhoto.setVisibility(View.VISIBLE);
 
@@ -437,7 +433,7 @@ public class EditModeFragment extends DialogFragment {
 		imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 			 if (editTextName.getText().toString().isEmpty()) {
 				Toast.makeText(getContext(), "Будь ласка вкажіть назву, це поле є обов'зковим для введення", Toast.LENGTH_SHORT).show();
-			} else if (editTextTitle.getText().toString() == null) {
+			} else if (editTextTitle.getText().toString().isEmpty()) {
 				Toast.makeText(getContext(), "Будь ласка коротко опишіть обєкт, це поле є обов'зковим для введення", Toast.LENGTH_SHORT).show();
 			} else if (routsLevel == 0 && mRout != null) {
 				Toast.makeText(getContext(), "Складність є важливим критерієм для вашого обєкта, визначте його", Toast.LENGTH_SHORT).show();
@@ -527,7 +523,6 @@ public class EditModeFragment extends DialogFragment {
 				editGroup.setVisibility(View.GONE);
 				cropToolsFrame.setVisibility(View.VISIBLE);
 				buttonSaveData.setVisibility(View.GONE);
-				buttonDeleteObject.setVisibility(View.GONE);
 				cropImageView.setImageUriAsync(selectedImage);
 				progressViewText.setText("Loading...");
 				progressView.setVisibility(View.VISIBLE);
@@ -540,7 +535,6 @@ public class EditModeFragment extends DialogFragment {
 		cropImageView.clearImage();
 		cropToolsFrame.setVisibility(View.GONE);
 		buttonSaveData.setVisibility(View.VISIBLE);
-		buttonDeleteObject.setVisibility(View.VISIBLE);
 		groupMorePhoto.setVisibility(View.VISIBLE);
 		editGroup.setVisibility(View.VISIBLE);
 	}
@@ -606,8 +600,8 @@ public class EditModeFragment extends DialogFragment {
 			searchPhotoInGallery();
 		}
 	}
-	@Click(R.id.buttonDeleteObject)
-	public void fabDeleteCreatedObject(){
+
+	public void deleteCreatedObject(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 		builder.setTitle("Deleting!");
 		if (mRout != null){
@@ -648,4 +642,5 @@ public class EditModeFragment extends DialogFragment {
 		AlertDialog alertDialog = builder.create();
 		alertDialog.show();
 	}
+
 }
