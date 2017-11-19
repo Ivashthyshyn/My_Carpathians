@@ -10,8 +10,8 @@
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         app:cardBackgroundColor="@color/input_login_hint"
         app:cardCornerRadius="5dp"
         app:cardElevation="3dp"
@@ -93,7 +93,7 @@
                 android:layout_height="4dp"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:background="@color/colorGreenPrimary"/>
+                android:background="@color/lbl_name"/>
         </LinearLayout>
 
     </android.support.v7.widget.CardView>

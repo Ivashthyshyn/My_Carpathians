@@ -165,7 +165,7 @@
                         android:layout_alignBottom="@+id/userAcountImage"
                         android:layout_alignLeft="@+id/googleLoginButton"
                         android:layout_alignStart="@+id/googleLoginButton"
-                        android:background="@drawable/ic_acebook"
+                        android:background="@drawable/ic_facebook"
                         android:visibility="invisible"/>
 
                     <Button

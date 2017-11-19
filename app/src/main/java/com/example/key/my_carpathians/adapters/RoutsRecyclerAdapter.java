@@ -95,13 +95,13 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         ratingRout(holder.mRout.getNameRout(), holder.ratingBar);
         switch (holder.mRout.getRoutsLevel()) {
             case LIGHT:
-                holder.buttonTypeAndLevel.setBackgroundResource(R.color.colorGreenPrimary);
+                holder.buttonTypeAndLevel.setBackgroundResource(R.color.lbl_name);
                 return;
             case MEDIUM:
-                holder.buttonTypeAndLevel.setBackgroundResource(R.color.colorYellowPrimary);
+                holder.buttonTypeAndLevel.setBackgroundResource(R.color.btn_login);
                 return;
             case HARD:
-                holder.buttonTypeAndLevel.setBackgroundResource(R.color.colorRedPrimary);
+                holder.buttonTypeAndLevel.setBackgroundResource(R.color.btn_logut_bg);
         }
         holder.itemView
                 .setBackgroundColor(mSelectedItemsIds.get(position) ? 0x9934B5E4

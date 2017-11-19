@@ -66,13 +66,13 @@ public class InfoFragment extends Fragment {
 			titleText.setText(place.getTitlePlace());
 		}else if(rout != null){
 			textViewNameObject.setText(rout.getNameRout());
-			textDifficultyValue.setText(dificultyLevel(rout.getRoutsLevel()));
+			textDifficultyValue.setText(difficultyLevel(rout.getRoutsLevel()));
 			textRoutLength.setText(rout.getLengthRout() + "km");
 			titleText.setText(rout.getTitleRout());
 		}
 	}
 
-	private String dificultyLevel(int routsLevel) {
+	private String difficultyLevel(int routsLevel) {
 		switch (routsLevel){
 			case LIGHT:
 				return "Light";
