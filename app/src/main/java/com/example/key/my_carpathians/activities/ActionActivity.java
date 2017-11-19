@@ -869,7 +869,7 @@ public void ratingBarDialog(){
 		View linearLayout = getLayoutInflater().inflate(R.layout.ratingdialog, null);
 		ratingDialog.setView(linearLayout);
 
-		final RatingBar rating = (RatingBar)linearLayout.findViewById(R.id.ratingbar);
+		final RatingBar rating = (RatingBar)linearLayout.findViewById(R.id.ratingbar2);
 
 		ratingDialog.setPositiveButton("ОК",
 				new DialogInterface.OnClickListener() {

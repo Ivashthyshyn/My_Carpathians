@@ -31,16 +31,16 @@
                 android:background="?attr/colorPrimaryDark"
                 android:elevation="3dp"
                 android:orientation="horizontal"
-                android:visibility="visible">
+                >
 
                 <ImageButton
                     android:id="@+id/buttonBakCrop"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:src="@drawable/ic_arrow_back_black_24dp"/>
+                    android:src="@drawable/ic_left_arrow"/>
 
                 <ImageButton
                     android:id="@+id/buttonRotationCrop"
@@ -55,11 +55,11 @@
                 <ImageButton
                     android:id="@+id/buttonCrop"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:src="@drawable/ic_done_black_24dp"
+                    android:src="@drawable/ic_done_white_24px"
                     android:text="обрізати"/>
             </LinearLayout>
 
@@ -155,7 +155,9 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_margin="10dp"
-                                android:text="Title Photo"/>
+                                android:text="Title Photo"
+                                android:textSize="18sp"
+                                android:textStyle="bold|italic"/>
 
                             <ImageButton
                                 android:id="@+id/buttonAddPhoto"
@@ -248,7 +250,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="1dp"
-                    android:background="@color/background"
+                    android:background="?attr/colorButtonNormal"
                     android:gravity="center"
                     android:orientation="horizontal"
                     >
@@ -261,7 +263,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="Difficulty"
-                        android:textColor="@color/colorAccent"
+                        android:textColor="@color/white"
                         android:textSize="18sp"/>
 
                     <RadioButton
@@ -272,7 +274,8 @@
                         android:layout_weight="1"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp"
-                        android:text="light"/>
+                        android:text="light"
+                        android:layout_marginLeft="20dp"/>
 
                     <RadioButton
                         android:id="@+id/radioButtonMedium"
@@ -298,11 +301,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:background="@color/background"
+                    android:background="?attr/colorButtonNormal"
                     android:gravity="center"
                     android:paddingLeft="5dp"
-                    android:text="Name"
-                    android:textColor="@color/colorAccent"
+                    android:text="NAME"
+                    android:textColor="@color/white"
                     android:textSize="18sp"/>
 
                 <android.support.design.widget.TextInputLayout
@@ -317,7 +320,7 @@
                         android:id="@+id/editTextName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        />
+                        android:textColorLink="@android:color/black"/>
                 </android.support.design.widget.TextInputLayout>
 
                 <TextView
@@ -325,11 +328,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:background="@color/background"
+                    android:background="?attr/colorButtonNormal"
                     android:gravity="center"
                     android:paddingLeft="5dp"
-                    android:text="interesting facts"
-                    android:textColor="@color/colorAccent"
+                    android:text="INTERESTINGS FACTS"
+                    android:textColor="@color/white"
                     android:textSize="18sp"/>
 
                 <android.support.design.widget.TextInputLayout
@@ -354,7 +357,8 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:paddingLeft="5dp"
-                                android:paddingRight="5dp"/>
+                                android:paddingRight="5dp"
+                                android:textColorLink="@android:color/black"/>
                         </LinearLayout>
                     </ScrollView>
 

@@ -30,7 +30,7 @@ public class AltitudeFinder {
 
 	private static final String LOG_TAG = AltitudeFinder.class.getSimpleName();
 	private static final String USGS_REQUEST_URL = "https://maps.googleapis.com/maps/api/elevation/json?locations=";
-	private static final String YOUR_API_KEY = "&key=AIzaSyD2BCy-prEsCoH9NOe2wnmNDKKBnSMe3do";
+	private static final String YOUR_API_KEY = "&key=AIzaSyCW-3Yyo8aeNIj-Bj9LK-Z1g97MYf9lWlg";
 	public static final int cTimeOutMs = 30 * 1000;
 	public AltitudeFinder(){
 
@@ -59,7 +59,7 @@ public class AltitudeFinder {
 	 */
 	private static URL createUrl(List<Position> positions) {
 		URL url = null;
-		String valueLocation = "https://maps.googleapis.com/maps/api/elevation/json?locations=";
+		String valueLocation = USGS_REQUEST_URL;
 		for (int i = 0 ; i < positions.size() - 1; i++){
 			valueLocation = valueLocation + String.valueOf(positions.get(i).getLatitude()) + "," +
 					String.valueOf(positions.get(i).getLongitude()) +"|";
@@ -70,7 +70,7 @@ public class AltitudeFinder {
 			url = new URL(valueLocation +
 					String.valueOf(positions.get(positions.size() - 1).getLatitude()) + "," +
 					String.valueOf(positions.get(positions.size() - 1).getLongitude()) +
-					"&key=AIzaSyCW-3Yyo8aeNIj-Bj9LK-Z1g97MYf9lWlg");
+					YOUR_API_KEY);
 		} catch (MalformedURLException e) {
 			Log.e(LOG_TAG, "Error with creating URL ", e);
 		}

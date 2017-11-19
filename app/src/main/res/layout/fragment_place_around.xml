@@ -13,11 +13,12 @@
         android:layout_height="wrap_content"
         android:background="@color/input_register_bg"
         android:gravity="center"
-        android:padding="2dp"
-        android:text="Add to map"/>
+        android:padding="3dp"
+        android:text="Add to map"
+        android:textColor="@color/white"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerViewPlaceAround"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="match_parent"/>
 </LinearLayout>

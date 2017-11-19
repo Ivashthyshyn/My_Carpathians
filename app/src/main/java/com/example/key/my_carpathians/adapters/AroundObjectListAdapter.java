@@ -14,6 +14,12 @@ import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -30,9 +36,9 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 	}
 
 	static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-		 CheckBox checkBox;
-		 TextView textNameRout;
-		 RatingBar ratingBar;
+		CheckBox checkBox;
+		TextView textNameRout;
+		RatingBar ratingBar;
 		TextView textLengthTrack;
 		Button buttonTypeAndLevel;
 		private Rout mRout;
@@ -49,7 +55,7 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 			textNameRout = (TextView) itemView.findViewById(R.id.textNameRout);
 			textNameRout.setVisibility(View.GONE);
 			textLengthTrack = (TextView)itemView.findViewById(R.id.textLenghtTrack);
-			ratingBar = (RatingBar) itemView.findViewById(R.id.ratingBar);
+			ratingBar = (RatingBar) itemView.findViewById(R.id.ratingBarSmall);
 			buttonTypeAndLevel =  (Button)itemView.findViewById(R.id.buttonTypeAndLevel);
 			mRout = null;
 			mPlace = null;
@@ -92,14 +98,78 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 			holder.mRout = routs.get(position);
 			holder.checkBox.setText(holder.mRout.getNameRout());
 			holder.textLengthTrack.setText(holder.mRout.getLengthRout() + "km");
+			ratingRout(holder.mRout.getNameRout(), holder.ratingBar);
 
 		}else if (places != null){
 			holder.mPlace = places.get(position);
 			holder.checkBox.setText(holder.mPlace.getNamePlace());
 			holder.textLengthTrack.setVisibility(View.GONE);
 			holder.buttonTypeAndLevel.setVisibility(View.GONE);
-
+			ratingPlace(holder.mPlace.getNamePlace(), holder.ratingBar);
 		}
+	}
+	private void ratingPlace(String namePlace, final RatingBar ratingBar) {
+		FirebaseDatabase database = FirebaseDatabase.getInstance();
+		DatabaseReference myRef = database.getReference();
+		Query myPlace = myRef.child("Rating").child(namePlace);
+
+		myPlace.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(DataSnapshot dataSnapshot) {
+				int counter = 0;
+				float sum = 0;
+				for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+					counter++;
+					float value = postSnapshot.getValue(float.class);
+					sum = sum + value;
+
+				}
+				if (sum > 0) {
+					float averageValue = sum / counter;
+					ratingBar.setRating(averageValue);
+				}else {
+					ratingBar.setRating(0);
+				}
+
+			}
+
+			@Override
+			public void onCancelled(DatabaseError databaseError) {
+				ratingBar.setRating(0);
+			}
+		});
+	}
+	private void ratingRout(String nameRout, final RatingBar ratingBar) {
+		FirebaseDatabase database = FirebaseDatabase.getInstance();
+		DatabaseReference myRef = database.getReference();
+		Query myPlace = myRef.child("Rating").child(nameRout);
+
+		myPlace.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(DataSnapshot dataSnapshot) {
+				int counter = 0;
+				float sum = 0;
+				for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+					counter++;
+					float value = postSnapshot.getValue(float.class);
+					sum = sum + value;
+
+				}
+				if (sum != 0) {
+					float averageValue = sum / counter;
+					ratingBar.setRating(averageValue);
+				}else {
+					ratingBar.setRating(0);
+				}
+
+			}
+
+			@Override
+			public void onCancelled(DatabaseError databaseError) {
+				ratingBar.setRating(0);
+			}
+		});
+
 	}
 
 	@Override
