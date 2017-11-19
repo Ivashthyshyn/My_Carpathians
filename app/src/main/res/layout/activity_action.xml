@@ -170,6 +170,6 @@
         android:scrollbarAlwaysDrawHorizontalTrack="false"
         android:src="@drawable/ic_map24px"
         app:elevation="0dp"
-        app:fabSize="mini"/>
+        app:fabSize="normal"/>
 
 </android.support.design.widget.CoordinatorLayout>

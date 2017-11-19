@@ -19,6 +19,7 @@ import android.support.v4.util.ArraySet;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -46,6 +47,7 @@ import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.example.key.my_carpathians.utils.AltitudeFinder;
+import com.example.key.my_carpathians.utils.EditObjectActionModeCallback;
 import com.example.key.my_carpathians.utils.ObjectService;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -159,6 +161,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	ViewPager viewPager;
 	String mRootPathString;
 	private Menu menu;
+	private ActionMode mActionMode;
 
 
 	@Override
@@ -816,9 +819,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	    myPlace = place;
 	    photoUrlList.clear();
         setBaseInformation(place, rout);
-	    if(editFragment !=  null){
-		    editFragment.dismiss();
-	    }
+	   mActionMode.finish();
     }
 
     @Override
@@ -993,12 +994,9 @@ public void ratingBarDialog(){
 
 	private void editCreatedObject() {
 		FragmentManager fm = getSupportFragmentManager();
-		android.support.v4.app.FragmentTransaction fragmentTransaction = fm
-				.beginTransaction();
 		editFragment = new EditModeFragment_();
-		fragmentTransaction.add(R.id.actionActivityContainer, editFragment);
 		editFragment.setData(myRout, myPlace, mRootPathString);
-		fragmentTransaction.commit();
+		mActionMode = ((AppCompatActivity) this).startSupportActionMode(new EditObjectActionModeCallback(this, editFragment, fm));
 
 	}
 }
