@@ -161,7 +161,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 						.load(root.buildUpon().appendPath("Photos").appendPath(holder.mPlace.getNamePlace()).build())
 						.into(holder.placeImage);
 			}
-	    /** Change background color of the selected items in list view  **/
+	    /** Change background_image color of the selected items in list view  **/
 	    holder.itemView
 			    .setBackgroundColor(mSelectedItemsIds.get(position) ? 0x9934B5E4
 					    : Color.TRANSPARENT);

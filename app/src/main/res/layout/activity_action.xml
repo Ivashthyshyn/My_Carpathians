@@ -7,10 +7,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/imageView10"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/wallpaper"/>
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="300dp"
+        android:background="@android:color/transparent"
         android:fitsSystemWindows="true">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -26,6 +34,7 @@
                 android:id="@+id/cardView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@android:color/transparent"
                 android:elevation="0dp"
                 android:visibility="visible">
 

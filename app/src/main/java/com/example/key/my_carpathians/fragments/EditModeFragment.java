@@ -190,7 +190,7 @@ public class EditModeFragment extends DialogFragment {
 				uriTitlePhoto = mPlace.getUrlPlace();
 				editTextName.setText(name);
 				if (uriTitlePhoto != null){
-					buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
+					buttonAddPhoto.setBackgroundResource(R.drawable.ic_refresh_48px);
 				}
 
 				radioGroup.setVisibility(View.GONE);
@@ -205,7 +205,7 @@ public class EditModeFragment extends DialogFragment {
 				editTextName.setText(name);
 				uriTitlePhoto = mRout.getUrlRout();
 				if (uriTitlePhoto != null){
-					buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
+					buttonAddPhoto.setBackgroundResource(R.drawable.ic_refresh_48px);
 				}
 
 
@@ -270,7 +270,7 @@ public class EditModeFragment extends DialogFragment {
 								.with(getContext())
 								.load(uriTitlePhoto)
 								.into(imageTitlePhoto);
-						buttonAddPhoto.setBackgroundResource(R.drawable.ic_exchange);
+						buttonAddPhoto.setBackgroundResource(R.drawable.ic_refresh_48px);
 						break;
 					case MORE_PHOTO_1:
 						uriPhoto1 = savePhoto(name + 1, cropImageView.getCroppedImage(), null);

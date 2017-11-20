@@ -12,10 +12,10 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
-        app:cardBackgroundColor="@color/input_login_hint"
+        app:cardBackgroundColor="@color/colorPrimaryDark"
         app:cardCornerRadius="5dp"
         app:cardElevation="3dp"
-        app:cardUseCompatPadding="true">
+        >
 
         <LinearLayout
             android:layout_width="match_parent"
