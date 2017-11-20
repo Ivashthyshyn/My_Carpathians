@@ -953,13 +953,13 @@ public class StartActivity extends AppCompatActivity implements
                 }
             }
                 if (favoriteP != null &&  tabLayout.getTabCount() > 0) {
-                    tabLayout.getTabAt(0).setIcon(R.drawable.ic_star_rate_black_18px);
+                    tabLayout.getTabAt(0).setIcon(R.drawable.ic_favorite_border_black_24px);
                     PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
                     placesListFragment.setList(favoriteP, FA_PLACE);
                 }
             }else{
                 if ( tabLayout.getTabCount() > 0) {
-                    tabLayout.getTabAt(0).setIcon(R.drawable.ic_star_rate_black_18px);
+                    tabLayout.getTabAt(0).setIcon(R.drawable.ic_favorite_border_black_24px);
                     PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
                     placesListFragment.setList(new ArrayList<Place>(), FA_PLACE);
                 }
@@ -984,13 +984,13 @@ public class StartActivity extends AppCompatActivity implements
 
                 }
                 if (favoriteR != null && tabLayout.getTabCount() > 1) {
-                    tabLayout.getTabAt(1).setIcon(R.drawable.ic_star_rate_black_18px);
+                    tabLayout.getTabAt(1).setIcon(R.drawable.ic_favorite_border_black_24px);
                     RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
                     routsListFragment.setList(favoriteR, FA_ROUT);
                 }
             } else {
                 if (tabLayout.getTabCount() > 1) {
-                    tabLayout.getTabAt(1).setIcon(R.drawable.ic_star_rate_black_18px);
+                    tabLayout.getTabAt(1).setIcon(R.drawable.ic_favorite_border_black_24px);
                     RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
                     routsListFragment.setList(new ArrayList<Rout>(), FA_ROUT);
                 }

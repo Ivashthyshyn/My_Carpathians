@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        android:background="?android:attr/colorPrimaryDark"
+        android:background="@color/colorPrimaryDark"
         android:orientation="vertical">
 
         <LinearLayout
@@ -143,19 +143,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@android:color/transparent"
+                        android:elevation="1dp"
                         android:orientation="horizontal">
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:background="@android:color/transparent">
+                            android:background="@android:color/transparent"
+                            android:elevation="5dp">
 
                             <TextView
                                 android:id="@+id/textView8"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_margin="10dp"
+                                android:elevation="3dp"
                                 android:text="Title Photo"
                                 android:textSize="18sp"
                                 android:textStyle="bold|italic"/>
