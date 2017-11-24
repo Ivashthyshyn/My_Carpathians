@@ -1,5 +1,6 @@
 package com.example.key.my_carpathians.fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,8 +22,11 @@ import org.androidannotations.annotations.EFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_OFFLINE_REGION;
-import static com.example.key.my_carpathians.activities.MapsActivity.PERIMETER_SIZE_TO_LONGITUDE;
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.key.my_carpathians.activities.MapsActivity.CONSTANT_PERIMETER_SIZE;
+import static com.example.key.my_carpathians.activities.SettingsActivity.AVERAGE_VALUE;
+import static com.example.key.my_carpathians.activities.SettingsActivity.VALUE_ROUT_AROUND_RADIUS;
+import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 
 @EFragment
 public class RoutsAroundFragment extends Fragment {
@@ -54,7 +58,8 @@ public class RoutsAroundFragment extends Fragment {
 
 	@AfterViews
 	public void afterView(){
-		if (routsAround.size() == 0){
+		searchRoutAround();
+		if (routsAround != null && routsAround.size() == 0){
 			textTitleRoutAround.setText("Немає жодного маршруту поруч");
 		}else {
 			AroundObjectListAdapter recyclerAdapter = new AroundObjectListAdapter(null, routsAround);
@@ -67,7 +72,7 @@ public class RoutsAroundFragment extends Fragment {
 		this.rout = rout;
 		this.routList = routList;
 		this.position = position;
-		searchRoutAround();
+
 	}
 
 	private void searchRoutAround() {
@@ -83,10 +88,13 @@ public class RoutsAroundFragment extends Fragment {
 			Rout mRout = routList.get(i);
 			double lat = mRout.getPositionRout().getLatitude();
 			double lng = mRout.getPositionRout().getLongitude();
-			if (position.getLongitude() + PERIMETER_SIZE_TO_LONGITUDE > lng
-					&& position.getLongitude() - PERIMETER_SIZE_TO_LONGITUDE < lng
-					&& position.getLatitude() + PERIMETER_SIZE_TO_OFFLINE_REGION > lat
-					&& position.getLatitude() - PERIMETER_SIZE_TO_OFFLINE_REGION < lat
+			SharedPreferences sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+			double perimeterValueForLongitude = CONSTANT_PERIMETER_SIZE *
+				sharedPreferences.getInt(VALUE_ROUT_AROUND_RADIUS, AVERAGE_VALUE);
+			if (position.getLongitude() + perimeterValueForLongitude > lng
+					&& position.getLongitude() - perimeterValueForLongitude < lng
+					&& position.getLatitude() + perimeterValueForLongitude > lat
+					&& position.getLatitude() - perimeterValueForLongitude < lat
 					&& !name.equals(mRout.getNameRout())) {
 				routsAround.add(mRout);
 				routsAroundName.add(mRout.getNameRout());

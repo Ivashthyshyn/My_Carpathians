@@ -10,4 +10,6 @@ import com.example.key.my_carpathians.models.Rout;
 public interface CommunicatorActionActivity {
 	void saveChanges(Rout rout, Place place);
 	void addToMap(Rout rout, Place place);
+	void autoOrientationOff(boolean checker);
+
 }

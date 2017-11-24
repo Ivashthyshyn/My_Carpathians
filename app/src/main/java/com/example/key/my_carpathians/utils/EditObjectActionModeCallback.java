@@ -9,6 +9,7 @@ import android.view.MenuItem;
 
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.fragments.EditModeFragment;
+import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 
 /**
  * Created by key on 18.11.17.
@@ -30,6 +31,8 @@ public class EditObjectActionModeCallback implements ActionMode.Callback{
 		mode.getMenuInflater().inflate(R.menu.menu_action_activity, menu);
 		mode.setTitle("Edit");
 		mode.setSubtitle("please fill in the form");
+		CommunicatorActionActivity communicatorMapActivity = (CommunicatorActionActivity) context;
+		communicatorMapActivity.autoOrientationOff(true);
 		return true;
 	}
 
@@ -58,6 +61,10 @@ public class EditObjectActionModeCallback implements ActionMode.Callback{
 
 	@Override
 	public void onDestroyActionMode(ActionMode mode) {
+		CommunicatorActionActivity communicatorMapActivity = (CommunicatorActionActivity) context;
+		communicatorMapActivity.autoOrientationOff(false);
 		fragment.dismiss();
 	}
+
+
 }

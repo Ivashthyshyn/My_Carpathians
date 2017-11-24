@@ -99,7 +99,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     implementation 'com.victor:lib:1.0.4'
     implementation 'com.makeramen:roundedimageview:2.3.0'
-
+    implementation 'com.shawnlin:number-picker:2.4.4'
     implementation 'com.android.support:mediarouter-v7:25.4.0'
 }
 
@@ -110,4 +110,7 @@ crashlytics {
     enableNdk true
     androidNdkOut 'src/main/obj'
     androidNdkLibsOut 'src/main/libs'
+}
+dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:+'
 }

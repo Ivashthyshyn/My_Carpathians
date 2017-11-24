@@ -95,6 +95,8 @@ import java.util.Random;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
+import static com.example.key.my_carpathians.activities.SettingsActivity.AVERAGE_VALUE;
+import static com.example.key.my_carpathians.activities.SettingsActivity.VALUE_OFFLINE_REGION_AROUND_RADIUS;
 import static com.example.key.my_carpathians.activities.StartActivity.OFFLINE_MAP;
 import static com.example.key.my_carpathians.activities.StartActivity.PLACE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
@@ -105,8 +107,8 @@ import static com.example.key.my_carpathians.utils.ObjectService.FILE_EXISTS;
 
 @EActivity
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, CommunicatorMapActivity {
-    public static final double PERIMETER_SIZE_TO_OFFLINE_REGION = 0.3;
-    public static final double PERIMETER_SIZE_TO_LONGITUDE = 0.4;
+
+    public static final double CONSTANT_PERIMETER_SIZE = 0.01;
     public static final String TO_SERVICE_COMMANDS = "service_commands";
     public static final int COMMAND_REC_ROUT = 4;
     public static final int COMMAND_REC_PLACE = 5;
@@ -427,7 +429,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 actionMode.setTitle("New Region");
                 actionMode.setSubtitle("tab to select");
             }else{
-                downloadRegionDialog(PERIMETER_SIZE_TO_OFFLINE_REGION);
+                double valueOfflineRegionPerimetr = CONSTANT_PERIMETER_SIZE * getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getInt(VALUE_OFFLINE_REGION_AROUND_RADIUS, AVERAGE_VALUE );
+                downloadRegionDialog(valueOfflineRegionPerimetr);
             }
 
 
@@ -1256,40 +1259,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+
     @UiThread
     public void showCreateNameDialog(final int model, String text) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
         final EditText nameInput = new EditText(this);
         builder.setView(nameInput);
+
         nameInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         if (text != null) {
-            builder.setTitle("Вибачте але це імя вже використовується");
+            builder.setTitle("Error!");
+            builder.setMessage("Вибачте але це імя вже використовується");
             nameInput.setText(text);
         }else if(model == ROUT && text == null){
-            builder.setTitle("Введіть назву вашого маршруту");
+            builder.setTitle("Save new rout!");
+            builder.setMessage("Введіть назву вашого маршруту");
         }else if(model == PLACE && text == null){
-            builder.setTitle("Введіть назву вашого місця");
+            builder.setTitle("Save new place!");
+            builder.setMessage("Введіть назву вашого місця");
             checkForRecButton = true;
         }
-        builder.setPositiveButton("Зберегти", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                if (!switchCheck && mMarker != null ||createdTrackPosition != null && createdTrackPosition.size() > 2){
-                    saveCreatedObject(model, nameInput.getText().toString());
-	                mPointCounter = 0;
-                    mapboxMap.setOnMapClickListener(null);
-                    actionMode.finish();
-
-                }else {
-                    Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
-                    serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameInput.getText().toString());
-                    serviceIntent.putExtra(TO_SERVICE_COMMANDS, model);
-                    MapsActivity.this.startService(serviceIntent);
-                    autoOrientationOff(false);
-                    dialog.cancel();
-                    actionMode.finish();
-                }
-            }
-        });
+        builder.setPositiveButton("Зберегти",null);
         builder.setNegativeButton("Не зберігати", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -1311,6 +1301,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
         alert = builder.create();
         alert.show();
+        alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (nameInput.getText().toString().equals("") ){
+                    nameInput.setError("Enter name");
+                }else {
+                    if (!switchCheck && mMarker != null || createdTrackPosition != null && createdTrackPosition.size() > 2) {
+                        saveCreatedObject(model, nameInput.getText().toString());
+                        mPointCounter = 0;
+                        mapboxMap.setOnMapClickListener(null);
+                        alert.dismiss();
+                        actionMode.finish();
+
+                    } else {
+                        Intent serviceIntent = new Intent(MapsActivity.this, LocationService.class);
+                        serviceIntent.putExtra(TO_SERVICE_TRACK_NAME, nameInput.getText().toString());
+                        serviceIntent.putExtra(TO_SERVICE_COMMANDS, model);
+                        MapsActivity.this.startService(serviceIntent);
+                        autoOrientationOff(false);
+                        alert.dismiss();
+                        actionMode.finish();
+                    }
+                }
+            }
+        });
     }
 	@Background
     public void saveCreatedObject(int model, String name) {

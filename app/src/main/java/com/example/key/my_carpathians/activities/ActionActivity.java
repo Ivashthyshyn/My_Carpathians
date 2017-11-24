@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -122,7 +123,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     public Set<String> selectedUserPlacesStringList = new ArraySet<>();
 	public SharedPreferences sharedPreferences;
 	public ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
-	private boolean mProdusedMode = false;
+	private boolean mProdussedMode = false;
 	public List<String> photoUrlList = new ArrayList<>();
 	private int mItemUrlList = 0;
 	private ViewPagerAdapter adapter;
@@ -181,12 +182,12 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         pointsRout = (List<Position>)getIntent().getSerializableExtra(PUT_EXTRA_POINTS);
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
-	    mProdusedMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
+	    mProdussedMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
 		produsedMode();
     }
 
 	private void produsedMode() {
-		if (mProdusedMode){
+		if (mProdussedMode){
 			infoFragment = new InfoFragment_();
 			adapter.addFragment(infoFragment, "INFO");
 			infoFragment.setData(myPlace, myRout);
@@ -224,7 +225,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 	private void setBaseInformation(Place place, Rout rout) {
 		if (place != null  ) {
-			if (isOnline() | mProdusedMode){
+			if (isOnline() | mProdussedMode){
 				morePhotos(place.getNamePlace());
 				fabChangePhotoLeft.setVisibility(View.GONE);
 			}else{
@@ -267,7 +268,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				infoFragment.setData(place, rout);
 				adapter.notifyDataSetChanged();
 			}
-            if (rout.getUrlRout() != null && isOnline() | mProdusedMode) {
+            if (rout.getUrlRout() != null && isOnline() | mProdussedMode) {
 	            photoUrlList.add(rout.getUrlRout());
 	            morePhotos(rout.getNameRout());
 	            imageView.setVisibility(View.GONE);
@@ -289,7 +290,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 
 	private void morePhotos(String name) {
-		if (mProdusedMode ){
+		if (mProdussedMode){
 				Uri rootPathForPhotosString =  Uri.parse(mRootPathString).buildUpon().appendPath("Photos").build();
 			for (int i = 1; i <= 3; i++) {
 				File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(name + String.valueOf(i)).build().getPath());
@@ -306,12 +307,14 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			myPlace.addValueEventListener(new ValueEventListener() {
 				@Override
 				public void onDataChange(DataSnapshot dataSnapshot) {
-					for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-						String value = postSnapshot.getValue(String.class);
-						photoUrlList.add(value);
+					if (dataSnapshot != null) {
+						fabChangePhotoRight.setVisibility(View.VISIBLE);
+						for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+							String value = postSnapshot.getValue(String.class);
+							photoUrlList.add(value);
+						}
 					}
 				}
-
 				@Override
 				public void onCancelled(DatabaseError databaseError) {
 				}
@@ -477,7 +480,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     }
     @Click(R.id.buttonShowOnMap)
     public void buttonShowOnMapWasClicked() {
-        if(mProdusedMode) {
+        if(mProdussedMode) {
             if (myPlace != null) {
                 selectedUserPlacesList.add(myPlace);
             }
@@ -487,7 +490,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
             Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
             mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
             mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
-            mapIntent.putExtra(PRODUCE_MODE, mProdusedMode);
+            mapIntent.putExtra(PRODUCE_MODE, mProdussedMode);
             startActivity(mapIntent);
         }else{
             if (myPlace != null) {
@@ -579,33 +582,35 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 					if (snapshot.getValue() == null) {
 						FirebaseStorage storage = FirebaseStorage.getInstance();
 						StorageReference storageRef = storage.getReference();
-						Uri uri = Uri.parse(place.getUrlPlace());
-						StorageReference riversRef = storageRef.child("placeImage/" + uri.getLastPathSegment());
-						UploadTask uploadTask = riversRef.putFile(uri);
-						uploadBar.setVisibility(View.VISIBLE);
-						uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-							@Override
-							public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-								double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-								uploadBar.setProgress((int) progress);
-								if (progress == 100.0){
-									uploadBar.setVisibility(View.GONE);
+
+						File file = new File(place.getUrlPlace());
+						if (file.exists()) {
+							StorageReference riversRef = storageRef.child("placeImage/" + (Uri.fromFile(file)).getLastPathSegment());
+							UploadTask uploadTask = riversRef.putFile(Uri.fromFile(file));
+							uploadBar.setVisibility(View.VISIBLE);
+							uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+								@Override
+								public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+									double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+									uploadBar.setProgress((int) progress);
+									if (progress == 100.0) {
+										uploadBar.setVisibility(View.GONE);
+									}
 								}
-							}
-						});
-						uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+							});
+							uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 								@Override
 								public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 									// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
 									Uri downloadUrl = taskSnapshot.getDownloadUrl();
 									Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
-												Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+											Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
 
 									place.setUrlPlace(downloadUrl.toString());
 									myRef.child("Places").child(place.getNamePlace()).setValue(place);
-									for (int i = 1; i <= 3; i++){
+									for (int i = 1; i <= 3; i++) {
 										File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(place.getNamePlace() + String.valueOf(i)).build().getPath());
-										if (photoFile.exists()){
+										if (photoFile.exists()) {
 											FirebaseStorage storage = FirebaseStorage.getInstance();
 											StorageReference storageRef = storage.getReference();
 											StorageReference riversRef = storageRef.child("placeImage/" + place.getNamePlace() + String.valueOf(i));
@@ -618,7 +623,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 												}
 
 											})
-											.addOnFailureListener(new OnFailureListener() {
+													.addOnFailureListener(new OnFailureListener() {
 														@Override
 														public void onFailure(@NonNull Exception e) {
 															Toast.makeText(ActionActivity.this, "Сталася помилка одна з додаткових фотографій не завантажилась", Toast.LENGTH_SHORT).show();
@@ -628,12 +633,14 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 									}
 
 								}
-						}).addOnFailureListener(new OnFailureListener() {
-							@Override
-							public void onFailure(@NonNull Exception e) {
-								Toast.makeText(ActionActivity.this, "Сталася помила завантаження не відбулося", Toast.LENGTH_SHORT).show();
-							}
-						});
+
+							}).addOnFailureListener(new OnFailureListener() {
+								@Override
+								public void onFailure(@NonNull Exception e) {
+									Toast.makeText(ActionActivity.this, "Сталася помила завантаження не відбулося", Toast.LENGTH_SHORT).show();
+								}
+							});
+						}
 					} else {
 						showAlreadyExistDialog("Place");
 					}
@@ -820,7 +827,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	    photoUrlList.clear();
         setBaseInformation(place, rout);
 	   mActionMode.finish();
-    }
+	}
 
     @Override
     public void addToMap(Rout rout, Place place) {
@@ -924,7 +931,7 @@ public void ratingBarDialog(){
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_action_activity, menu);
 		this.menu = menu;
-		if (mProdusedMode){
+		if (mProdussedMode){
 			MenuItem actionEdit = menu.findItem(R.id.action_edit);
 			actionEdit.setVisible(true);
 			MenuItem actionPublisher = menu.findItem(R.id.action_publish);
@@ -998,5 +1005,13 @@ public void ratingBarDialog(){
 		editFragment.setData(myRout, myPlace, mRootPathString);
 		mActionMode = ((AppCompatActivity) this).startSupportActionMode(new EditObjectActionModeCallback(this, editFragment, fm));
 
+	}
+	@Override
+	public void autoOrientationOff(boolean yes) {
+		if (yes) {
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+		}else {
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+		}
 	}
 }

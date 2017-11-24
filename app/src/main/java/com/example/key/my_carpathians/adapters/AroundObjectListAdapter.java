@@ -23,6 +23,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
+import static com.example.key.my_carpathians.fragments.EditModeFragment.HARD;
+import static com.example.key.my_carpathians.fragments.EditModeFragment.LIGHT;
+import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
+
 
 public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectListAdapter.ViewHolder> {
 	public Context context;
@@ -99,6 +103,16 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 			holder.checkBox.setText(holder.mRout.getNameRout());
 			holder.textLengthTrack.setText(holder.mRout.getLengthRout() + "km");
 			ratingRout(holder.mRout.getNameRout(), holder.ratingBar);
+			switch (holder.mRout.getRoutsLevel()) {
+				case LIGHT:
+					holder.buttonTypeAndLevel.setBackgroundResource(R.color.lbl_name);
+					return;
+				case MEDIUM:
+					holder.buttonTypeAndLevel.setBackgroundResource(R.color.btn_login);
+					return;
+				case HARD:
+					holder.buttonTypeAndLevel.setBackgroundResource(R.color.btn_logut_bg);
+			}
 
 		}else if (places != null){
 			holder.mPlace = places.get(position);

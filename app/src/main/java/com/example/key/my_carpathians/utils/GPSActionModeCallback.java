@@ -55,7 +55,7 @@ public class GPSActionModeCallback implements ActionMode.Callback {
 			saveAction.setVisible(false);
 			saveAction.setEnabled(false);
 			MenuItem actionPause = menu.findItem(R.id.actionStop);
-			actionPause.setIcon(R.drawable.ic_exchange);
+			actionPause.setIcon(R.drawable.ic_refresh_48px);
 			actionPause.setVisible(false);
 			actionPause.setEnabled(false);
 			MenuItem actionStartRec =menu.findItem(R.id.actionStartRec);
