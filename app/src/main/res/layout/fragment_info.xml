@@ -10,7 +10,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/colorButtonNormal"
         android:orientation="vertical">
 
         <TextView
@@ -23,80 +22,65 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="3dp"
-            android:layout_marginRight="3dp"
-            android:background="@color/white"
             android:orientation="vertical">
 
             <LinearLayout
                 android:id="@+id/groupForRout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
+                android:padding="@dimen/default_half_margin"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/textView10"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp"
                     android:layout_weight="1"
-                    android:background="@color/colorPrimary"
-                    android:paddingLeft="5dp"
-                    android:text="Level"
-                    android:textColor="@android:color/black"/>
+                    android:text="Level"/>
 
                 <TextView
                     android:id="@+id/textDifficultyValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp"
                     android:layout_weight="1"
-                    android:background="@color/colorPrimary"
                     android:gravity="center"
                     android:text="difficulty"
                     android:textColor="@color/lbl_name"/>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/primaryLightColor"
+                    android:layout_marginRight="@dimen/default_margin"/>
 
                 <TextView
                     android:id="@+id/textView11"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp"
                     android:layout_weight="1"
-                    android:background="@color/colorPrimary"
-                    android:paddingLeft="5dp"
-                    android:text="Lenght"
-                    android:textColor="@android:color/black"/>
+                    android:text="Lenght"/>
 
                 <TextView
                     android:id="@+id/textRoutLength"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp"
                     android:layout_weight="1"
-                    android:background="@color/colorPrimary"
                     android:gravity="right"
                     android:paddingRight="5dp"
                     android:text="33км"/>
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/textView5"
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="1dp"
-                android:background="?attr/colorButtonNormal"
-                android:paddingLeft="4dp"
-                android:text="Info"
-                android:textColor="@color/white"/>
+                android:layout_height="1dp"
+                android:background="@color/primaryLightColor"/>
 
             <TextView
                 android:id="@+id/titleText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="1dp"
-                android:background="@color/colorPrimaryDark"
-                android:padding="5dp"
+                android:padding="@dimen/default_half_margin"
+                android:background="@color/secondaryBackgroundColor"
                 android:text="TextView"/>
         </LinearLayout>
 
