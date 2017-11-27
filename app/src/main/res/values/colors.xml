@@ -3,9 +3,11 @@
 
     <color name="primaryColor">#3e5496</color>
     <color name="primaryLightColor">#5982fd</color>
-    <color name="primaryDarkColor">#3b4f8c</color>
+    <color name="primaryDarkColor">#465993</color>
     <color name="primaryTextColor">#fafafa</color>
+    <color name="secondaryTextColor">#1d1d1d</color>
     <color name="secondaryBackgroundColor">#2d2d2d</color>
+    <color name="transparent">#00000000</color>
 
     <color name="colorPrimary">@color/primaryColor</color>
     <color name="colorPrimaryDark">@color/primaryDarkColor</color>
@@ -29,9 +31,9 @@
     <color name="input_register">#888888</color>
     <color name="input_register_bg">#3b3e41</color>
     <color name="input_register_hint">#af5e6266</color>
-    <color name="btn_login">#fad91b</color>
     <color name="btn_login_bg">#eceef1</color>
-    <color name="lbl_name">#1f7a1d</color>
+    <color name="btn_login">#fad91b</color>
+    <color name="lbl_name">#45c942</color>
     <color name="btn_logut_bg">#ff6861</color>
     <color name="background_material_light">#7b7878</color>
 
