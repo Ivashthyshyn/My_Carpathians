@@ -126,7 +126,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	private boolean mProdussedMode = false;
 	public List<String> photoUrlList = new ArrayList<>();
 	private int mItemUrlList = 0;
-	private ViewPagerAdapter adapter;
+	private ViewPagerAdapter viewPagerAdapter;
 	private boolean connected = false;
 	private FirebaseDatabase database;
 	private DatabaseReference myRef;
@@ -174,7 +174,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		setupSizeViews();
         tabLayout.setupWithViewPager(viewPager);
-        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 	    mRootPathString = sharedPreferences.getString(ROOT_PATH, null);
 	    routList = (List<Rout>) getIntent().getSerializableExtra(PUT_EXTRA_ROUTS_LIST);
@@ -187,25 +187,26 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     }
 
 	private void produsedMode() {
+		infoFragment = new InfoFragment_().builder()
+				.place(myPlace)
+				.rout(myRout)
+				.build();
+
 		if (mProdussedMode){
-			infoFragment = new InfoFragment_();
-			adapter.addFragment(infoFragment, "INFO");
-			infoFragment.setData(myPlace, myRout);
-			viewPager.setAdapter(adapter);
+			viewPagerAdapter.addFragment(infoFragment, "INFO");
+			viewPager.setAdapter(viewPagerAdapter);
 			viewPager.setCurrentItem(0);
 			ratingBar.setVisibility(View.GONE);
 			setBaseInformation(myPlace, myRout);
 
 		}else {
 			PlaceAroundFragment placeAroundFragment = new PlaceAroundFragment_();
-			adapter.addFragment(placeAroundFragment, "PLACE AROUND");
+			viewPagerAdapter.addFragment(placeAroundFragment, "PLACE AROUND");
 
-			InfoFragment infoFragment = new InfoFragment_();
-			adapter.addFragment(infoFragment, "INFO");
-			infoFragment.setData(myPlace, myRout);
+			viewPagerAdapter.addFragment(infoFragment, "INFO");
 			RoutsAroundFragment routsAroundFragment = new RoutsAroundFragment_();
-			adapter.addFragment(routsAroundFragment, "ROUT AROUND");
-			viewPager.setAdapter(adapter);
+			viewPagerAdapter.addFragment(routsAroundFragment, "ROUT AROUND");
+			viewPager.setAdapter(viewPagerAdapter);
 			viewPager.setCurrentItem(1);
 			viewPager.setOffscreenPageLimit(2);
 			setBaseInformation(myPlace, myRout);
@@ -234,8 +235,9 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			}
 
 			if (infoFragment != null) {
-				infoFragment.setData(place, rout);
-				adapter.notifyDataSetChanged();
+				infoFragment.setPlace(place);
+				infoFragment.setRout(rout);
+				viewPagerAdapter.notifyDataSetChanged();
 			}
 			if (mRootPathString != null) {
 				Uri photoUri = Uri.parse(mRootPathString);
@@ -265,8 +267,9 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			photoUrlList.add("graph");
 			getRating(rout.getNameRout());
 			if (infoFragment != null) {
-				infoFragment.setData(place, rout);
-				adapter.notifyDataSetChanged();
+				infoFragment.setPlace(null);
+				infoFragment.setRout(rout);
+				viewPagerAdapter.notifyDataSetChanged();
 			}
             if (rout.getUrlRout() != null && isOnline() | mProdussedMode) {
 	            photoUrlList.add(rout.getUrlRout());

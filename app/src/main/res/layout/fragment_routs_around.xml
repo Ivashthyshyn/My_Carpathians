@@ -1,9 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
               android:orientation="vertical"
-             tools:context="com.example.key.my_carpathians.fragments.RoutsAroundFragment">
+              android:background="@color/secondaryBackgroundColor"
+              tools:context="com.example.key.my_carpathians.fragments.RoutsAroundFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -11,14 +12,12 @@
         android:id="@+id/textTitleRoutAround"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/input_register_bg"
-        android:gravity="center"
-        android:padding="2dp"
+        style="@style/list_header_text"
         android:text="Add to map"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerViewRoutAround"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark"/>
+        style="@style/info_list_style"/>
 </LinearLayout>

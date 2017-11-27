@@ -14,6 +14,7 @@ import com.example.key.my_carpathians.models.Rout;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
+import org.androidannotations.annotations.FragmentArg;
 import org.androidannotations.annotations.ViewById;
 
 import static com.example.key.my_carpathians.fragments.EditModeFragment.HARD;
@@ -24,8 +25,6 @@ import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
  */
 @EFragment
 public class InfoFragment extends Fragment {
-	Place place;
-	Rout rout;
 	View view;
 	@ViewById(R.id.titleText)
 	TextView titleText;
@@ -41,6 +40,21 @@ public class InfoFragment extends Fragment {
 
 	@ViewById(R.id.groupForRout)
 	LinearLayout groupForRout;
+
+	@FragmentArg
+	Place place;
+
+	@FragmentArg
+	Rout rout;
+
+	public void setPlace(Place place) {
+		this.place = place;
+	}
+
+	public void setRout(Rout rout) {
+		this.rout = rout;
+	}
+
 	public InfoFragment() {
 		// Required empty public constructor
 	}
@@ -84,13 +98,5 @@ public class InfoFragment extends Fragment {
 				return "unknown";
 		}
 
-	}
-
-	public void setData(Place place, Rout rout){
-		this.place = place;
-		this.rout = rout;
-		if (view != null){
-			afterViews();
-		}
 	}
 }

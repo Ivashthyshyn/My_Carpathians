@@ -2,6 +2,7 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
+             android:background="@color/secondaryBackgroundColor"
              tools:context="com.example.key.my_carpathians.fragments.InfoFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -16,12 +17,8 @@
             android:id="@+id/textViewNameObject"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/input_register_bg"
-            android:gravity="center"
-            android:padding="4dp"
-            android:text="TextView"
-            android:textColor="@color/white"
-            android:textStyle="bold"/>
+            style="@style/list_header_text"
+            tools:text="Sample"/>
 
         <LinearLayout
             android:layout_width="match_parent"

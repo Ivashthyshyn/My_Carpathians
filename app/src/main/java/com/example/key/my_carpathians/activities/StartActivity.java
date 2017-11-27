@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -44,6 +45,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.ViewPagerAdapter;
+import com.example.key.my_carpathians.fragments.IRotation;
 import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
 import com.example.key.my_carpathians.fragments.RoutsListFragment;
@@ -156,23 +158,7 @@ public class StartActivity extends AppCompatActivity implements
 	public ArrayList<Rout> routs = new ArrayList<>();
 	public AlertDialog.Builder builder;
 	public ActionBarDrawerToggle actionBarDrawerToggle;
-	public ViewPagerAdapter adapter;
-	private boolean mConnected = false;
-	private String[] mPermissionList = new String[]{
-			ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE
-			, READ_EXTERNAL_STORAGE};
-	private FirebaseAuth.AuthStateListener mAuthListener;
-	private SharedPreferences mSharedPreferences;
-	private CallbackManager mCallbackManager;
-	private FirebaseUser mUser;
-	private FirebaseAuth mAuth;
-	private GoogleApiClient mGoogleApiClient;
-	private String mUserUID = null;
-	private boolean mTypeMode = false;
-	private Uri mRootPath;
-	private int mRegionSelected;
-	private LoginManager mFacebookLoginManager;
-	private String mQuery;
+	public ViewPagerAdapter viewPagerAdapter;
 	@ViewById(R.id.fabRecEditor)
 	FloatingActionButton fabRecEditor;
 	@ViewById(R.id.userAcountImage)
@@ -215,9 +201,22 @@ public class StartActivity extends AppCompatActivity implements
 	ImageButton buttonLogout;
 	@ViewById(R.id.buttonAuthorization)
 	Button buttonAuthorization;
-
-
-
+	private boolean mConnected = false;
+	private String[] mPermissionList = new String[]{
+			ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE
+			, READ_EXTERNAL_STORAGE};
+	private FirebaseAuth.AuthStateListener mAuthListener;
+	private SharedPreferences mSharedPreferences;
+	private CallbackManager mCallbackManager;
+	private FirebaseUser mUser;
+	private FirebaseAuth mAuth;
+	private GoogleApiClient mGoogleApiClient;
+	private String mUserUID = null;
+	private boolean mTypeMode = false;
+	private Uri mRootPath;
+	private int mRegionSelected;
+	private LoginManager mFacebookLoginManager;
+	private String mQuery;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -227,26 +226,26 @@ public class StartActivity extends AppCompatActivity implements
 		toolbar.showOverflowMenu();
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		tabLayout.setupWithViewPager(viewPager);
-		adapter = new ViewPagerAdapter(getSupportFragmentManager());
-		viewPager.setAdapter(adapter);
+		viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+		viewPager.setAdapter(viewPagerAdapter);
 		mAuth = FirebaseAuth.getInstance();
 		viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout) {
 			@Override
 			public void onPageScrollStateChanged(int state) {
 
 				if (state == PLACE) {
-					RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(ROUT);
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(ROUT);
 					routsListFragment.dismissActionMode();
 				} else if (state == ROUT) {
-					PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(PLACE);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(PLACE);
 					placesListFragment.dismissActionMode();
 				}
 				if (mQuery != null) {
 					if (tabLayout.getTabCount() != 0 && state == PLACE) {
-						PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(PLACE);
+						PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(PLACE);
 						placesListFragment.filter(mQuery);
 					} else if (tabLayout.getTabCount() != 0 && state == ROUT) {
-						RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(ROUT);
+						RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(ROUT);
 						routsListFragment.filter(mQuery);
 					}
 				}
@@ -308,12 +307,12 @@ public class StartActivity extends AppCompatActivity implements
 				if (tabLayout.getTabCount() == 0) {
 					PlacesListFragment placesListFragment = new PlacesListFragment_();
 					placesListFragment.setList(places, PLACE);
-					adapter.addFragment(placesListFragment, "Place");
-					adapter.notifyDataSetChanged();
+					viewPagerAdapter.addFragment(placesListFragment, "Place");
+					viewPagerAdapter.notifyDataSetChanged();
 
 				} else {
 					tabLayout.getTabAt(0).setIcon(null);
-					PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(places, PLACE);
 				}
 			}
@@ -341,12 +340,12 @@ public class StartActivity extends AppCompatActivity implements
 				if (tabLayout.getTabCount() == 1) {
 					RoutsListFragment routsListFragment = new RoutsListFragment_();
 					routsListFragment.setList(routs, ROUT);
-					adapter.addFragment(routsListFragment, "Routs");
-					adapter.notifyDataSetChanged();
+					viewPagerAdapter.addFragment(routsListFragment, "Routs");
+					viewPagerAdapter.notifyDataSetChanged();
 
 				} else {
 					tabLayout.getTabAt(1).setIcon(null);
-					RoutsListFragment routsListFragment = (RoutsListFragment_) adapter.getItem(1);
+					RoutsListFragment routsListFragment = (RoutsListFragment_) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(routs, ROUT);
 				}
 			}
@@ -363,7 +362,7 @@ public class StartActivity extends AppCompatActivity implements
 			checkCurrentUser();
 		}
 		if (viewPager.getAdapter() == null) {
-			viewPager.setAdapter(adapter);
+			viewPager.setAdapter(viewPagerAdapter);
 		}
 
 	}
@@ -440,10 +439,10 @@ public class StartActivity extends AppCompatActivity implements
 			public boolean onQueryTextChange(String newText) {
 				mQuery = newText;
 				if (tabLayout.getTabCount() > 0 && tabLayout.getSelectedTabPosition() == PLACE) {
-					PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(tabLayout.getSelectedTabPosition());
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
 					placesListFragment.filter(newText);
 				} else if (tabLayout.getTabCount() > 0 && tabLayout.getSelectedTabPosition() == ROUT) {
-					RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(tabLayout.getSelectedTabPosition());
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
 					routsListFragment.filter(newText);
 				}
 
@@ -459,9 +458,9 @@ public class StartActivity extends AppCompatActivity implements
 			@Override
 			public boolean onMenuItemActionCollapse(MenuItem item) {
 				if (tabLayout.getTabCount() == 2) {
-					PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(PLACE);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(PLACE);
 					placesListFragment.filter(null);
-					RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(ROUT);
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(ROUT);
 					routsListFragment.filter(null);
 					mQuery = null;
 				}
@@ -867,13 +866,13 @@ public class StartActivity extends AppCompatActivity implements
 				}
 				if (createdP != null && tabLayout.getTabCount() > 0) {
 					tabLayout.getTabAt(0).setIcon(R.drawable.ic_create_black_24px);
-					PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(createdP, MY_PLACE);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 0) {
 					tabLayout.getTabAt(0).setIcon(R.drawable.ic_create_black_24px);
-					PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(new ArrayList<Place>(), MY_PLACE);
 				}
 				dialogFlag++;
@@ -911,13 +910,13 @@ public class StartActivity extends AppCompatActivity implements
 				}
 				if (createdR != null && tabLayout.getTabCount() > 1) {
 					tabLayout.getTabAt(1).setIcon(R.drawable.ic_create_black_24px);
-					RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(createdR, MY_ROUT);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 1) {
 					tabLayout.getTabAt(1).setIcon(R.drawable.ic_create_black_24px);
-					RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(new ArrayList<Rout>(), MY_ROUT);
 				}
 				dialogFlag++;
@@ -950,13 +949,13 @@ public class StartActivity extends AppCompatActivity implements
 				}
 				if (favoriteP != null && tabLayout.getTabCount() > 0) {
 					tabLayout.getTabAt(0).setIcon(R.drawable.ic_favorite_border_black_24px);
-					PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(favoriteP, FA_PLACE);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 0) {
 					tabLayout.getTabAt(0).setIcon(R.drawable.ic_favorite_border_black_24px);
-					PlacesListFragment placesListFragment = (PlacesListFragment) adapter.getItem(0);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(new ArrayList<Place>(), FA_PLACE);
 				}
 				dialogFlag++;
@@ -981,13 +980,13 @@ public class StartActivity extends AppCompatActivity implements
 				}
 				if (favoriteR != null && tabLayout.getTabCount() > 1) {
 					tabLayout.getTabAt(1).setIcon(R.drawable.ic_favorite_border_black_24px);
-					RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(favoriteR, FA_ROUT);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 1) {
 					tabLayout.getTabAt(1).setIcon(R.drawable.ic_favorite_border_black_24px);
-					RoutsListFragment routsListFragment = (RoutsListFragment) adapter.getItem(1);
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(new ArrayList<Rout>(), FA_ROUT);
 				}
 				dialogFlag++;
@@ -1009,6 +1008,17 @@ public class StartActivity extends AppCompatActivity implements
 		super.onResume();
 		setDrawerState(true);
 		getDateFromFirebace();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+
+		// Checks the orientation of the screen
+		for (int i = 0; i < viewPagerAdapter.getCount(); i++) {
+			IRotation item = (IRotation) viewPagerAdapter.getItem(i);
+			item.onRotation();
+		}
 	}
 
 	public void setDrawerState(boolean isEnabled) {

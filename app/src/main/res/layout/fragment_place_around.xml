@@ -3,6 +3,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
+              android:background="@color/secondaryBackgroundColor"
               tools:context="com.example.key.my_carpathians.fragments.PlaceAroundFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -11,15 +12,12 @@
         android:id="@+id/textTitlePlaceAround"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/input_register_bg"
-        android:gravity="center"
-        android:padding="3dp"
-        android:text="Add to map"
-        android:textColor="@color/white"/>
+        style="@style/list_header_text"
+        android:text="Add to map"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerViewPlaceAround"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark"/>
+        style="@style/info_list_style"/>
 </LinearLayout>

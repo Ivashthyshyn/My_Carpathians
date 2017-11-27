@@ -46,15 +46,11 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
-                    android:elevation="3dp"
                     android:paddingBottom="20dp"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
                     android:paddingTop="20dp"
-                    android:text="TextView"
-                    android:textStyle="italic"/>
-
-                .
+                    android:text="TextView"/>
 
                 <TextView
                     android:id="@+id/textLenghtTrack"
@@ -66,7 +62,7 @@
                     android:gravity="right"
                     android:paddingRight="15dp"
                     android:text="30 km"
-                    android:textColor="@android:color/holo_purple"/>
+                    android:textStyle="italic"/>
 
                 <RatingBar
                     android:id="@+id/ratingBarSmall"

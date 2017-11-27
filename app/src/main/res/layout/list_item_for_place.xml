@@ -3,7 +3,7 @@
               xmlns:app="http://schemas.android.com/apk/res-auto"
               xmlns:card_view="http://schemas.android.com/tools"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
+              android:layout_height="200dp"
               android:background="@android:color/transparent"
               android:orientation="horizontal">
 
@@ -46,7 +46,6 @@
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:background="@drawable/line_to_text"
-            android:elevation="5dp"
             android:orientation="horizontal">
 
             <TextView
@@ -63,7 +62,7 @@
                 android:layout_weight="1"
                 android:elevation="5dp"
                 android:text="Name"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/primaryTextColor"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
 
@@ -77,12 +76,12 @@
                 android:layout_alignParentRight="true"
                 android:layout_gravity="center"
                 android:layout_marginRight="10dp"
-                android:backgroundTint="@color/bg_login"
+                android:backgroundTint="@color/primaryDarkColor"
                 android:elevation="5dp"
                 android:isIndicator="true"
                 android:numStars="5"
                 android:rating="1"
-                android:secondaryProgressTint="@color/colorAccent"
+                android:secondaryProgressTint="@color/primaryTextColor"
                 android:stepSize="0.5"/>
 
         </LinearLayout>
