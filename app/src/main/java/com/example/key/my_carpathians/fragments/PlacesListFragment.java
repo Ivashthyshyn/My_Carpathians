@@ -13,8 +13,10 @@ import android.view.ViewGroup;
 
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter;
+import com.example.key.my_carpathians.interfaces.IRotation;
 import com.example.key.my_carpathians.models.Place;
 
+import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 
 import java.util.ArrayList;
@@ -46,9 +48,6 @@ public class PlacesListFragment extends Fragment implements IRotation {
 		fragmentView = inflater.inflate(R.layout.fragment_places_list, container, false);
 		emptyView = (CardView) fragmentView.findViewById(R.id.emptyViewForPlace);
 		recyclerView = (RecyclerView) fragmentView.findViewById(R.id.recyclerViewForPlace);
-
-		updateLayoutManager();
-		createList();
 		return fragmentView;
 	}
 
@@ -63,6 +62,11 @@ public class PlacesListFragment extends Fragment implements IRotation {
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(this.getActivity(), 2);
 			recyclerView.setLayoutManager(gridLayoutManager);
 		}
+	}
+	@AfterViews
+	public void afterView(){
+		updateLayoutManager();
+		createList();
 	}
 
 	private void createList() {

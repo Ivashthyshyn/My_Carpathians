@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_factory_settings"
-        android:icon="@android:drawable/stat_sys_download_done"
+        android:icon="@drawable/ic_settings_backup_restore_white_24px"
         android:title="Back to factory settings"
         app:showAsAction="always"/>
 </menu>

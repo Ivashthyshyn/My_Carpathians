@@ -45,7 +45,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="difficulty"
-                    android:textColor="@color/lbl_name"/>
+                    android:textColor="@color/color_level_green"/>
 
                 <View
                     android:layout_width="1dp"

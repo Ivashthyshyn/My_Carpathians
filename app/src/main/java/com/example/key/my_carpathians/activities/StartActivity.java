@@ -45,7 +45,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.ViewPagerAdapter;
-import com.example.key.my_carpathians.fragments.IRotation;
+import com.example.key.my_carpathians.interfaces.IRotation;
 import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
 import com.example.key.my_carpathians.fragments.RoutsListFragment;

@@ -47,14 +47,6 @@ public class InfoFragment extends Fragment {
 	@FragmentArg
 	Rout rout;
 
-	public void setPlace(Place place) {
-		this.place = place;
-	}
-
-	public void setRout(Rout rout) {
-		this.rout = rout;
-	}
-
 	public InfoFragment() {
 		// Required empty public constructor
 	}
@@ -86,15 +78,26 @@ public class InfoFragment extends Fragment {
 		}
 	}
 
+	public void setPlace(Place place) {
+		this.place = place;
+	}
+	public void setRout(Rout rout) {
+		this.rout = rout;
+	}
+
 	private String difficultyLevel(int routsLevel) {
 		switch (routsLevel){
 			case LIGHT:
+				textDifficultyValue.setTextColor(getResources().getColor(R.color.color_level_green ));
 				return "Light";
 			case MEDIUM:
+				textDifficultyValue.setTextColor(getResources().getColor(R.color.color_level_yellow));
 				return "Medium";
 			case HARD:
+				textDifficultyValue.setTextColor(getResources().getColor(R.color.color_level_red ));
 				return "Hard";
 			default:
+				textDifficultyValue.setTextColor(getResources().getColor(R.color.background_material_light));
 				return "unknown";
 		}
 

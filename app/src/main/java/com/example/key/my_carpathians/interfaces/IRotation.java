@@ -1,4 +1,4 @@
-package com.example.key.my_carpathians.fragments;
+package com.example.key.my_carpathians.interfaces;
 
 /**
  * Created by key on 27.11.17.
