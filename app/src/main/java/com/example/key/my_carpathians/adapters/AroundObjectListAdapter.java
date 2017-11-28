@@ -105,13 +105,13 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 			ratingRout(holder.mRout.getNameRout(), holder.ratingBar);
 			switch (holder.mRout.getRoutsLevel()) {
 				case LIGHT:
-					holder.buttonTypeAndLevel.setBackgroundResource(R.color.lbl_name);
+					holder.buttonTypeAndLevel.setBackgroundResource(R.color.color_level_green);
 					return;
 				case MEDIUM:
-					holder.buttonTypeAndLevel.setBackgroundResource(R.color.btn_login);
+					holder.buttonTypeAndLevel.setBackgroundResource(R.color.color_level_yellow);
 					return;
 				case HARD:
-					holder.buttonTypeAndLevel.setBackgroundResource(R.color.btn_logut_bg);
+					holder.buttonTypeAndLevel.setBackgroundResource(R.color.color_level_red);
 			}
 
 		}else if (places != null){

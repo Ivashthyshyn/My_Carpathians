@@ -104,6 +104,34 @@
 
     <string name="action_settings">Settings</string>
     <string name="btn_login">Go</string>
+    <string name="title_info">INFO</string>
+    <string name="title_place_around">PLACE AROUND</string>
+    <string name="title_rout_around">ROUT AROUN</string>
+    <string name="title_login_dialog">Для того щоб отримати доступ до всіх функцій програми потрібно зареєструватися</string>
+    <string name="message_login_dialog">Виберіть спосіб реєстраці</string>
+    <string name="registration">Зареєструватися</string>
+    <string name="no">No</string>
+    <string name="internet">The Internet.</string>
+    <string name="no_internet">Нажаль ви зараз ви не підключені до мережі інтернет!</string>
+    <string name="no_internet2">Керування автентифікацією недоступне!</string>
+    <string name="publish">Publish</string>
+    <string name="error_publisher">Для поблікації потрібно заповнити всі дані</string>
+    <string name="error_publisher_1p">Ви не вказали імя місця</string>
+    <string name="error_publisher_2p">Не вказана позиція</string>
+    <string name="error_publisher_3p">Не вказано титульної інформації про місце</string>
+    <string name="error_publisher_4p">Ви не встановили титульну фотографію</string>
+    <string name="error_publisher_1r">Ви не вказали імя маршруту</string>
+    <string name="error_publisher_2r">Не вказана позиція\"</string>
+    <string name="error_publisher_3r">Не вказана титульна фотографія</string>
+    <string name="error_publisher_4r">Немає титульної інформації</string>
+    <string name="error_publisher_5r">Не вказана складність маршруту</string>
+    <string name="enother_photo_downlod">Another photo download</string>
+    <string name="error_downloading_photo">Сталася помилка одна з додаткових фотографій не завантажилась</string>
+    <string name="error_uploading">Сталася помила завантаження не відбулося</string>
+    <string name="already_exist">з таким іменем уже існує! Змінити назву?</string>
+    <string name="set_rating">Проголосувати за місце</string>
+    <string name="add_to_fevorite">Added to favorite list!</string>
+    <string name="offline_message">\"Sorry, no internet access, you will be able to post data later when \" + \t\t\t\t\t\t\t\" there is a good connection to the network</string>
 
 
 </resources>

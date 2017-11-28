@@ -16,7 +16,7 @@
         android:id="@+id/action_edit"
         android:checkable="false"
         android:enabled="true"
-        android:icon="@drawable/ic_pen"
+        android:icon="@android:drawable/ic_menu_edit"
         android:title="edit"
         app:showAsAction="always"/>
 

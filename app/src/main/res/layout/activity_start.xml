@@ -204,9 +204,8 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_below="@+id/userAcountImage"
-                    android:background="@color/input_register_bg"
                     android:orientation="vertical"
-                    android:padding="5dp">
+                    >
 
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/inputEmailLayout"
@@ -215,8 +214,9 @@
                         android:layout_alignParentBottom="false"
                         android:layout_alignParentLeft="false"
                         android:layout_alignParentStart="false"
-                        android:layout_marginLeft="4dp"
-                        android:layout_marginRight="4dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginTop="8dp"
                         android:visibility="gone">
 
                         <EditText
@@ -227,7 +227,7 @@
                             android:layout_marginRight="5dp"
                             android:hint="@string/hint_email"
                             android:inputType="textEmailAddress"
-                            android:textColor="@color/btn_login"
+                            android:textColor="@color/color_level_yellow"
                             android:textColorHint="@android:color/white"/>
                     </android.support.design.widget.TextInputLayout>
 
@@ -235,8 +235,9 @@
                         android:id="@+id/inputPasswordLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:layout_marginRight="4dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginRight="8dp"
                         android:visibility="gone">
 
                         <EditText
@@ -247,7 +248,7 @@
                             android:layout_marginRight="5dp"
                             android:hint="@string/hint_password"
                             android:inputType="textPassword|textVisiblePassword"
-                            android:textColor="@color/btn_login"
+                            android:textColor="@color/color_level_yellow"
                             android:textColorHint="@android:color/white"
                             android:visibility="visible"/>
                     </android.support.design.widget.TextInputLayout>

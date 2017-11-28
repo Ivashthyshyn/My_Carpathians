@@ -32,11 +32,11 @@
     <color name="input_register_bg">#3b3e41</color>
     <color name="input_register_hint">#af5e6266</color>
     <color name="btn_login_bg">#eceef1</color>
-    <color name="btn_login">#fad91b</color>
-    <color name="lbl_name">#45c942</color>
-    <color name="btn_logut_bg">#ff6861</color>
+    <color name="color_level_yellow">#fad91b</color>
+    <color name="color_level_green">#45c942</color>
+    <color name="color_level_red">#ff6861</color>
     <color name="background_material_light">#7b7878</color>
 
-    <color name="tabTransparant">#607c4dff</color>
+    <color name="tabTransparant">#7c3e5496</color>
     <color name="background">#726e6e</color>
 </resources>

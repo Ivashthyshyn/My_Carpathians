@@ -14,8 +14,10 @@ import android.view.ViewGroup;
 
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter;
+import com.example.key.my_carpathians.interfaces.IRotation;
 import com.example.key.my_carpathians.models.Rout;
 
+import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 
 import java.util.ArrayList;
@@ -45,8 +47,7 @@ public class RoutsListFragment extends Fragment implements IRotation {
 		fragmentView = inflater.inflate(R.layout.fragment_routs_list, container, false);
 		emptyView = (CardView) fragmentView.findViewById(R.id.emptyViewForRout);
 		recyclerView = (RecyclerView) fragmentView.findViewById(R.id.recyclerViewForRout);
-		updateLayoutManager();
-		createList();
+
 		return fragmentView;
 	}
 
@@ -58,6 +59,11 @@ public class RoutsListFragment extends Fragment implements IRotation {
 		}
 	}
 
+	@AfterViews
+	public void afterViews(){
+		updateLayoutManager();
+		createList();
+	}
 	public void setList(List<Rout> routList, int mode) {
 		this.mRoutsList = routList;
 		this.mMode = mode;

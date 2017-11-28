@@ -81,7 +81,7 @@ public class SettingsActivity extends AppCompatActivity implements
 		setContentView(R.layout.activity_settings);
 		setSupportActionBar(toolbar);
 		toolbar.showOverflowMenu();
-		getSupportActionBar().setDisplayShowHomeEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		pickerOfRegion.setValue(AVERAGE_VALUE);
 		pickerOfPlacesAround.setValue(AVERAGE_VALUE);

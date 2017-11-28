@@ -110,13 +110,18 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     public static final String SELECTED_USER_ROUTS = "selected-user_routs";
     public static final String SELECTED_USER_PLACES = "selected_user_places";
 	public static final String LOGIN = "login";
+	public static final String PHOTO_STR = "Photos";
+	public static final String ROUT_STR = "Routs";
+	public static final String PLACE_IMAGE_STR = "placeImage";
+	public static final String RATING_STR = "Rating";
+	public static final String PLACE_STR = "Places";
 	public List<Rout> routList;
     public List<Place> placeList;
     public List<Position> pointsRout;
     public Place myPlace;
     public Rout myRout;
-	public  InfoFragment infoFragment;
-	public  EditModeFragment editFragment;
+	public InfoFragment infoFragment;
+	public EditModeFragment editFragment;
     public com.example.key.my_carpathians.models.Position myPosition;
     public String myName;
     public ArrayList<String> selectedUserRouts = new ArrayList<>();
@@ -131,12 +136,12 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	private FirebaseDatabase database;
 	private DatabaseReference myRef;
 	private List<Position> mPositionList;
+	private String mRootPathString;
+	private ActionMode mActionMode;
 	@ViewById(R.id.uploadBar)
 	ProgressBar uploadBar;
-
-   @ViewById(R.id.toolBarActionActivity)
-   Toolbar toolbar;
-
+	@ViewById(R.id.toolBarActionActivity)
+	Toolbar toolbar;
 	@ViewById(R.id.appBarLayout)
 	AppBarLayout appBarLayout;
 
@@ -160,9 +165,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	TabLayout tabLayout;
 	@ViewById(R.id.viewpager)
 	ViewPager viewPager;
-	String mRootPathString;
-	private Menu menu;
-	private ActionMode mActionMode;
+
 
 
 	@Override
@@ -193,7 +196,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				.build();
 
 		if (mProdussedMode){
-			viewPagerAdapter.addFragment(infoFragment, "INFO");
+			viewPagerAdapter.addFragment(infoFragment, getResources().getString(R.string.title_info));
 			viewPager.setAdapter(viewPagerAdapter);
 			viewPager.setCurrentItem(0);
 			ratingBar.setVisibility(View.GONE);
@@ -201,11 +204,11 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 		}else {
 			PlaceAroundFragment placeAroundFragment = new PlaceAroundFragment_();
-			viewPagerAdapter.addFragment(placeAroundFragment, "PLACE AROUND");
+			viewPagerAdapter.addFragment(placeAroundFragment, getResources().getString(R.string.title_place_around));
 
-			viewPagerAdapter.addFragment(infoFragment, "INFO");
+			viewPagerAdapter.addFragment(infoFragment, getResources().getString(R.string.title_info));
 			RoutsAroundFragment routsAroundFragment = new RoutsAroundFragment_();
-			viewPagerAdapter.addFragment(routsAroundFragment, "ROUT AROUND");
+			viewPagerAdapter.addFragment(routsAroundFragment, getResources().getString(R.string.title_rout_around));
 			viewPager.setAdapter(viewPagerAdapter);
 			viewPager.setCurrentItem(1);
 			viewPager.setOffscreenPageLimit(2);
@@ -242,7 +245,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			if (mRootPathString != null) {
 				Uri photoUri = Uri.parse(mRootPathString);
 
-			File titlePhotoFile = new File(photoUri.buildUpon().appendPath("Photos").build().getPath(), myPlace.getNamePlace());
+			File titlePhotoFile = new File(photoUri.buildUpon().appendPath(PHOTO_STR).build().getPath(), myPlace.getNamePlace());
 				Glide
 						.with(ActionActivity.this)
 						.load(titlePhotoFile)
@@ -284,19 +287,21 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
             }
             if (mRootPathString != null){
 	            Uri uriRootRout = Uri.parse(mRootPathString);
-	            createDataPoint(uriRootRout.buildUpon().appendPath("Routs").appendPath(myRout.getNameRout()).build().getPath());
+	            createDataPoint(uriRootRout.buildUpon().appendPath(ROUT_STR)
+			            .appendPath(myRout.getNameRout()).build().getPath());
             }
 			myPosition = rout.getPositionRout();
 			myName = rout.getNameRout();
 		}
 	}
 
-
 	private void morePhotos(String name) {
 		if (mProdussedMode){
-				Uri rootPathForPhotosString =  Uri.parse(mRootPathString).buildUpon().appendPath("Photos").build();
+				Uri rootPathForPhotosString =  Uri.parse(mRootPathString)
+						.buildUpon().appendPath(PHOTO_STR).build();
 			for (int i = 1; i <= 3; i++) {
-				File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(name + String.valueOf(i)).build().getPath());
+				File photoFile = new File(rootPathForPhotosString.buildUpon()
+						.appendPath(name + String.valueOf(i)).build().getPath());
 				if (photoFile.exists()) {
 					photoUrlList.add(Uri.fromFile(photoFile).getPath());
 				}
@@ -305,8 +310,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		}else {
 			FirebaseDatabase database = FirebaseDatabase.getInstance();
 			DatabaseReference myRef = database.getReference();
-			Query myPlace = myRef.child("Photos").child(name).child("placeImage");
-
+			Query myPlace = myRef.child(PHOTO_STR).child(name).child(PLACE_IMAGE_STR);
 			myPlace.addValueEventListener(new ValueEventListener() {
 				@Override
 				public void onDataChange(DataSnapshot dataSnapshot) {
@@ -330,7 +334,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	private void getRating(String namePlace) {
 		database = FirebaseDatabase.getInstance();
 		DatabaseReference myRef = database.getReference();
-		Query myPlace = myRef.child("Rating").child(namePlace);
+		Query myPlace = myRef.child(RATING_STR).child(namePlace);
 
 		myPlace.addValueEventListener(new ValueEventListener() {
 			@Override
@@ -359,17 +363,17 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		database = FirebaseDatabase.getInstance();
 		DatabaseReference myRef = database.getReference();
 		FirebaseAuth mAuth = FirebaseAuth.getInstance();
-		myRef.child("Rating").child(myName).child(mAuth.getCurrentUser().getUid()).setValue(rating);
+		myRef.child(RATING_STR).child(myName).child(mAuth.getCurrentUser().getUid()).setValue(rating);
 	}
 
 	public void showLoginDialog() {
 		AlertDialog.Builder builder;
 		if (isOnline()) {
 			builder = new AlertDialog.Builder(this);
-			builder.setTitle("Для того щоб отримати доступ до всіх функцій програми потрібно зареєструватися");
-			builder.setMessage("Виберіть спосіб реєстраці");
+			builder.setTitle(getResources().getString(R.string.title_login_dialog));
+			builder.setMessage(getResources().getString(R.string.message_login_dialog));
 
-			builder.setPositiveButton("Зареєструватися", new DialogInterface.OnClickListener() {
+			builder.setPositiveButton(getResources().getString(R.string.registration), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int arg1) {
 				Intent intent = new Intent(ActionActivity.this, StartActivity_.class);
 					intent.putExtra(LOGIN, true );
@@ -378,7 +382,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 				}
 			});
-			builder.setNegativeButton(" ні", new DialogInterface.OnClickListener() {
+			builder.setNegativeButton(getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int arg1) {
 					dialog.dismiss();
 				}
@@ -394,19 +398,17 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			alert.show();
 		} else {
 			builder = new AlertDialog.Builder(this);
-			builder.setTitle("Мережа Інтернет");
-			builder.setMessage("Нажаль ви зараз ви не підключені до мережі інтернет!" +
-					" Керування автентифікацією недоступне! ");
+			builder.setTitle(getResources().getString(R.string.internet));
+			builder.setMessage(getResources().getString(R.string.no_internet) +" " +
+					getResources().getString(R.string.no_internet2));
 
-			builder.setPositiveButton("Так", new DialogInterface.OnClickListener() {
+			builder.setPositiveButton(getResources().getString(R.string.ok),
+					new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int arg1) {
 
 				}
 			});
-
 			builder.setCancelable(true);
-
-
 			AlertDialog alert = builder.create();
 			alert.show();
 		}
@@ -417,11 +419,11 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
        mPositionList = new ArrayList<>();
         try {
             // Load GeoJSON file
-
             File file = new File(uriRoutTrack);
 	        if (file.exists()) {
 		        InputStream fileInputStream = new FileInputStream(file);
-		        BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
+		        BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream,
+				        Charset.forName("UTF-8")));
 		        StringBuilder sb = new StringBuilder();
 		        int cp;
 		        while ((cp = rd.read()) != -1) {
@@ -511,9 +513,9 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 	private void showPublisherDialog(String problem) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Publish");
+		builder.setTitle(getResources().getString(R.string.publish));
 		builder.setMessage(problem);
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
 				dialogInterface.dismiss();
@@ -528,43 +530,43 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		int problem = 0;
 		if (place != null){
 			if (place.getNamePlace().isEmpty()) {
-				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
-						"Ви не вказали імя місця");
+				showPublisherDialog(getResources().getString(R.string.error_publisher)
+						+ "\n" + getResources().getString(R.string.error_publisher_1p));
 				problem++;
 			} else if (place.getPositionPlace() == null) {
-				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
-						"Не вказана позиція");
+				showPublisherDialog(getResources().getString(R.string.error_publisher)
+						+ "\n" + getResources().getString(R.string.error_publisher_2p));
 				problem++;
 			} else if (place.getTitlePlace().isEmpty()) {
-				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
-						"Не вказано титульної інформації про місце");
+				showPublisherDialog(getResources().getString(R.string.error_publisher)
+						+ "\n" +getResources().getString(R.string.error_publisher_3p));
 				problem++;
 			} else if (place.getUrlPlace().isEmpty()) {
-				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
-						"Ви не встановили титульну фотографію");
+				showPublisherDialog(getResources().getString(R.string.error_publisher)
+						+ "\n" + getResources().getString(R.string.error_publisher_4p));
 				problem++;
 			}
 
 		}else if (rout != null){
 			if (rout.getNameRout().isEmpty()) {
-				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
-						"Ви не вказали імя маршруту");
+				showPublisherDialog(getResources().getString(R.string.error_publisher)
+						+ "\n" + getResources().getString(R.string.error_publisher_1r));
 				problem++;
 			} else if (rout.getPositionRout() == null) {
-				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
-						"Не вказана позиція");
+				showPublisherDialog(getResources().getString(R.string.error_publisher)
+						+ "\n" + getResources().getString(R.string.error_publisher_2r));
 				problem++;
 			} else if (rout.getUrlRout().isEmpty()) {
-				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
-						"Не вказана титульна фотографія");
+				showPublisherDialog(getResources().getString(R.string.error_publisher)
+						+ "\n" + getResources().getString(R.string.error_publisher_3r));
 				problem++;
 			}else if (rout.getTitleRout().isEmpty()) {
-				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
-						"Немає титульної інформації");
+				showPublisherDialog(getResources().getString(R.string.error_publisher)
+						+ "\n" + getResources().getString(R.string.error_publisher_4r));
 				problem++;
 			}else if (rout.getRoutsLevel() == 0) {
-				showPublisherDialog("Для поблікації потрібно заповнити всі дані" + "\n" +
-						"Не вказана складність маршруту");
+				showPublisherDialog(getResources().getString(R.string.error_publisher)
+						+ "\n" + getResources().getString(R.string.error_publisher_5r)	);
 			problem++;
 		}
 		}
@@ -572,14 +574,15 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
 
 	@Background
-	public void saveToFirebase(final Place place, final Rout rout) {
+	public void saveToFireBase(final Place place, final Rout rout) {
 		if (place != null){
 			database = FirebaseDatabase.getInstance();
 			myRef = database.getReference();
 			FirebaseAuth mAuth = FirebaseAuth.getInstance();
 			String email = mAuth.getCurrentUser().getEmail();
 			place.setPublisher(email);
-			myRef.child("Places").child(place.getNamePlace()).addListenerForSingleValueEvent(new ValueEventListener() {
+			myRef.child(PLACE_STR).child(place.getNamePlace())
+					.addListenerForSingleValueEvent(new ValueEventListener() {
 				@Override
 				public void onDataChange(DataSnapshot snapshot) {
 					if (snapshot.getValue() == null) {
@@ -588,13 +591,15 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 						File file = new File(place.getUrlPlace());
 						if (file.exists()) {
-							StorageReference riversRef = storageRef.child("placeImage/" + (Uri.fromFile(file)).getLastPathSegment());
+							StorageReference riversRef = storageRef.child(PLACE_IMAGE_STR +"/"
+									+ (Uri.fromFile(file)).getLastPathSegment());
 							UploadTask uploadTask = riversRef.putFile(Uri.fromFile(file));
 							uploadBar.setVisibility(View.VISIBLE);
 							uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
 								@Override
 								public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-									double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+									double progress = (100.0 * taskSnapshot.getBytesTransferred())
+											/ taskSnapshot.getTotalByteCount();
 									uploadBar.setProgress((int) progress);
 									if (progress == 100.0) {
 										uploadBar.setVisibility(View.GONE);
@@ -604,32 +609,43 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 							uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 								@Override
 								public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-									// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+									// taskSnapshot.getMetadata() contains file metadata
+									// such as size, content-type, and download URL.
 									Uri downloadUrl = taskSnapshot.getDownloadUrl();
-									Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
-											Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+									Uri rootPathForPhotosString = Uri.fromFile(ActionActivity
+											.this.getExternalFilesDir(
+											Environment.DIRECTORY_DOWNLOADS)).buildUpon()
+											.appendPath(PHOTO_STR).build();
 
 									place.setUrlPlace(downloadUrl.toString());
-									myRef.child("Places").child(place.getNamePlace()).setValue(place);
+									myRef.child(PHOTO_STR).child(place.getNamePlace()).setValue(place);
 									for (int i = 1; i <= 3; i++) {
-										File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(place.getNamePlace() + String.valueOf(i)).build().getPath());
+										File photoFile = new File(rootPathForPhotosString.buildUpon()
+												.appendPath(place.getNamePlace()
+														+ String.valueOf(i)).build().getPath());
 										if (photoFile.exists()) {
 											FirebaseStorage storage = FirebaseStorage.getInstance();
 											StorageReference storageRef = storage.getReference();
-											StorageReference riversRef = storageRef.child("placeImage/" + place.getNamePlace() + String.valueOf(i));
+											StorageReference riversRef = storageRef
+													.child(PLACE_IMAGE_STR +"/" + place.getNamePlace()
+															+ String.valueOf(i));
 											UploadTask uploadTask = riversRef.putFile(Uri.fromFile(photoFile));
 											uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 												@Override
 												public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-													Toast.makeText(ActionActivity.this, "  Another photo download", Toast.LENGTH_SHORT).show();
-													myRef.child("Photos").child(place.getNamePlace()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
+													Toast.makeText(ActionActivity.this, getResources().getString(R.string.enother_photo_downlod), Toast.LENGTH_SHORT).show();
+													myRef.child(PHOTO_STR).child(place.getNamePlace())
+															.child(taskSnapshot.getDownloadUrl()
+																	.getLastPathSegment())
+															.setValue(taskSnapshot.getDownloadUrl()
+																	.toString());
 												}
 
 											})
 													.addOnFailureListener(new OnFailureListener() {
 														@Override
 														public void onFailure(@NonNull Exception e) {
-															Toast.makeText(ActionActivity.this, "Сталася помилка одна з додаткових фотографій не завантажилась", Toast.LENGTH_SHORT).show();
+															Toast.makeText(ActionActivity.this, getResources().getString(R.string.error_downloading_photo), Toast.LENGTH_SHORT).show();
 														}
 													});
 										}
@@ -640,12 +656,12 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 							}).addOnFailureListener(new OnFailureListener() {
 								@Override
 								public void onFailure(@NonNull Exception e) {
-									Toast.makeText(ActionActivity.this, "Сталася помила завантаження не відбулося", Toast.LENGTH_SHORT).show();
+									Toast.makeText(ActionActivity.this, getResources().getString(R.string.error_uploading), Toast.LENGTH_SHORT).show();
 								}
 							});
 						}
 					} else {
-						showAlreadyExistDialog("Place");
+						showAlreadyExistDialog(PLACE_STR);
 					}
 				}
 
@@ -661,7 +677,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			myRef = database.getReference();
 			FirebaseAuth mAuth = FirebaseAuth.getInstance();
 			rout.setPublisher(mAuth.getCurrentUser().getEmail());
-			myRef.child("Rout").child(rout.getNameRout()).addListenerForSingleValueEvent(new ValueEventListener() {
+			myRef.child(ROUT_STR).child(rout.getNameRout())
+					.addListenerForSingleValueEvent(new ValueEventListener() {
 				@Override
 				public void onDataChange(DataSnapshot snapshot) {
 					if (snapshot.getValue() == null) {
@@ -682,7 +699,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 						File file1 = new File(rout.getUrlRout());
 						if(file1.exists()) {
 
-							StorageReference riversRef1 = storageRef.child("placeImage/" + (Uri.fromFile(file1)).getLastPathSegment());
+							StorageReference riversRef1 = storageRef.child(PLACE_IMAGE_STR + "/" + (Uri.fromFile(file1)).getLastPathSegment());
 							UploadTask uploadTask1 = riversRef1.putFile(Uri.fromFile(file1));
 							uploadBar.setVisibility(View.VISIBLE);
 							uploadTask1.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -702,28 +719,28 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 									// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
 									Uri downloadUrl = taskSnapshot.getDownloadUrl();
 									Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
-											Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath("Photos").build();
+											Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath(PHOTO_STR).build();
 									rout.setUrlRout(downloadUrl.toString());
-									myRef.child("Rout").child(rout.getNameRout()).setValue(rout);
+									myRef.child(ROUT_STR).child(rout.getNameRout()).setValue(rout);
 									for (int i = 1; i <= 3; i++) {
 										File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(rout.getNameRout() + String.valueOf(i)).build().getPath());
 										if (photoFile.exists()) {
 											FirebaseStorage storage = FirebaseStorage.getInstance();
 											StorageReference storageRef = storage.getReference();
-											StorageReference riversRef = storageRef.child("placeImage/" + rout.getNameRout() + String.valueOf(i));
+											StorageReference riversRef = storageRef.child(PLACE_IMAGE_STR + "/" + rout.getNameRout() + String.valueOf(i));
 											UploadTask uploadTask = riversRef.putFile(Uri.fromFile(photoFile));
 											uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 												@Override
 												public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-													Toast.makeText(ActionActivity.this, "  Another photo download", Toast.LENGTH_SHORT).show();
-													myRef.child("Photos").child(rout.getNameRout()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
+													Toast.makeText(ActionActivity.this, getResources().getString(R.string.enother_photo_downlod), Toast.LENGTH_SHORT).show();
+													myRef.child(PHOTO_STR).child(rout.getNameRout()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
 												}
 
 											})
 													.addOnFailureListener(new OnFailureListener() {
 														@Override
 														public void onFailure(@NonNull Exception e) {
-															Toast.makeText(ActionActivity.this, "Сталася помилка одна з додаткових фотографій не завантажилась", Toast.LENGTH_SHORT).show();
+															Toast.makeText(ActionActivity.this, getResources().getString(R.string.error_downloading_photo), Toast.LENGTH_SHORT).show();
 														}
 													});
 										}
@@ -733,13 +750,14 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 							}).addOnFailureListener(new OnFailureListener() {
 								@Override
 								public void onFailure(@NonNull Exception e) {
-									Log.e("Bumar", e.toString());
-									Toast.makeText(ActionActivity.this, "Сталася помила завантаження не відбулося", Toast.LENGTH_SHORT).show();
+									Log.e("Error upload", e.toString());
+									Toast.makeText(ActionActivity.this, getResources()
+											.getString(R.string.error_uploading), Toast.LENGTH_SHORT).show();
 								}
 							});
 						}
 					} else {
-						showAlreadyExistDialog("Rout");
+						showAlreadyExistDialog(ROUT_STR);
 
 					}
 				}
@@ -754,16 +772,16 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 	private void showAlreadyExistDialog(String name) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(ActionActivity.this);
-		builder.setTitle("Публікація даних")
-				.setMessage( name +"з таким іменем уже існує! Змінити назву?")
-				.setPositiveButton("Так", new DialogInterface.OnClickListener() {
+		builder.setTitle(getResources().getString(R.string.publish))
+				.setMessage( name +" " + getResources().getString(R.string.already_exist))
+				.setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialogInterface, int i) {
 						editCreatedObject();
 						dialogInterface.dismiss();
 					}
 				})
-				.setNegativeButton("Ні", new DialogInterface.OnClickListener() {
+				.setNegativeButton(getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialogInterface, int i) {
 						dialogInterface.dismiss();
@@ -874,14 +892,14 @@ public void ratingBarDialog(){
 		final AlertDialog.Builder ratingDialog = new AlertDialog.Builder(this);
 
 		ratingDialog.setIcon(android.R.drawable.btn_star_big_on);
-		ratingDialog.setTitle("Проголосувати за місце");
+		ratingDialog.setTitle(getResources().getString(R.string.set_rating));
 
 		View linearLayout = getLayoutInflater().inflate(R.layout.ratingdialog, null);
 		ratingDialog.setView(linearLayout);
 
 		final RatingBar rating = (RatingBar)linearLayout.findViewById(R.id.ratingbar2);
 
-		ratingDialog.setPositiveButton("ОК",
+		ratingDialog.setPositiveButton(getResources().getString(R.string.ok),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						setRating(rating.getRating());
@@ -889,7 +907,7 @@ public void ratingBarDialog(){
 					}
 				})
 
-				.setNegativeButton("Ні",
+				.setNegativeButton(getResources().getString(R.string.no),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								dialog.cancel();
@@ -933,21 +951,20 @@ public void ratingBarDialog(){
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_action_activity, menu);
-		this.menu = menu;
 		if (mProdussedMode){
 			MenuItem actionEdit = menu.findItem(R.id.action_edit);
 			actionEdit.setVisible(true);
 			MenuItem actionPublisher = menu.findItem(R.id.action_publish);
 			actionPublisher.setVisible(true);
-			MenuItem actionAddToFavorit = menu.findItem(R.id.action_add_to_favorites);
-			actionAddToFavorit.setVisible(false);
+			MenuItem actionAddToFavorite = menu.findItem(R.id.action_add_to_favorites);
+			actionAddToFavorite.setVisible(false);
 		}else{
 			MenuItem actionEdit = menu.findItem(R.id.action_edit);
 			actionEdit.setVisible(false);
 			MenuItem actionPublisher = menu.findItem(R.id.action_publish);
 			actionPublisher.setVisible(false);
-			MenuItem actionAddToFavorit = menu.findItem(R.id.action_add_to_favorites);
-			actionAddToFavorit.setVisible(true);
+			MenuItem actionAddToFavorite = menu.findItem(R.id.action_add_to_favorites);
+			actionAddToFavorite.setVisible(true);
 		}
 
 		return true;
@@ -955,7 +972,7 @@ public void ratingBarDialog(){
 
 
 	@Click(R.id.ratingBarrContainer)
-	public void ratingBarWasCklicked(){
+	public void ratingBarWasClicked(){
 		if (FirebaseAuth.getInstance().getCurrentUser() != null && !FirebaseAuth.getInstance().getCurrentUser().isAnonymous()) {
 			ratingBarDialog();
 		}else{
@@ -981,7 +998,7 @@ public void ratingBarDialog(){
 				editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
 				editor.apply();
 
-				Toast.makeText(ActionActivity.this, " Add to favorites", LENGTH_LONG).show();
+				Toast.makeText(ActionActivity.this, getResources().getString(R.string.add_to_fevorite), LENGTH_LONG).show();
 				return true;
 			case R.id.action_edit:
 				editCreatedObject();
@@ -989,11 +1006,10 @@ public void ratingBarDialog(){
 			case R.id.action_publish:
 				if (isOnline()) {
 					if (dataIntegrityCheck(myPlace, myRout) == 0) {
-						saveToFirebase(myPlace, myRout);
+						saveToFireBase(myPlace, myRout);
 					}
 				} else {
-					showPublisherDialog("Sorry, no internet access, you will be able to post data later when " +
-							" there is a good connection to the network ");
+					showPublisherDialog(getResources().getString(R.string.offline_message));
 
 				}
 				return true;
@@ -1006,7 +1022,7 @@ public void ratingBarDialog(){
 		FragmentManager fm = getSupportFragmentManager();
 		editFragment = new EditModeFragment_();
 		editFragment.setData(myRout, myPlace, mRootPathString);
-		mActionMode = ((AppCompatActivity) this).startSupportActionMode(new EditObjectActionModeCallback(this, editFragment, fm));
+		mActionMode = this.startSupportActionMode(new EditObjectActionModeCallback(this, editFragment, fm));
 
 	}
 	@Override
