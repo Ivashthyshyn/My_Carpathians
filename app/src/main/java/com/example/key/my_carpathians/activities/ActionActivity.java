@@ -111,7 +111,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     public static final String SELECTED_USER_PLACES = "selected_user_places";
 	public static final String LOGIN = "login";
 	public static final String PHOTO_STR = "Photos";
-	public static final String ROUT_STR = "Routs";
+	public static final String ROUT_STR = "Rout";
 	public static final String PLACE_IMAGE_STR = "placeImage";
 	public static final String RATING_STR = "Rating";
 	public static final String PLACE_STR = "Places";
@@ -128,7 +128,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     public Set<String> selectedUserPlacesStringList = new ArraySet<>();
 	public SharedPreferences sharedPreferences;
 	public ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
-	private boolean mProdussedMode = false;
+	private boolean mProduceMode = false;
 	public List<String> photoUrlList = new ArrayList<>();
 	private int mItemUrlList = 0;
 	private ViewPagerAdapter viewPagerAdapter;
@@ -185,7 +185,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         pointsRout = (List<Position>)getIntent().getSerializableExtra(PUT_EXTRA_POINTS);
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
-	    mProdussedMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
+	    mProduceMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
 		produsedMode();
     }
 
@@ -195,7 +195,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				.rout(myRout)
 				.build();
 
-		if (mProdussedMode){
+		if (mProduceMode){
 			viewPagerAdapter.addFragment(infoFragment, getResources().getString(R.string.title_info));
 			viewPager.setAdapter(viewPagerAdapter);
 			viewPager.setCurrentItem(0);
@@ -229,7 +229,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 	private void setBaseInformation(Place place, Rout rout) {
 		if (place != null  ) {
-			if (isOnline() | mProdussedMode){
+			if (isOnline() | mProduceMode){
 				morePhotos(place.getNamePlace());
 				fabChangePhotoLeft.setVisibility(View.GONE);
 			}else{
@@ -274,7 +274,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				infoFragment.setRout(rout);
 				viewPagerAdapter.notifyDataSetChanged();
 			}
-            if (rout.getUrlRout() != null && isOnline() | mProdussedMode) {
+            if (rout.getUrlRout() != null && isOnline() | mProduceMode) {
 	            photoUrlList.add(rout.getUrlRout());
 	            morePhotos(rout.getNameRout());
 	            imageView.setVisibility(View.GONE);
@@ -296,7 +296,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
 
 	private void morePhotos(String name) {
-		if (mProdussedMode){
+		if (mProduceMode){
 				Uri rootPathForPhotosString =  Uri.parse(mRootPathString)
 						.buildUpon().appendPath(PHOTO_STR).build();
 			for (int i = 1; i <= 3; i++) {
@@ -485,7 +485,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     }
     @Click(R.id.buttonShowOnMap)
     public void buttonShowOnMapWasClicked() {
-        if(mProdussedMode) {
+        if(mProduceMode) {
             if (myPlace != null) {
                 selectedUserPlacesList.add(myPlace);
             }
@@ -495,7 +495,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
             Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
             mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
             mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
-            mapIntent.putExtra(PRODUCE_MODE, mProdussedMode);
+            mapIntent.putExtra(PRODUCE_MODE, mProduceMode);
             startActivity(mapIntent);
         }else{
             if (myPlace != null) {
@@ -951,7 +951,7 @@ public void ratingBarDialog(){
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_action_activity, menu);
-		if (mProdussedMode){
+		if (mProduceMode){
 			MenuItem actionEdit = menu.findItem(R.id.action_edit);
 			actionEdit.setVisible(true);
 			MenuItem actionPublisher = menu.findItem(R.id.action_publish);

@@ -132,6 +132,27 @@
     <string name="set_rating">Проголосувати за місце</string>
     <string name="add_to_fevorite">Added to favorite list!</string>
     <string name="offline_message">\"Sorry, no internet access, you will be able to post data later when \" + \t\t\t\t\t\t\t\" there is a good connection to the network</string>
+    <string name="save_date">Save Data to Storage!</string>
+    <string name="save_date_message">External memory is not available!  And in the interior storage  is not enough free space.  You can not use this program in ofline.</string>
+    <string name="save_date_message_permission"><![CDATA[You do not gave permission to download data to External Storage! Save data to Internal storage&]]></string>
+    <string name="permission">Permission</string>
+    <string name="no_grandet_permission">You do not gave any permission</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="button_authorization">Authentication</string>
+    <string name="dialog_get_registr">Для того щоб отримати доступ до всіх функцій програми потрібно зареєструватися</string>
+    <string name="dialog_get_registr_message">Виберіть спосіб реєстраці</string>
+    <string name="favorite">Favorite</string>
+    <string name="your">Your</string>
+    <string name="empty_list">List is empty!</string>
+    <string name="enter_email">Enter email address!</string>
+    <string name="enter_pass">Enter password!</string>
+    <string name="dialog_register">Registration!</string>
+    <string name="dialog_register_message">An account with this email address and password  does not exist! Create a new account?</string>
+    <string name="button_create_new">Create new</string>
+    <string name="button_check_pass">Check password</string>
+    <string name="invalid_email">Invalid email!</string>
+    <string name="logged_in">Logged In</string>
+    <string name="authentification_failed">Authentication failed.</string>
 
 
 </resources>

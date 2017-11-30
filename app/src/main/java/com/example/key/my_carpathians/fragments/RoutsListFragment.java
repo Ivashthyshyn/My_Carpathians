@@ -3,7 +3,6 @@ package com.example.key.my_carpathians.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,6 +18,7 @@ import com.example.key.my_carpathians.models.Rout;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
+import org.androidannotations.annotations.FragmentArg;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +26,12 @@ import java.util.List;
 @EFragment
 public class RoutsListFragment extends Fragment implements IRotation {
 	RecyclerView recyclerView;
-	List<Rout> mRoutsList;
 	RoutsRecyclerAdapter recyclerAdapter;
 	CardView emptyView;
-	private int mMode;
-	private ActionMode mActionMode;
+	@FragmentArg
+	ArrayList<Rout> mRoutsList;
+	@FragmentArg
+	int mMode;
 	private List<Rout> mSearchList;
 	private View fragmentView;
 
@@ -64,7 +65,7 @@ public class RoutsListFragment extends Fragment implements IRotation {
 		updateLayoutManager();
 		createList();
 	}
-	public void setList(List<Rout> routList, int mode) {
+	public void setList(ArrayList<Rout> routList, int mode) {
 		this.mRoutsList = routList;
 		this.mMode = mode;
 		if (recyclerAdapter != null & routList != null) {
