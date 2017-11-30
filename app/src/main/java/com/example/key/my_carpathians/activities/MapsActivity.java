@@ -93,6 +93,7 @@ import java.util.List;
 import java.util.Random;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static com.example.key.my_carpathians.activities.ActionActivity.ROUT_STR;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_PLACES;
 import static com.example.key.my_carpathians.activities.ActionActivity.SELECTED_USER_ROUTS;
 import static com.example.key.my_carpathians.activities.SettingsActivity.AVERAGE_VALUE;
@@ -627,7 +628,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapboxMap.getUiSettings().setCompassMargins(20,20,20,20);
 
         if (selectUserRouts != null && selectUserRouts.size() > 0 && mRootPathString != null) {
-            Uri rootPathForRoutsString = Uri.parse(mRootPathString).buildUpon().appendPath("Routs").build();
+            Uri rootPathForRoutsString = Uri.parse(mRootPathString).buildUpon().appendPath(ROUT_STR).build();
             for (int i = 0; i < selectUserRouts.size(); i++) {
                 String mUriString = rootPathForRoutsString.buildUpon().appendPath(selectUserRouts.get(i)).build().getPath();
                 if (mUriString != null) {
