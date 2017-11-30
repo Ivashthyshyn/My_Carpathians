@@ -18,6 +18,7 @@ import com.example.key.my_carpathians.models.Place;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
+import org.androidannotations.annotations.FragmentArg;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +30,14 @@ import java.util.List;
 @EFragment
 public class PlacesListFragment extends Fragment implements IRotation {
 	RecyclerView recyclerView;
-	List<Place> placeList;
 	PlacesRecyclerAdapter recyclerAdapter;
 	CardView emptyView;
-	private int mMode;
 	private List<Place> mSearchList;
 	private View fragmentView;
+	@FragmentArg
+	ArrayList<Place> placeList;
+	@FragmentArg
+	int mMode;
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,7 +81,7 @@ public class PlacesListFragment extends Fragment implements IRotation {
 	}
 
 
-	public void setList(List<Place> placeList, int mode) {
+	public void setList(ArrayList<Place> placeList, int mode) {
 		this.placeList = placeList;
 		this.mMode = mode;
 		if (recyclerAdapter != null & placeList != null) {

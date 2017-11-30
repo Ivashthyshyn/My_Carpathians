@@ -120,6 +120,9 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.example.key.my_carpathians.activities.ActionActivity.LOGIN;
+import static com.example.key.my_carpathians.activities.ActionActivity.PHOTO_STR;
+import static com.example.key.my_carpathians.activities.ActionActivity.PLACE_STR;
+import static com.example.key.my_carpathians.activities.ActionActivity.ROUT_STR;
 import static com.example.key.my_carpathians.activities.MapsActivity.JSON_CHARSET;
 import static com.example.key.my_carpathians.activities.MapsActivity.JSON_FIELD_REGION_NAME;
 import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
@@ -153,12 +156,32 @@ public class StartActivity extends AppCompatActivity implements
 	public static final int FA_ROUT = 3;
 	public static final int RC_SIGN_IN = 9001;
 	public static final String TAG = "StartActivity";
+	public static final String GOOGLE_PROVIDER = "google.com";
+	public static final String FACEBOOK_PROVIDER = "facebook.com";
+	public static final String EMAIL_PROVIDER = "password";
+	public static final String CREATED_STR = "Created";
 	public Context context = StartActivity.this;
 	public ArrayList<Place> places = new ArrayList<>();
 	public ArrayList<Rout> routs = new ArrayList<>();
 	public AlertDialog.Builder builder;
 	public ActionBarDrawerToggle actionBarDrawerToggle;
 	public ViewPagerAdapter viewPagerAdapter;
+	private boolean mConnected = false;
+	private String[] mPermissionList = new String[]{
+			ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE
+			, READ_EXTERNAL_STORAGE};
+	private FirebaseAuth.AuthStateListener mAuthListener;
+	private SharedPreferences mSharedPreferences;
+	private CallbackManager mCallbackManager;
+	private FirebaseUser mUser;
+	private FirebaseAuth mAuth;
+	private GoogleApiClient mGoogleApiClient;
+	private String mUserUID = null;
+	private boolean mTypeMode = false;
+	private Uri mRootPath;
+	private int mRegionSelected;
+	private LoginManager mFacebookLoginManager;
+	private String mQuery;
 	@ViewById(R.id.fabRecEditor)
 	FloatingActionButton fabRecEditor;
 	@ViewById(R.id.userAcountImage)
@@ -201,22 +224,7 @@ public class StartActivity extends AppCompatActivity implements
 	ImageButton buttonLogout;
 	@ViewById(R.id.buttonAuthorization)
 	Button buttonAuthorization;
-	private boolean mConnected = false;
-	private String[] mPermissionList = new String[]{
-			ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE
-			, READ_EXTERNAL_STORAGE};
-	private FirebaseAuth.AuthStateListener mAuthListener;
-	private SharedPreferences mSharedPreferences;
-	private CallbackManager mCallbackManager;
-	private FirebaseUser mUser;
-	private FirebaseAuth mAuth;
-	private GoogleApiClient mGoogleApiClient;
-	private String mUserUID = null;
-	private boolean mTypeMode = false;
-	private Uri mRootPath;
-	private int mRegionSelected;
-	private LoginManager mFacebookLoginManager;
-	private String mQuery;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -234,25 +242,30 @@ public class StartActivity extends AppCompatActivity implements
 			public void onPageScrollStateChanged(int state) {
 
 				if (state == PLACE) {
-					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(ROUT);
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter
+							.getItem(ROUT);
 					routsListFragment.dismissActionMode();
 				} else if (state == ROUT) {
-					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(PLACE);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter
+							.getItem(PLACE);
 					placesListFragment.dismissActionMode();
 				}
 				if (mQuery != null) {
 					if (tabLayout.getTabCount() != 0 && state == PLACE) {
-						PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(PLACE);
+						PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter
+								.getItem(PLACE);
 						placesListFragment.filter(mQuery);
 					} else if (tabLayout.getTabCount() != 0 && state == ROUT) {
-						RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(ROUT);
+						RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter
+								.getItem(ROUT);
 						routsListFragment.filter(mQuery);
 					}
 				}
 			}
 		});
 
-		actionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.app_name, R.string.app_name);
+		actionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar,
+				R.string.app_name, R.string.app_name);
 		mDrawerLayout.addDrawerListener(actionBarDrawerToggle);
 		actionBarDrawerToggle.syncState();
 
@@ -270,7 +283,7 @@ public class StartActivity extends AppCompatActivity implements
 					mTypeMode = false;
 					buttonLogout.setVisibility(View.VISIBLE);
 				} else {
-					showableLogInGroup(true);
+					showLogInGroup(true);
 					mTypeMode = false;
 				}
 
@@ -291,7 +304,7 @@ public class StartActivity extends AppCompatActivity implements
 		FirebaseDatabase database = FirebaseDatabase.getInstance();
 		DatabaseReference myRef = database.getReference();
 
-		Query myPlace = myRef.child("Places");
+		Query myPlace = myRef.child(PLACE_STR);
 		myPlace.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(DataSnapshot dataSnapshot) {
@@ -305,14 +318,17 @@ public class StartActivity extends AppCompatActivity implements
 				downloadPhoto(places);
 
 				if (tabLayout.getTabCount() == 0) {
-					PlacesListFragment placesListFragment = new PlacesListFragment_();
-					placesListFragment.setList(places, PLACE);
-					viewPagerAdapter.addFragment(placesListFragment, "Place");
+					PlacesListFragment placesListFragment = new PlacesListFragment_().builder()
+							.placeList(places)
+							.mMode(PLACE)
+							.build();
+					viewPagerAdapter.addFragment(placesListFragment, PLACE_STR);
 					viewPagerAdapter.notifyDataSetChanged();
 
 				} else {
 					tabLayout.getTabAt(0).setIcon(null);
-					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter
+							.getItem(0);
 					placesListFragment.setList(places, PLACE);
 				}
 			}
@@ -323,7 +339,7 @@ public class StartActivity extends AppCompatActivity implements
 			}
 		});
 
-		Query myRouts = myRef.child("Rout");
+		Query myRouts = myRef.child(ROUT_STR);
 		myRouts.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(DataSnapshot dataSnapshot) {
@@ -338,14 +354,17 @@ public class StartActivity extends AppCompatActivity implements
 					downloadRoutToStorage(routs);
 				}
 				if (tabLayout.getTabCount() == 1) {
-					RoutsListFragment routsListFragment = new RoutsListFragment_();
-					routsListFragment.setList(routs, ROUT);
-					viewPagerAdapter.addFragment(routsListFragment, "Routs");
+					RoutsListFragment routsListFragment = new RoutsListFragment_().builder()
+							.mRoutsList(routs)
+							.mMode(ROUT)
+							.build();
+					viewPagerAdapter.addFragment(routsListFragment, ROUT_STR);
 					viewPagerAdapter.notifyDataSetChanged();
 
 				} else {
 					tabLayout.getTabAt(1).setIcon(null);
-					RoutsListFragment routsListFragment = (RoutsListFragment_) viewPagerAdapter.getItem(1);
+					RoutsListFragment routsListFragment = (RoutsListFragment_) viewPagerAdapter
+							.getItem(1);
 					routsListFragment.setList(routs, ROUT);
 				}
 			}
@@ -385,18 +404,24 @@ public class StartActivity extends AppCompatActivity implements
 						getDateFromFirebace();
 					} else {
 						if (context.getFilesDir().getFreeSpace() > 1250000L) {
-							mRootPath = Uri.fromFile(context.getDir("my_carpathians", Context.MODE_PRIVATE));
-							mSharedPreferences.edit().putString(ROOT_PATH, mRootPath.toString()).apply();
+							mRootPath = Uri.fromFile(context.getDir("my_carpathians",
+									Context.MODE_PRIVATE));
+							mSharedPreferences.edit().putString(ROOT_PATH, mRootPath.toString())
+									.apply();
 							getDateFromFirebace();
 						} else {
-							AlertDialog.Builder noAvailableStorageDialog = new AlertDialog.Builder(StartActivity.this);
-							noAvailableStorageDialog.setTitle("Save Data");
-							noAvailableStorageDialog.setMessage("External memory is not available! \n" +
-									"And in the interior storage  is not enough free space.\n" + " You can not use this program in ofline");
-							noAvailableStorageDialog.setPositiveButton("Oк", new DialogInterface.OnClickListener() {
+							AlertDialog.Builder noAvailableStorageDialog = new AlertDialog
+									.Builder(StartActivity.this);
+							noAvailableStorageDialog.setTitle(getResources()
+									.getString(R.string.save_date));
+							noAvailableStorageDialog.setMessage(getResources()
+									.getString(R.string.save_date_message));
+							noAvailableStorageDialog.setPositiveButton(getResources()
+									.getString(R.string.ok), new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialogInterface, int i) {
-									Intent settingsIntent = new Intent(Settings.ACTION_APPLICATION_SETTINGS);
+									Intent settingsIntent = new Intent(Settings
+											.ACTION_APPLICATION_SETTINGS);
 									startActivity(settingsIntent);
 								}
 
@@ -407,17 +432,17 @@ public class StartActivity extends AppCompatActivity implements
 					}
 
 				} else {
-					Toast.makeText(this, "" + mPermissionList[i].toString() + " is already granted.", Toast.LENGTH_SHORT).show();
+					Log.d("StartActivity", mPermissionList[i].toString() + " is already granted.");
 				}
 			}
 		}
 		if (mListPerm.size() > 0) {
-			String[] permision = new String[mListPerm.size()];
+			String[] permission = new String[mListPerm.size()];
 			for (int i = 0; i < mListPerm.size(); i++) {
-				permision[i] = mListPerm.get(i);
+				permission[i] = mListPerm.get(i);
 			}
 
-			ActivityCompat.requestPermissions(StartActivity.this, permision, 69);
+			ActivityCompat.requestPermissions(StartActivity.this, permission, 69);
 		}
 
 
@@ -439,10 +464,12 @@ public class StartActivity extends AppCompatActivity implements
 			public boolean onQueryTextChange(String newText) {
 				mQuery = newText;
 				if (tabLayout.getTabCount() > 0 && tabLayout.getSelectedTabPosition() == PLACE) {
-					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter
+							.getItem(tabLayout.getSelectedTabPosition());
 					placesListFragment.filter(newText);
-				} else if (tabLayout.getTabCount() > 0 && tabLayout.getSelectedTabPosition() == ROUT) {
-					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
+				} else if (tabLayout.getTabCount() > 0 && tabLayout.getSelectedTabPosition() == ROUT){
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter
+							.getItem(tabLayout.getSelectedTabPosition());
 					routsListFragment.filter(newText);
 				}
 
@@ -458,9 +485,11 @@ public class StartActivity extends AppCompatActivity implements
 			@Override
 			public boolean onMenuItemActionCollapse(MenuItem item) {
 				if (tabLayout.getTabCount() == 2) {
-					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(PLACE);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter
+							.getItem(PLACE);
 					placesListFragment.filter(null);
-					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(ROUT);
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter
+							.getItem(ROUT);
 					routsListFragment.filter(null);
 					mQuery = null;
 				}
@@ -491,18 +520,23 @@ public class StartActivity extends AppCompatActivity implements
 						getDateFromFirebace();
 					} else {
 						AlertDialog.Builder builder = new AlertDialog.Builder(this);
-						builder.setTitle("Download Data!");
-						builder.setMessage("You do not gave permission to download data to External Storage! Save data to Internal storage& ");
-						builder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+						builder.setTitle(getResources().getString(R.string.save_date));
+						builder.setMessage(getResources()
+								.getString(R.string.save_date_message_permission));
+						builder.setPositiveButton(getResources().getString(R.string.ok),
+								new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialogInterface, int i) {
-								mRootPath = Uri.fromFile(context.getDir("my_carpathians", Context.MODE_PRIVATE));
-								mSharedPreferences.edit().putString(ROOT_PATH, mRootPath.toString()).apply();
+								mRootPath = Uri.fromFile(context.getDir("my_carpathians",
+										Context.MODE_PRIVATE));
+								mSharedPreferences.edit().putString(ROOT_PATH, mRootPath.toString())
+										.apply();
 								getDateFromFirebace();
 								dialogInterface.dismiss();
 							}
 						});
-						builder.setNegativeButton("permission", new DialogInterface.OnClickListener() {
+						builder.setNegativeButton(getResources().getString(R.string.permission),
+								new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialogInterface, int i) {
 								checkAllPermission();
@@ -519,34 +553,34 @@ public class StartActivity extends AppCompatActivity implements
 						alertDialog.show();
 					}
 				}
-				if (permissions[i].equals(READ_EXTERNAL_STORAGE) && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+				if (permissions[i].equals(READ_EXTERNAL_STORAGE) && grantResults[i] ==
+						PackageManager.PERMISSION_GRANTED) {
 				} else {
 
 				}
 			}
 
 		} else {
-			Toast.makeText(StartActivity.this, " You do not gave any permission ", Toast.LENGTH_SHORT).show();
-
-
+			Toast.makeText(StartActivity.this,getResources().
+					getString(R.string.no_grandet_permission),  Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	private void checkCurrentUser() {
 		mUser = mAuth.getCurrentUser();
 		if (mUser == null) {
-			showableLogInGroup(true);
+			showLogInGroup(true);
 			updateUI(null, null);
 			mTypeMode = false;
 			showLoginDialog();
 		} else if (mUser.isAnonymous()) {
-			updateUI("Anonymous", null);
+			updateUI(getResources().getString(R.string.anonymous), null);
 			mUserUID = mUser.getUid();
 			mTypeMode = false;
 			showInterfaceForAnonymous();
 			produceToolsVisibility(mTypeMode);
 		} else {
-			if (mUser.getProviders().get(0).equals("google.com")) {
+			if (mUser.getProviders().get(0).equals(GOOGLE_PROVIDER)) {
 				produceToolsVisibility(mTypeMode);
 				mTypeMode = true;
 				loginGoogle();
@@ -554,7 +588,7 @@ public class StartActivity extends AppCompatActivity implements
 				updateUI(mUser.getProviderData().get(0).getDisplayName(),
 						String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
 				buttonLogout.setVisibility(View.VISIBLE);
-			} else if (mUser.getProviders().get(0).equals("facebook.com")) {
+			} else if (mUser.getProviders().get(0).equals(FACEBOOK_PROVIDER)) {
 				produceToolsVisibility(mTypeMode);
 				mTypeMode = true;
 				mUserUID = mUser.getUid();
@@ -562,7 +596,7 @@ public class StartActivity extends AppCompatActivity implements
 				updateUI(mUser.getProviderData().get(0).getDisplayName(),
 						String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
 				buttonLogout.setVisibility(View.VISIBLE);
-			} else if (mUser.getProviders().get(0).equals("password")) {
+			} else if (mUser.getProviders().get(0).equals(EMAIL_PROVIDER)) {
 				produceToolsVisibility(mTypeMode);
 				mTypeMode = true;
 				mUserUID = mUser.getUid();
@@ -595,8 +629,8 @@ public class StartActivity extends AppCompatActivity implements
 
 	private void showInterfaceForAnonymous() {
 
-		buttonAuthorization.setText("Authentication");
-		showableLogInGroup(false);
+		buttonAuthorization.setText(getResources().getString(R.string.button_authorization));
+		showLogInGroup(false);
 		buttonLogout.setVisibility(View.VISIBLE);
 	}
 
@@ -604,7 +638,7 @@ public class StartActivity extends AppCompatActivity implements
 		if (mAuth.getCurrentUser() != null) {
 			mAuth.signOut();
 			updateUI(null, null);
-			showableLogInGroup(true);
+			showLogInGroup(true);
 		}
 	}
 
@@ -616,8 +650,10 @@ public class StartActivity extends AppCompatActivity implements
 	public void downloadRoutToStorage(List<Rout> routsList) {
 		for (int i = 0; i < routsList.size(); i++) {
 			FirebaseStorage storage = FirebaseStorage.getInstance();
-			StorageReference httpsReference = storage.getReferenceFromUrl(routsList.get(i).getUrlRoutsTrack());
-			File rootPath = new File(this.mRootPath.buildUpon().appendPath("Routs").build().getPath());
+			StorageReference httpsReference = storage.getReferenceFromUrl(routsList.get(i)
+					.getUrlRoutsTrack());
+			File rootPath = new File(this.mRootPath.buildUpon().appendPath(ROUT_STR).build()
+					.getPath());
 			if (!rootPath.exists()) {
 				rootPath.mkdirs();
 			}
@@ -645,7 +681,7 @@ public class StartActivity extends AppCompatActivity implements
 			try {
 				URL url = new URL(placeList.get(i).getUrlPlace());
 
-				File rootPath = new File(this.mRootPath.getPath(), "Photos");
+				File rootPath = new File(this.mRootPath.getPath(), PHOTO_STR);
 				if (!rootPath.exists()) {
 					rootPath.mkdirs();
 				}
@@ -671,11 +707,12 @@ public class StartActivity extends AppCompatActivity implements
 					while ((bufferLength = inputStream.read(buffer)) > 0) {
 						fos.write(buffer, 0, bufferLength);
 						downloadedSize += bufferLength;
-						Log.i("Progress:", "downloadedSize:" + downloadedSize + "totalSize:" + totalSize);
+						Log.i("Progress:", "downloadedSize:" + downloadedSize
+								+ "totalSize:" + totalSize);
 					}
 
 					fos.close();
-					Log.d("test", "Image Saved in sdcard..");
+					Log.d("test", "Image Saved in storage..");
 				}
 			} catch (IOException io) {
 				io.printStackTrace();
@@ -699,6 +736,8 @@ public class StartActivity extends AppCompatActivity implements
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		if (drawer.isDrawerOpen(GravityCompat.START)) {
 			drawer.closeDrawer(GravityCompat.START);
+		}else{
+			super.onBackPressed();
 		}
 
 
@@ -717,16 +756,18 @@ public class StartActivity extends AppCompatActivity implements
 	void showLoginDialog() {
 		if (isOnline()) {
 			builder = new AlertDialog.Builder(this);
-			builder.setTitle("Для того щоб отримати доступ до всіх функцій програми потрібно зареєструватися");
-			builder.setMessage("Виберіть спосіб реєстраці");
+			builder.setTitle(getResources().getString(R.string.dialog_get_registr));
+			builder.setMessage(getResources().getString(R.string.dialog_get_registr_message));
 
-			builder.setPositiveButton("Зареєструватися", new DialogInterface.OnClickListener() {
+			builder.setPositiveButton(getResources().getString(R.string.registration)
+					, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int arg1) {
 
 					mDrawerLayout.openDrawer(Gravity.START);
 				}
 			});
-			builder.setNegativeButton("Анонімний вхід", new DialogInterface.OnClickListener() {
+			builder.setNegativeButton(getResources().getString(R.string.anonymous)
+					, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int arg1) {
 					signInAnonymously();
 					mDrawerLayout.closeDrawer(Gravity.START);
@@ -744,27 +785,24 @@ public class StartActivity extends AppCompatActivity implements
 			alert.show();
 		} else {
 			builder = new AlertDialog.Builder(this);
-			builder.setTitle("Мережа Інтернет");
-			builder.setMessage("Нажаль ви зараз ви не підключені до мережі інтернет!" +
-					" Керування автентифікацією недоступне! ");
+			builder.setTitle(getResources().getString(R.string.internet));
+			builder.setMessage(getResources().getString(R.string.no_internet) +
+					getResources().getString(R.string.no_internet2));
 
-			builder.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+			builder.setPositiveButton(getResources().getString(R.string.settings)
+					, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int arg1) {
 					Intent intentSettingsNetwork = new Intent(Intent.ACTION_MAIN);
-					intentSettingsNetwork.setClassName("com.android.phone", "com.android.phone.NetworkSetting");
+					intentSettingsNetwork.setClassName("com.android.phone",
+							"com.android.phone.NetworkSetting");
 					startActivity(intentSettingsNetwork);
 				}
 			});
-
 			builder.setCancelable(true);
-
-
 			AlertDialog alert = builder.create();
 			alert.show();
 		}
 	}
-
-
 	private void signInAnonymously() {
 		mAuth.signInAnonymously()
 				.addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -839,15 +877,14 @@ public class StartActivity extends AppCompatActivity implements
 		int dialogFlag = 0;
 
 		if (createdPlaces != null) {
-			List<Place> createdP = new ArrayList<>();
+			ArrayList<Place> createdP = new ArrayList<>();
 			if (createdPlaces.size() > 0) {
 				for (int i = 0; i < createdPlaces.size(); i++) {
 					File rootPath = new File(context.getExternalFilesDir(
-							Environment.DIRECTORY_DOWNLOADS), "Created");
+							Environment.DIRECTORY_DOWNLOADS), CREATED_STR);
 					if (!rootPath.exists()) {
 						rootPath.mkdirs();
 					}
-
 					File file = new File(rootPath, createdPlaces.get(i));
 					if (file.exists()) {
 						try {
@@ -884,11 +921,11 @@ public class StartActivity extends AppCompatActivity implements
 			dialogFlag++;
 		}
 		if (createdRouts != null) {
-			List<Rout> createdR = new ArrayList<>();
+			ArrayList<Rout> createdR = new ArrayList<>();
 			if (createdRouts.size() > 0) {
 				for (int i = 0; i < createdRouts.size(); i++) {
 					File rootPath = new File(context.getExternalFilesDir(
-							Environment.DIRECTORY_DOWNLOADS), "Created");
+							Environment.DIRECTORY_DOWNLOADS), CREATED_STR);
 					if (!rootPath.exists()) {
 						rootPath.mkdirs();
 					}
@@ -925,7 +962,7 @@ public class StartActivity extends AppCompatActivity implements
 			dialogFlag++;
 		}
 		if (dialogFlag > 1) {
-			showFavoriteEmptyDialog("Created");
+			showFavoriteEmptyDialog(CREATED_STR);
 			setDrawerState(false);
 		} else {
 
@@ -937,7 +974,7 @@ public class StartActivity extends AppCompatActivity implements
 	public void showFavoriteList(List<String> favoritesPlaces, List<String> favoritesRouts) {
 		int dialogFlag = 0;
 		if (favoritesPlaces != null) {
-			List<Place> favoriteP = new ArrayList<>();
+			ArrayList<Place> favoriteP = new ArrayList<>();
 			if (favoritesPlaces.size() > 0) {
 				for (int i = 0; i < places.size(); i++) {
 					for (int s = 0; s < favoritesPlaces.size(); s++) {
@@ -967,7 +1004,7 @@ public class StartActivity extends AppCompatActivity implements
 			dialogFlag++;
 		}
 		if (favoritesRouts != null) {
-			List<Rout> favoriteR = new ArrayList<>();
+			ArrayList<Rout> favoriteR = new ArrayList<>();
 			if (favoritesRouts.size() > 0) {
 				for (int i = 0; i < routs.size(); i++) {
 					for (int s = 0; s < favoritesRouts.size(); s++) {
@@ -995,7 +1032,7 @@ public class StartActivity extends AppCompatActivity implements
 			dialogFlag++;
 		}
 		if (dialogFlag > 1) {
-			showFavoriteEmptyDialog("Favorite");
+			showFavoriteEmptyDialog(getResources().getString(R.string.favorite));
 			setDrawerState(false);
 		} else {
 
@@ -1045,10 +1082,12 @@ public class StartActivity extends AppCompatActivity implements
 
 	private void showFavoriteEmptyDialog(String nameList) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Favorite");
-		builder.setMessage("Your " + nameList + " List is empty!");
+		builder.setTitle(nameList);
+		builder.setMessage(getResources().getString(R.string.your) + nameList + " " +
+				getResources().getString(R.string.empty_list));
 		builder.setIcon(R.drawable.ic_favorite_border_black_24px);
-		builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(getResources().getString(R.string.ok)
+				, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
 				dialogInterface.dismiss();
@@ -1062,7 +1101,8 @@ public class StartActivity extends AppCompatActivity implements
 	public void deletedFromFavoriteList(final List<String> names, final int type) {
 
 		if (type == ROUT) {
-			Set<String> favoritesRoutsList = new HashSet<>(mSharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>()));
+			Set<String> favoritesRoutsList = new HashSet<>(mSharedPreferences
+					.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>()));
 			favoritesRoutsList.removeAll(names);
 			SharedPreferences.Editor editor = mSharedPreferences.edit();
 			editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
@@ -1073,7 +1113,8 @@ public class StartActivity extends AppCompatActivity implements
 			}
 			showFavoriteList(null, mListRouts);
 		} else if (type == PLACE) {
-			Set<String> favoritesPlacesList = new HashSet<>(mSharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>()));
+			Set<String> favoritesPlacesList = new HashSet<>(mSharedPreferences
+					.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>()));
 			favoritesPlacesList.removeAll(names);
 			SharedPreferences.Editor editor = mSharedPreferences.edit();
 			editor.putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList);
@@ -1093,7 +1134,8 @@ public class StartActivity extends AppCompatActivity implements
 
 		if (type == ROUT) {
 			for (int p = 0; p < names.size(); p++) {
-				ObjectService objectService = new ObjectService(StartActivity.this, mRootPath.toString());
+				ObjectService objectService = new ObjectService(StartActivity.this,
+						mRootPath.toString());
 				String mOutcome = objectService.deleteRout(names.get(p));
 				if (!mOutcome.equals(ERROR)) {
 					Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG).show();
@@ -1103,7 +1145,8 @@ public class StartActivity extends AppCompatActivity implements
 			}
 		} else if (type == PLACE) {
 			for (int p = 0; p < names.size(); p++) {
-				ObjectService objectService = new ObjectService(StartActivity.this, mRootPath.toString());
+				ObjectService objectService = new ObjectService(StartActivity.this,
+						mRootPath.toString());
 				String mOutcome = objectService.deletePlace(names.get(p));
 				if (!mOutcome.equals(ERROR)) {
 					Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG).show();
@@ -1144,12 +1187,14 @@ public class StartActivity extends AppCompatActivity implements
 
 
 			if (TextUtils.isEmpty(email)) {
-				Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.enter_email),
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 
 			if (TextUtils.isEmpty(password)) {
-				Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.enter_pass),
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 
@@ -1170,15 +1215,17 @@ public class StartActivity extends AppCompatActivity implements
 										inputPassword.setError(getString(R.string.minimum_password));
 									} else {
 										AlertDialog.Builder builder = new AlertDialog.Builder(StartActivity.this);
-										builder.setTitle("Registration!");
-										builder.setMessage("An account with this email address and password  does not exist! Create a new account?");
-										builder.setPositiveButton("Create new", new DialogInterface.OnClickListener() {
+										builder.setTitle(getResources().getString(R.string.dialog_register));
+										builder.setMessage(getResources().getString(R.string.dialog_register_message));
+										builder.setPositiveButton(getResources().getString(R.string.button_create_new),
+												new DialogInterface.OnClickListener() {
 											@Override
 											public void onClick(DialogInterface dialog, int which) {
 												createNewAccount();
 											}
 										});
-										builder.setNegativeButton("Check password", new DialogInterface.OnClickListener() {
+										builder.setNegativeButton(getResources().getString(R.string.button_check_pass),
+												new DialogInterface.OnClickListener() {
 											@Override
 											public void onClick(DialogInterface dialog, int which) {
 												dialog.dismiss();
@@ -1188,13 +1235,13 @@ public class StartActivity extends AppCompatActivity implements
 									}
 								} else {
 									updateUI(email.toString(), null);
-									showableLogInGroup(false);
+									showLogInGroup(false);
 
 								}
 							}
 						});
 			} else {
-				inputEmail.setError("Invalid email!");
+				inputEmail.setError(getResources().getString(R.string.invalid_email));
 			}
 		} else {
 			showLoginDialog();
@@ -1208,7 +1255,6 @@ public class StartActivity extends AppCompatActivity implements
 				.addOnCompleteListener(StartActivity.this, new OnCompleteListener<AuthResult>() {
 					@Override
 					public void onComplete(@NonNull Task<AuthResult> task) {
-						Toast.makeText(StartActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
 						progressBar.setVisibility(View.GONE);
 						// If sign in fails, display a message to the user. If sign in succeeds
 						// the auth state listener will be notified and logic to handle the
@@ -1248,11 +1294,11 @@ public class StartActivity extends AppCompatActivity implements
 				protected void onCurrentAccessTokenChanged(AccessToken accessToken, AccessToken accessToken2) {
 					Log.d(TAG, "onCurrentAccessTokenChanged()");
 					if (accessToken == null) {
-						showableLogInGroup(false);
+						showLogInGroup(false);
 					} else if (accessToken2 == null) {
 						LoginManager.getInstance().logOut();
 						mAuth.signOut();
-						showableLogInGroup(true);
+						showLogInGroup(true);
 					}
 				}
 			};
@@ -1264,21 +1310,22 @@ public class StartActivity extends AppCompatActivity implements
 			mFacebookLoginManager.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
 				@Override
 				public void onSuccess(LoginResult loginResult) {
-					Toast toast = Toast.makeText(StartActivity.this, "Logged In", Toast.LENGTH_SHORT);
+					Toast toast = Toast.makeText(StartActivity.this, getResources()
+							.getString(R.string. logged_in), Toast.LENGTH_SHORT);
 					handleFacebookAccessToken(loginResult.getAccessToken());
 					toast.show();
 				}
 
 				@Override
 				public void onCancel() {
-					showableLogInGroup(true);
+					showLogInGroup(true);
 					updateUI(null, null);
 				}
 
 				@Override
 				public void onError(FacebookException exception) {
 					progressBar.setVisibility(View.GONE);
-					showableLogInGroup(true);
+					showLogInGroup(true);
 					updateUI(null, null);
 				}
 
@@ -1289,7 +1336,7 @@ public class StartActivity extends AppCompatActivity implements
 
 	}
 
-	private void showableLogInGroup(boolean b) {
+	private void showLogInGroup(boolean b) {
 		if (b) {
 			inputPasswordLayout.setVisibility(View.VISIBLE);
 			inputEmailLayout.setVisibility(View.VISIBLE);
@@ -1324,7 +1371,8 @@ public class StartActivity extends AppCompatActivity implements
 		// [END config_signin]
 		if (mGoogleApiClient == null) {
 			mGoogleApiClient = new GoogleApiClient.Builder(this)
-					.enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+					.enableAutoManage(this /* FragmentActivity */,
+							this /* OnConnectionFailedListener */)
 					.addApi(Auth.GOOGLE_SIGN_IN_API, gso)
 					.build();
 		}
@@ -1343,12 +1391,13 @@ public class StartActivity extends AppCompatActivity implements
 			GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 			if (result.isSuccess()) {
 				// Google Sign In was successful, authenticate with Firebase
+
 				GoogleSignInAccount account = result.getSignInAccount();
 				firebaseAuthWithGoogle(account);
 			} else {
 				// Google Sign In failed, update UI appropriately
 				// [START_EXCLUDE]
-				showableLogInGroup(true);
+				showLogInGroup(true);
 				// [END_EXCLUDE]
 			}
 		}
@@ -1388,13 +1437,15 @@ public class StartActivity extends AppCompatActivity implements
 						if (!task.isSuccessful()) {
 							progressBar.setVisibility(View.GONE);
 							//Log.w(TAG, "signInWithCredential", task.getException());
-							Toast.makeText(StartActivity.this, "Authentication failed.",
+							Toast.makeText(StartActivity.this, getResources()
+											.getString(R.string.authentification_failed),
 									Toast.LENGTH_SHORT).show();
-							showableLogInGroup(true);
+							showLogInGroup(true);
 
 						} else {
 							Profile profile = Profile.getCurrentProfile();
-							updateUI(profile.getFirstName(), profile.getProfilePictureUri(200, 200).toString());
+							updateUI(profile.getFirstName(),
+									profile.getProfilePictureUri(200, 200).toString());
 							mUserUID = mAuth.getCurrentUser().getUid();
 							mTypeMode = true;
 							produceToolsVisibility(mTypeMode);
@@ -1430,10 +1481,11 @@ public class StartActivity extends AppCompatActivity implements
 						} else {
 							// If sign in fails, display a message to the mUser.
 							Log.w(TAG, "signInWithCredential:failure", task.getException());
-							Toast.makeText(StartActivity.this, "Authentication failed.",
+							Toast.makeText(StartActivity.this, getResources()
+											.getString(R.string.auth_failed),
 									Toast.LENGTH_SHORT).show();
 							updateUI(null, null);
-							showableLogInGroup(true);
+							showLogInGroup(true);
 							progressBar.setVisibility(View.GONE);
 						}
 					}
@@ -1449,7 +1501,6 @@ public class StartActivity extends AppCompatActivity implements
 						if (status.isSuccess()) {
 							signOut();
 						}
-						// ...
 					}
 				});
 	}
@@ -1464,7 +1515,7 @@ public class StartActivity extends AppCompatActivity implements
 	@Click(R.id.facebokLoginButton)
 	void facebookLoginButtonWasClicked() {
 		if (isOnline()) {
-			showableLogInGroup(false);
+			showLogInGroup(false);
 			loginFacebook();
 			sigInFacebook();
 		} else {
@@ -1474,13 +1525,14 @@ public class StartActivity extends AppCompatActivity implements
 
 	private void sigInFacebook() {
 		progressBar.setVisibility(View.VISIBLE);
-		mFacebookLoginManager.logInWithReadPermissions(StartActivity.this, Arrays.asList("public_profile", "email"));
+		mFacebookLoginManager.logInWithReadPermissions(StartActivity.this,
+				Arrays.asList("public_profile", "email"));
 	}
 
 	@Click(R.id.googleLoginButton)
 	void googleLoginButtonWasClicked() {
 		if (isOnline()) {
-			showableLogInGroup(false);
+			showLogInGroup(false);
 			loginGoogle();
 			signIn();
 			//  loginGoogle.setVisibility(View.VISIBLE);
@@ -1496,12 +1548,12 @@ public class StartActivity extends AppCompatActivity implements
 			if (mUser.isAnonymous()) {
 				signOut();
 			} else {
-				if (mUser.getProviders().get(0).equals("google.com")) {
+				if (mUser.getProviders().get(0).equals(GOOGLE_PROVIDER)) {
 					googleSignOut();
-				} else if (mUser.getProviders().get(0).equals("facebook.com")) {
+				} else if (mUser.getProviders().get(0).equals(FACEBOOK_PROVIDER)) {
 					LoginManager.getInstance().logOut();
 					signOut();
-				} else if (mUser.getProviders().get(0).equals("password")) {
+				} else if (mUser.getProviders().get(0).equals(EMAIL_PROVIDER)) {
 					signOut();
 				}
 			}
@@ -1514,7 +1566,7 @@ public class StartActivity extends AppCompatActivity implements
 	void buttonAuthorizationWasClicked() {
 		if (isOnline()) {
 			signOut();
-			showableLogInGroup(true);
+			showLogInGroup(true);
 		} else {
 			showLoginDialog();
 		}
@@ -1548,9 +1600,11 @@ public class StartActivity extends AppCompatActivity implements
 	@Click(R.id.buttonCreated)
 	void buttonMyCreated() {
 		mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		Set<String> createdByUserPlaceList = mSharedPreferences.getStringSet(CREATED_BY_USER_PLACE_LIST, null);
+		Set<String> createdByUserPlaceList = mSharedPreferences
+				.getStringSet(CREATED_BY_USER_PLACE_LIST, null);
 		mSharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		Set<String> createdByUserTrackList = mSharedPreferences.getStringSet(CREATED_BY_USER_ROUT_LIST, null);
+		Set<String> createdByUserTrackList = mSharedPreferences
+				.getStringSet(CREATED_BY_USER_ROUT_LIST, null);
 		ArrayList<String> mListRouts;
 		ArrayList<String> mListPlaces;
 		if (createdByUserPlaceList != null && createdByUserPlaceList.size() > 0) {
@@ -1575,13 +1629,15 @@ public class StartActivity extends AppCompatActivity implements
 		mRegionSelected = 0;
 		// Query the DB asynchronously
 		Mapbox.getInstance(this, getString(R.string.access_token));
-		OfflineManager.getInstance(StartActivity.this).listOfflineRegions(new OfflineManager.ListOfflineRegionsCallback() {
+		OfflineManager.getInstance(StartActivity.this).listOfflineRegions(
+				new OfflineManager.ListOfflineRegionsCallback() {
 			@Override
 			public void onList(final OfflineRegion[] offlineRegions) {
 				// Check result. If no regions have been
 				// downloaded yet, notify user and return
 				if (offlineRegions == null || offlineRegions.length == 0) {
-					Toast.makeText(getApplicationContext(), getString(R.string.toast_no_regions_yet), Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(),
+							getString(R.string.toast_no_regions_yet), Toast.LENGTH_SHORT).show();
 					return;
 				}
 
@@ -1590,7 +1646,8 @@ public class StartActivity extends AppCompatActivity implements
 				for (OfflineRegion offlineRegion : offlineRegions) {
 					offlineRegionsNames.add(getRegionName(offlineRegion));
 				}
-				final CharSequence[] items = offlineRegionsNames.toArray(new CharSequence[offlineRegionsNames.size()]);
+				final CharSequence[] items = offlineRegionsNames
+						.toArray(new CharSequence[offlineRegionsNames.size()]);
 
 				// Build a dialog containing the list of regions
 				AlertDialog dialog = new AlertDialog.Builder(StartActivity.this)
@@ -1602,18 +1659,21 @@ public class StartActivity extends AppCompatActivity implements
 								mRegionSelected = which;
 							}
 						})
-						.setPositiveButton(getString(R.string.navigate_positive_button), new DialogInterface.OnClickListener() {
+						.setPositiveButton(getString(R.string.navigate_positive_button),
+								new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int id) {
 
-								Toast.makeText(StartActivity.this, items[mRegionSelected], Toast.LENGTH_LONG).show();
+								Toast.makeText(StartActivity.this, items[mRegionSelected],
+										Toast.LENGTH_LONG).show();
 								Intent mapIntent = new Intent(StartActivity.this, MapsActivity_.class);
 								mapIntent.putExtra(OFFLINE_MAP, items[mRegionSelected]);
 								startActivity(mapIntent);
 
 							}
 						})
-						.setNeutralButton(getString(R.string.navigate_neutral_button_title), new DialogInterface.OnClickListener() {
+						.setNeutralButton(getString(R.string.navigate_neutral_button_title),
+								new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int id) {
 								// Make progressBar indeterminate and
@@ -1623,14 +1683,16 @@ public class StartActivity extends AppCompatActivity implements
 								progressBar.setVisibility(View.VISIBLE);
 
 								// Begin the deletion process
-								offlineRegions[mRegionSelected].delete(new OfflineRegion.OfflineRegionDeleteCallback() {
+								offlineRegions[mRegionSelected].delete(
+										new OfflineRegion.OfflineRegionDeleteCallback() {
 									@Override
 									public void onDelete() {
 										// Once the region is deleted, remove the
 										// progressBar and display a toast
 										progressBar.setVisibility(View.INVISIBLE);
 										progressBar.setIndeterminate(false);
-										Toast.makeText(getApplicationContext(), getString(R.string.toast_region_deleted),
+										Toast.makeText(getApplicationContext(),
+												getString(R.string.toast_region_deleted),
 												Toast.LENGTH_LONG).show();
 									}
 
@@ -1643,7 +1705,8 @@ public class StartActivity extends AppCompatActivity implements
 								});
 							}
 						})
-						.setNegativeButton(getString(R.string.navigate_negative_button_title), new DialogInterface.OnClickListener() {
+						.setNegativeButton(getString(R.string.navigate_negative_button_title),
+								new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int id) {
 								// When the user cancels, don't do anything.
