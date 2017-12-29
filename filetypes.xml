@@ -3,6 +3,7 @@
     <extensionMap>
       <mapping ext="rawproto" type="PLAIN_TEXT" />
       <mapping ext="xml(portret)" type="PLAIN_TEXT" />
+      <mapping pattern="dimens" type="XML" />
       <mapping ext="xml(port)" type="XML" />
     </extensionMap>
   </component>
