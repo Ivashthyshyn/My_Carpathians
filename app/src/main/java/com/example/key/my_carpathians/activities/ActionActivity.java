@@ -175,6 +175,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         setSupportActionBar(toolbar);
 	    toolbar.showOverflowMenu();
 	    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setDisplayShowTitleEnabled(false);
 		setupSizeViews();
         tabLayout.setupWithViewPager(viewPager);
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -471,7 +472,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	    Integer     xi = 0;
 	    for (int i = 1; i < size; i++) {
 		    Integer yi = (int) mPositionList.get(i).getAltitude();
-		    xi = xi + (int) TurfMeasurement.distance(mPositionList.get(i - 1), mPositionList.get(i), TurfConstants.UNIT_METERS);
+		    xi = xi + (int) TurfMeasurement.distance((mPositionList.get(i - 1)), mPositionList.get(i), TurfConstants.UNIT_METERS);
 		    DataPoint v = new DataPoint(xi, yi);
 		    values[i] = v;
 	    }

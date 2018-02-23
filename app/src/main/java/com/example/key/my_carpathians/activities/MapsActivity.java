@@ -721,9 +721,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // This method show download dialog
     private void downloadRegionDialog(final double perimeterValue ) {
-        // Set up download interaction. Display a dialog
-        // when the user clicks download button and require
-        // a user-provided region name
         AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
 
         final EditText regionNameEdit = new EditText(MapsActivity.this);
@@ -1235,10 +1232,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (!TextUtils.isEmpty(type) && type.equalsIgnoreCase("LineString")) {
 
                         // Get the Coordinates
-                        JSONArray coords = geometry.getJSONArray("coordinates");
-                        for (int lc = 0; lc < coords.length(); lc++) {
-                            JSONArray coord = coords.getJSONArray(lc);
-                            LatLng latLng = new LatLng(coord.getDouble(1), coord.getDouble(0));
+                        JSONArray coordinates = geometry.getJSONArray("coordinates");
+                        for (int lc = 0; lc < coordinates.length(); lc++) {
+                            JSONArray coordinate = coordinates.getJSONArray(lc);
+                            LatLng latLng = new LatLng(coordinate.getDouble(1), coordinate.getDouble(0));
                             points.add(latLng);
                         }
                     }
@@ -1272,6 +1269,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             int randomNumber = randomGenerator.nextInt(mColors.length);
 
             if (points.size() > 0) {
+                mPoint = points.get(points.size()/2);
                 // Draw polyline on map
                 mapboxMap.addPolyline(new PolylineOptions()
                         .addAll(points)

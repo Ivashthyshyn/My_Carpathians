@@ -17,7 +17,7 @@
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="460dp"
         android:background="@android:color/transparent"
         android:fitsSystemWindows="true">
 
@@ -29,6 +29,18 @@
             app:layout_scrollInterpolator="@android:anim/decelerate_interpolator"
             app:titleEnabled="false"
             app:toolbarId="@+id/toolBarActionActivity">
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:elevation="5dp"
+                >
+
+            </android.support.design.widget.TabLayout>
 
             <android.support.v7.widget.CardView
                 android:id="@+id/cardView"
@@ -54,7 +66,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginBottom="24dp"
-                    android:layout_marginTop="40dp"
+                    android:layout_marginTop="50dp"
                     android:elevation="2dp"/>
 
                 <ProgressBar
@@ -103,54 +115,40 @@
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolBarActionActivity"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/tabTransparant"
                 android:elevation="2dp"
                 android:padding="0dp"
-                app:layout_collapseMode="none">
+                >
             </android.support.v7.widget.Toolbar>
 
             <LinearLayout
                 android:id="@+id/ratingBarrContainer"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="?attr/actionBarSize"
                 android:layout_gravity="top|center_horizontal"
-                android:layout_marginBottom="20dp"
-                android:layout_marginLeft="10dp"
                 android:background="@android:color/transparent"
                 android:clickable="true"
                 android:elevation="6dp"
                 android:orientation="horizontal"
-                android:paddingRight="10dp"
-                android:paddingTop="5dp">
+                >
 
                 <RatingBar
                     android:id="@+id/ratingBar"
-                    android:layout_width="match_parent"
+                    style="@style/Widget.AppCompat.RatingBar.Indicator"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:contextClickable="true"
                     android:isIndicator="true"
                     android:numStars="5"
-                    android:progressBackgroundTint="@color/bg_login"
+                    android:progressBackgroundTint="@android:color/white"
                     android:progressTint="@color/colorAccent"
                     android:rating="3"
                     android:stepSize="0.5"/>
             </LinearLayout>
-
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tabLayout"
-                android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:layout_gravity="bottom"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
-                android:elevation="5dp"
-                >
-
-            </android.support.design.widget.TabLayout>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

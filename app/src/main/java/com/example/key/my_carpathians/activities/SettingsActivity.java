@@ -83,9 +83,9 @@ public class SettingsActivity extends AppCompatActivity implements
 		toolbar.showOverflowMenu();
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		pickerOfRegion.setValue(AVERAGE_VALUE);
-		pickerOfPlacesAround.setValue(AVERAGE_VALUE);
-		pickerOfRoutesAround.setValue(AVERAGE_VALUE);
+		pickerOfRegion.setValue(sharedPreferences.getInt(VALUE_OFFLINE_REGION_AROUND_RADIUS, AVERAGE_VALUE));
+		pickerOfPlacesAround.setValue(sharedPreferences.getInt(VALUE_PLACE_AROUND_RADIUS, AVERAGE_VALUE));
+		pickerOfRoutesAround.setValue(sharedPreferences.getInt(VALUE_ROUT_AROUND_RADIUS, AVERAGE_VALUE));
 		pickerOfRoutesAround.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
 			@Override
 			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {

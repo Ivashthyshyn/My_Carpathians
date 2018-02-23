@@ -116,3 +116,6 @@ crashlytics {
 dependencies {
     implementation 'com.android.support.constraint:constraint-layout:+'
 }
+dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:+'
+}

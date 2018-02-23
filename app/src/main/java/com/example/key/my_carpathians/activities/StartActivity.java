@@ -1044,7 +1044,6 @@ public class StartActivity extends AppCompatActivity implements
 	protected void onResume() {
 		super.onResume();
 		setDrawerState(true);
-		getDateFromFirebace();
 	}
 
 	@Override
