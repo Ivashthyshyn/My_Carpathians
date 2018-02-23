@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/create_place"
+        android:checkable="false"
+        android:enabled="true"
+        android:title="Create Place"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/create_rout"
+        android:checkable="false"
+        android:enabled="true"
+        android:title="Create Rout"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/download_region"
+        android:checkable="false"
+        android:enabled="true"
+        android:title="Create offline region"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_g_p_s"
+        android:icon="@android:drawable/ic_menu_mylocation"
+        android:title="GPS on"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/offline_regions"
+        android:title=" List Offline Map"/>
+    <item
+        android:id="@+id/auto_create_offline_region"
+        android:title="Create Offline Map"
+        app:showAsAction="never"/>
+    <item
+        android:enabled="false"
+        app:showAsAction="always"/>
+    <item
+        android:enabled="false"
+        app:showAsAction="always"/>
+
+
+</menu>

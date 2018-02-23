@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="primaryColor">#3e5496</color>
+    <color name="primaryLightColor">#5982fd</color>
+    <color name="primaryDarkColor">#465993</color>
+    <color name="primaryTextColor">#fafafa</color>
+    <color name="secondaryTextColor">#1d1d1d</color>
+    <color name="secondaryBackgroundColor">#2d2d2d</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="colorPrimary">@color/primaryColor</color>
+    <color name="colorPrimaryDark">@color/primaryDarkColor</color>
+    <color name="colorAccent">@color/primaryLightColor</color>
+
+
+    <color name="colorPrimaryLight">#CFD8DC</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#BDBDBD</color>
+
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_300">#E0E0E0</color>
+    <color name="bg_login">#8c8d8e</color>
+    <color name="bg_register">#2e3237</color>
+    <color name="bg_main">#428bca</color>
+    <color name="white">#ffffff</color>
+    <color name="input_login">#222222</color>
+    <color name="input_login_hint">#999999</color>
+    <color name="input_register">#888888</color>
+    <color name="input_register_bg">#3b3e41</color>
+    <color name="input_register_hint">#af5e6266</color>
+    <color name="btn_login_bg">#eceef1</color>
+    <color name="color_level_yellow">#fad91b</color>
+    <color name="color_level_green">#45c942</color>
+    <color name="color_level_red">#ff6861</color>
+    <color name="background_material_light">#7b7878</color>
+
+    <color name="tabTransparant">#7c3e5496</color>
+    <color name="background">#726e6e</color>
+    <color name="region_background">#3bb2b0</color>
+    <color name="polygon_background">#3bb2b0</color>
+    <color name="my_location_tint_color">#56B881</color>
+    <color name="my_location_accuracy_tint_color">#FBB03B</color>
+</resources>

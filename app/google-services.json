@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "539020489538",
+    "firebase_url": "https://my-carpathians-1496328028184.firebaseio.com",
+    "project_id": "my-carpathians-1496328028184",
+    "storage_bucket": "my-carpathians-1496328028184.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:539020489538:android:7cf53c385c444e1f",
+        "android_client_info": {
+          "package_name": "com.example.key.my_carpathians"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "539020489538-jfrsedo9r7m92e3ed1p53tbicicqglhh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.key.my_carpathians",
+            "certificate_hash": "3fc332252a4863290e5acdce3ee81cac2c50d632"
+          }
+        },
+        {
+          "client_id": "539020489538-g0fgafova9pef2hglpo0mp9pr0d68fju.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0VCVu0hMgtJFuJ821yanVWpGOF9Rx7rY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "539020489538-g0fgafova9pef2hglpo0mp9pr0d68fju.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/wallpaper"
+    android:orientation="vertical"
+    tools:context="com.example.key.my_carpathians.activities.SettingsActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbarSettingsActivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:title="Settings"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:gravity="fill_horizontal"
+            android:text="Loaded perimeter radius of the default offline Region (km)"/>
+
+        <com.shawnlin.numberpicker.NumberPicker
+            android:id="@+id/pickerOfRegion"
+            style="@android:style/Widget.Material.NumberPicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            app:np_dividerColor="@color/cardview_light_background"
+            app:np_dividerThickness="3dp"
+            app:np_height="90dp"
+            app:np_max="50"
+            app:np_min="5"
+            app:np_orientation="horizontal"
+            app:np_selectedTextColor="@color/colorAccent"
+            app:np_textColor="@color/cardview_light_background"
+            app:np_width="150dp">
+
+        </com.shawnlin.numberpicker.NumberPicker>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:gravity="fill_horizontal"
+            android:text="Radius of places nearby (km)"/>
+
+        <com.shawnlin.numberpicker.NumberPicker
+            android:id="@+id/pickerOfPlacesAround"
+            style="@android:style/Widget.Material.NumberPicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            app:np_dividerColor="@color/cardview_light_background"
+            app:np_dividerThickness="3dp"
+            app:np_height="90dp"
+            app:np_max="50"
+            app:np_min="5"
+            app:np_orientation="horizontal"
+            app:np_selectedTextColor="@color/colorAccent"
+            app:np_textColor="@color/cardview_light_background"
+
+            app:np_width="150dp">
+
+        </com.shawnlin.numberpicker.NumberPicker>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:gravity="fill_horizontal"
+            android:text="Radius of Routes nearby  (km)"/>
+
+        <com.shawnlin.numberpicker.NumberPicker
+            android:id="@+id/pickerOfRoutesAround"
+            style="@android:style/Widget.Material.NumberPicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            app:np_dividerColor="@color/cardview_light_background"
+            app:np_dividerThickness="3dp"
+            app:np_height="90dp"
+            app:np_max="50"
+            app:np_min="5"
+            app:np_orientation="horizontal"
+            app:np_selectedTextColor="@color/colorAccent"
+            app:np_textColor="@color/cardview_light_background"
+            app:np_width="150dp">
+
+        </com.shawnlin.numberpicker.NumberPicker>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView13"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Acaunt setings"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Delete acaunt"/>
+
+        <Button
+            android:id="@+id/buttonDeleteAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:padding="16dp"
+            android:text="@string/ok"/>
+    </LinearLayout>
+
+</LinearLayout>

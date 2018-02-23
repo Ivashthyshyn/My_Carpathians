@@ -1,0 +1,15 @@
+Index: app/src/main/java/com/example/key/my_carpathians/activities/MapsActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/key/my_carpathians/activities/MapsActivity.java	(revision 72f6840e49cc4a8405026ab673ef54066fb95893)
++++ app/src/main/java/com/example/key/my_carpathians/activities/MapsActivity.java	(revision )
+@@ -1059,6 +1059,7 @@
+     }
+ 
+     /**
++     *
+      * This method turns on and turns off flashing animation for button buttonRecTrack.
+      */
+     private void flashingColorAnimation(boolean b) {

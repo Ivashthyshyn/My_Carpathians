@@ -1,0 +1,23 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="@color/secondaryBackgroundColor"
+              tools:context="com.example.key.my_carpathians.fragments.PlaceAroundFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <TextView
+        android:id="@+id/textTitlePlaceAround"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/list_header_text"
+        android:text="Add to map"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerViewPlaceAround"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@style/info_list_style"/>
+</LinearLayout>

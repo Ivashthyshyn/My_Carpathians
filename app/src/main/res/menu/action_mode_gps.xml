@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/recIndicator"
+        android:icon="@drawable/red_shape"
+        android:title="Item"
+        android:visible="false"
+        app:showAsAction="always"/>
+    <item
+        app:showAsAction="never|always"/>
+    <item
+        android:id="@+id/actionStartRec"
+        android:icon="@android:drawable/ic_media_play"
+        android:title="Rec"
+        app:showAsAction="always"/>
+    <item
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/actionStop"
+        android:icon="@drawable/ic_media_stop_light"
+        android:title="Pause"
+        android:visible="false"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/actionSaveRecord"
+        android:checkable="false"
+        android:icon="@drawable/ic_done_white_24px"
+        android:title="Save Record"
+        android:visible="false"
+        app:showAsAction="always"/>
+</menu>

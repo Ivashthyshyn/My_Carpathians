@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="4dp"
+              android:layout_marginTop="4dp"
+              android:background="@android:color/transparent">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        app:cardBackgroundColor="@color/colorPrimaryDark"
+        app:cardCornerRadius="5dp"
+        app:cardElevation="3dp"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/checkBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:text="name"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/textNameRout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:paddingBottom="20dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="20dp"
+                    android:text="TextView"/>
+
+                <TextView
+                    android:id="@+id/textLenghtTrack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="30dp"
+                    android:elevation="2dp"
+                    android:gravity="right"
+                    android:paddingRight="15dp"
+                    android:text="30 km"
+                    android:textStyle="italic"/>
+
+                <RatingBar
+                    android:id="@+id/ratingBarSmall"
+                    style="@style/Widget.AppCompat.RatingBar.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/textNamePlace"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="10dp"
+                    android:elevation="5dp"
+                    android:isIndicator="true"
+                    android:numStars="5"
+                    android:progressBackgroundTint="#FFF"
+                    android:progressTint="@color/colorAccent"
+                    android:rating="1"
+                    android:stepSize="0.5"/>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/buttonTypeAndLevel"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_gravity="center_vertical"
+                android:background="@color/color_level_green"/>
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>
