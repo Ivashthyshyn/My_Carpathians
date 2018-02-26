@@ -1,5 +1,6 @@
 package com.example.key.my_carpathians.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -45,12 +46,12 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.ViewPagerAdapter;
-import com.example.key.my_carpathians.interfaces.IRotation;
 import com.example.key.my_carpathians.fragments.PlacesListFragment;
 import com.example.key.my_carpathians.fragments.PlacesListFragment_;
 import com.example.key.my_carpathians.fragments.RoutsListFragment;
 import com.example.key.my_carpathians.fragments.RoutsListFragment_;
 import com.example.key.my_carpathians.interfaces.CommunicatorStartActivity;
+import com.example.key.my_carpathians.interfaces.IRotation;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
 import com.example.key.my_carpathians.utils.ObjectService;
@@ -101,13 +102,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -350,9 +345,9 @@ public class StartActivity extends AppCompatActivity implements
 					Rout rout = postSnapshot.getValue(Rout.class);
 					routs.add(rout);
 				}
-				if (isOnline()) {
-					downloadRoutToStorage(routs);
-				}
+
+				downloadRoutToStorage(routs);
+
 				if (tabLayout.getTabCount() == 1) {
 					RoutsListFragment routsListFragment = new RoutsListFragment_().builder()
 							.mRoutsList(routs)
@@ -648,17 +643,17 @@ public class StartActivity extends AppCompatActivity implements
 	 */
 	@Background
 	public void downloadRoutToStorage(List<Rout> routsList) {
-		for (int i = 0; i < routsList.size(); i++) {
+		for (Rout rout : routs) {
 			FirebaseStorage storage = FirebaseStorage.getInstance();
-			StorageReference httpsReference = storage.getReferenceFromUrl(routsList.get(i)
+			StorageReference httpsReference = storage.getReferenceFromUrl(rout
 					.getUrlRoutsTrack());
 			File rootPath = new File(this.mRootPath.buildUpon().appendPath(ROUT_STR).build()
 					.getPath());
 			if (!rootPath.exists()) {
 				rootPath.mkdirs();
 			}
-			final File localFile = new File(rootPath, routsList.get(i).getNameRout());
-			if (!localFile.exists()) {
+			final File localFile = new File(rootPath, rout.getNameRout());
+			if (!localFile.exists() && isOnline() ) {
 				httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
 					@Override
 					public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
@@ -667,58 +662,43 @@ public class StartActivity extends AppCompatActivity implements
 				}).addOnFailureListener(new OnFailureListener() {
 					@Override
 					public void onFailure(@NonNull Exception exception) {
-
 						Log.e("firebase ", ";local tem file not created " + exception.toString());
 					}
 				});
 			}
+				rout.setUrlRoutsTrack(Uri.fromFile(localFile).toString());
 		}
 	}
 
 	@Background
 	public void downloadPhoto(List<Place> placeList) {
-		for (int i = 0; i < placeList.size(); i++) {
-			try {
-				URL url = new URL(placeList.get(i).getUrlPlace());
+		for (Place place : places) {
+
+			FirebaseStorage storage = FirebaseStorage.getInstance();
+			StorageReference httpsReference = storage.getReferenceFromUrl(place
+					.getUrlPlace());
+
 
 				File rootPath = new File(this.mRootPath.getPath(), PHOTO_STR);
 				if (!rootPath.exists()) {
 					rootPath.mkdirs();
 				}
 
-
-				File file = new File(rootPath, placeList.get(i).getNamePlace());
-				if (!file.exists()) {
-					URLConnection urlConnection = url.openConnection();
-					InputStream inputStream = null;
-					HttpURLConnection httpConn = (HttpURLConnection) urlConnection;
-					httpConn.setRequestMethod("GET");
-					httpConn.connect();
-
-					if (httpConn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-						inputStream = httpConn.getInputStream();
-					}
-
-					FileOutputStream fos = new FileOutputStream(file);
-					int totalSize = httpConn.getContentLength();
-					int downloadedSize = 0;
-					byte[] buffer = new byte[1024];
-					int bufferLength = 0;
-					while ((bufferLength = inputStream.read(buffer)) > 0) {
-						fos.write(buffer, 0, bufferLength);
-						downloadedSize += bufferLength;
-						Log.i("Progress:", "downloadedSize:" + downloadedSize
-								+ "totalSize:" + totalSize);
-					}
-
-					fos.close();
-					Log.d("test", "Image Saved in storage..");
+				final File localFile = new File(rootPath, place.getNamePlace());
+				if (!localFile.exists() && isOnline() ) {
+					httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+						@Override
+						public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+							Log.e("firebase ", ";local tem file  created " + localFile.toString());
+						}
+					}).addOnFailureListener(new OnFailureListener() {
+						@Override
+						public void onFailure(@NonNull Exception exception) {
+							Log.e("firebase ", ";local tem file not created " + exception.toString());
+						}
+					});
 				}
-			} catch (IOException io) {
-				io.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			place.setUrlPlace(Uri.fromFile(localFile).toString());
 		}
 	}
 
@@ -1044,7 +1024,6 @@ public class StartActivity extends AppCompatActivity implements
 	protected void onResume() {
 		super.onResume();
 		setDrawerState(true);
-		getDateFromFirebace();
 	}
 
 	@Override
@@ -1724,6 +1703,7 @@ public class StartActivity extends AppCompatActivity implements
 		});
 	}
 
+	@SuppressLint("StringFormatInvalid")
 	private String getRegionName(OfflineRegion offlineRegion) {
 		// Get the region name from the offline region metadata
 		String regionName;

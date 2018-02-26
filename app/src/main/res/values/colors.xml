@@ -39,4 +39,8 @@
 
     <color name="tabTransparant">#7c3e5496</color>
     <color name="background">#726e6e</color>
+    <color name="region_background">#3bb2b0</color>
+    <color name="polygon_background">#3bb2b0</color>
+    <color name="my_location_tint_color">#56B881</color>
+    <color name="my_location_accuracy_tint_color">#FBB03B</color>
 </resources>

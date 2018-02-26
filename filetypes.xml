@@ -1,12 +1,7 @@
 <application>
   <component name="FileTypeManager" version="17">
     <extensionMap>
-      <mapping pattern="fsm" type="JSON" />
-      <mapping pattern="fsng" type="JSON Schema" />
       <mapping ext="rawproto" type="PLAIN_TEXT" />
-      <mapping ext="xml(portret)" type="PLAIN_TEXT" />
-      <mapping pattern="dimens" type="XML" />
-      <mapping ext="xml(port)" type="XML" />
     </extensionMap>
   </component>
 </application>

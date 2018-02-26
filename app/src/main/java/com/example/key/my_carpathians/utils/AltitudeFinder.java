@@ -73,6 +73,7 @@ public class AltitudeFinder {
 					YOUR_API_KEY);
 		} catch (MalformedURLException e) {
 			Log.e(LOG_TAG, "Error with creating URL ", e);
+			return null;
 		}
 		return url;
 	}
@@ -85,7 +86,7 @@ public class AltitudeFinder {
 
 		// If the URL is null, then return early.
 		if (url == null) {
-			return jsonResponse;
+			return null;
 		}
 		HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
 		InputStream inputStream = null;
@@ -111,6 +112,7 @@ public class AltitudeFinder {
 
 		} catch (IOException e) {
 			Log.e(LOG_TAG, "Problem retrieving the earthquake JSON results.", e);
+			return null;
 		} finally {
 			if (urlConnection != null) {
 				urlConnection.disconnect();
@@ -177,6 +179,7 @@ public class AltitudeFinder {
 			// catch the exception here, so the app doesn't crash. Print a log message
 			// with the message from the exception.
 			Log.e(LOG_TAG, "Problem parsing the news JSON results", e);
+			return null;
 		}
 		// Return the list of
 		return trackPositions;

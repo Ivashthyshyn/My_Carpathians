@@ -5,7 +5,7 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="access_token">pk.eyJ1Ijoidnlsa3kiLCJhIjoiY2o2cnNwM2dvMGU5MTJxbnp4eWNzZ3RvbyJ9.bpQOCLBr_GXDAc_AYPFDEg</string>
+    <string name="access_token">pk.eyJ1Ijoidnlsa3kiLCJhIjoiY2pibTI5NDdlMXZkNTMxb2JneXV4MzBwZiJ9.T4Kakw4VplpStA54g19JMA</string>
     <string name="facebook_app_id">1535201253190515</string>
     <string name="fb_login_protocol_scheme">fb1535201253190515</string>
     <string name="places">PLACE</string>
@@ -13,46 +13,46 @@
     <string name="settings">SETTINGS</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
     <string name="emailpassword_title_text">Please enter your email</string>
     <string name="signed_out">signed out</string>
     <string name="sign_in">sign in</string>
     <string name="create_account">Create account</string>
     <string name="sign_out">sigin out</string>
     <string name="verify_email">verifity email</string>
-    <string name="emailpassword_status_fmt">Email User: %1$s (verified: %2$b)</string>
-    <string name="firebaseui_status_fmt">Firebase User: %s</string>
-    <string name="firebaseui_title_text">FirebaseUI Auth</string>
-    <string name="firebase_status_fmt">Firebase User: %s</string>
-    <string name="firebase_user_management">Firebase User Management</string>
+    <string name="emailpassword_status_fmt" translatable="false">Email User: %1$s (verified: %2$b)</string>
+    <string name="firebaseui_status_fmt" translatable="false">Firebase User: %s</string>
+    <string name="firebaseui_title_text" translatable="false">FirebaseUI Auth</string>
+    <string name="firebase_status_fmt" translatable="false">Firebase User: %s</string>
+    <string name="firebase_user_management" translatable="false">Firebase User Management</string>
 
-    <string name="label_facebook_login">Firebase + Facebook Login</string>
-    <string name="desc_facebook_login">Use a Facebook Login credential to authenticate with Firebase.</string>
+    <string name="label_facebook_login" translatable="false">Firebase + Facebook Login</string>
+    <string name="desc_facebook_login" translatable="false">Use a Facebook Login credential to authenticate with Firebase.</string>
 
-    <string name="facebook_status_fmt">Facebook User: %s</string>
-    <string name="facebook_title_text">Facebook Login</string>
+    <string name="facebook_status_fmt" translatable="false">Facebook User: %s</string>
+    <string name="facebook_title_text" translatable="false">Facebook Login</string>
 
-    <string name="desc_firebase_lockup">Firebase logo and name</string>
+    <string name="desc_firebase_lockup" translatable="false">Firebase logo and name</string>
     <string name="cancelled">Cancelled</string>
     <string name="permission_not_granted">Unable to perform selected action because permissions were not granted.</string>
     <string name="ok">OK</string>
     <string name="hello_user">Hello %1$s!</string>
     <string name="success">Success</string>
-    <string name="successfully_posted_post">Post ID: %1$s</string>
+    <string name="successfully_posted_post" translatable="false">Post ID: %1$s</string>
     <string name="error">Error</string>
     <string name="status_update">Updating status for %1$s at %2$s</string>
-    <string name="photo_post">Photo Post</string>
-    <string name="you_picked">You picked:</string>
-    <string name="no_friends_selected">&lt;No friends selected&gt;</string>
-    <string name="no_place_selected">&lt;No place selected&gt;</string>
-    <string name="pick_seattle_place">Pick a Seattle Place</string>
-    <string name="app_id">355198514515820</string>
-    <string name="exception">Exception: %1$s</string>
-    <string name="title_activity_facebook_login1">FacebookLoginActivity1</string>
+    <string name="photo_post" translatable="false">Photo Post</string>
+    <string name="you_picked" translatable="false">You picked:</string>
+    <string name="no_friends_selected" translatable="false">No friends selected</string>
+    <string name="no_place_selected" translatable="false">No place selected</string>
+    <string name="pick_seattle_place" translatable="false">Pick a Seattle Place</string>
+    <string name="app_id" translatable="false">355198514515820</string>
+    <string name="exception" translatable="false">Exception: %1$s</string>
+    <string name="title_activity_facebook_login1" translatable="false">FacebookLoginActivity1</string>
 
 
     <!--Strings for OfflineManager activity-->
-    <string name="dialog_title">Name new region</string>
+    <string name="dialog_title">New Region name!</string>
     <string name="dialog_message">Downloads the map region you currently are viewing</string>
     <string name="dialog_positive_button">Download</string>
     <string name="dialog_negative_button">Cancel</string>
@@ -79,17 +79,16 @@
     <string name="send_password_reset_email">Send Password reset email</string>
     <string name="remove_user">Remove user</string>
     <string name="new_pass">New Password</string>
-    <string name="title_activity_profile">Firebase</string>
+    <string name="title_activity_profile" translatable="false">Firebase</string>
     <string name="title_activity_login">Sign in</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="hint_name">Fullname</string>
-    <string name="btn_link_to_register">Not a member? Get registered in Firebase now!</string>
-    <string name="btn_link_to_login">Already registered. Login Me!</string>
-    <string name="title_activity_reset_password">ResetPasswordActivity</string>
+    <string name="btn_link_to_register" translatable="false">Not a member? Get registered in Firebase now!</string>
+    <string name="btn_link_to_login" translatable="false">Already registered. Login Me!</string>
+    <string name="title_activity_reset_password" translatable="false">ResetPasswordActivity</string>
     <string name="btn_forgot_password">Forgot your password?</string>
     <string name="btn_reset_password">Reset Password</string>
-    <string name="btn_back"><![CDATA[<< Back]]></string>
     <string name="hint_new_email">New Email</string>
     <string name="btn_change">Change</string>
     <string name="btn_send">Send</string>
@@ -105,42 +104,36 @@
     <string name="action_settings">Settings</string>
     <string name="btn_login">Go</string>
     <string name="title_info">INFO</string>
-    <string name="title_place_around">PLACE AROUND</string>
-    <string name="title_rout_around">ROUT AROUN</string>
-    <string name="title_login_dialog">Для того щоб отримати доступ до всіх функцій програми потрібно зареєструватися</string>
-    <string name="message_login_dialog">Виберіть спосіб реєстраці</string>
-    <string name="registration">Зареєструватися</string>
+    <string name="title_place_around">PLACES </string>
+    <string name="title_rout_around">ROUTS</string>
+    <string name="message_login_dialog">Choose a registration method</string>
+    <string name="registration">Sign up</string>
     <string name="no">No</string>
     <string name="internet">The Internet.</string>
-    <string name="no_internet">Нажаль ви зараз ви не підключені до мережі інтернет!</string>
-    <string name="no_internet2">Керування автентифікацією недоступне!</string>
+    <string name="no_internet">"Unfortunately you are not connected to the Internet now! "</string>
+    <string name="no_internet2">"Authentication management is not available! "</string>
     <string name="publish">Publish</string>
-    <string name="error_publisher">Для поблікації потрібно заповнити всі дані</string>
-    <string name="error_publisher_1p">Ви не вказали імя місця</string>
-    <string name="error_publisher_2p">Не вказана позиція</string>
-    <string name="error_publisher_3p">Не вказано титульної інформації про місце</string>
-    <string name="error_publisher_4p">Ви не встановили титульну фотографію</string>
-    <string name="error_publisher_1r">Ви не вказали імя маршруту</string>
-    <string name="error_publisher_2r">Не вказана позиція\"</string>
-    <string name="error_publisher_3r">Не вказана титульна фотографія</string>
-    <string name="error_publisher_4r">Немає титульної інформації</string>
-    <string name="error_publisher_5r">Не вказана складність маршруту</string>
+    <string name="error_publisher">To upload, you need to fill in all the data</string>
+    <string name="error_publisher_1p">No name given</string>
+    <string name="error_publisher_3p">No title information about place</string>
+    <string name="error_publisher_2r">No position given</string>
+    <string name="error_publisher_3r">No title information about place</string>
+    <string name="error_publisher_4r">No title information about place</string>
+    <string name="error_publisher_5r">"No rout difficulty given "</string>
     <string name="enother_photo_downlod">Another photo download</string>
-    <string name="error_downloading_photo">Сталася помилка одна з додаткових фотографій не завантажилась</string>
-    <string name="error_uploading">Сталася помила завантаження не відбулося</string>
-    <string name="already_exist">з таким іменем уже існує! Змінити назву?</string>
-    <string name="set_rating">Проголосувати за місце</string>
+    <string name="error_uploading">Error! Upload disapproved</string>
+    <string name="set_rating">Set rating place</string>
     <string name="add_to_fevorite">Added to favorite list!</string>
-    <string name="offline_message">\"Sorry, no internet access, you will be able to post data later when \" + \t\t\t\t\t\t\t\" there is a good connection to the network</string>
+    <string name="offline_message">Sorry, no internet access, you will be able to post data later</string>
     <string name="save_date">Save Data to Storage!</string>
-    <string name="save_date_message">External memory is not available!  And in the interior storage  is not enough free space.  You can not use this program in ofline.</string>
-    <string name="save_date_message_permission"><![CDATA[You do not gave permission to download data to External Storage! Save data to Internal storage&]]></string>
+    <string name="save_date_message">External memory is not available! And in the interior storage is not enough free space. You can not use this program in offline.</string>
+    <string name="save_date_message_permission">You do not gave permission to download data to External Storage! Save data to Internal storage?</string>
     <string name="permission">Permission</string>
     <string name="no_grandet_permission">You do not gave any permission</string>
     <string name="anonymous">Anonymous</string>
     <string name="button_authorization">Authentication</string>
-    <string name="dialog_get_registr">Для того щоб отримати доступ до всіх функцій програми потрібно зареєструватися</string>
-    <string name="dialog_get_registr_message">Виберіть спосіб реєстраці</string>
+    <string name="dialog_get_registr">To access all the features of the program you need to register</string>
+    <string name="dialog_get_registr_message">Choose a method to register</string>
     <string name="favorite">Favorite</string>
     <string name="your">Your</string>
     <string name="empty_list">List is empty!</string>
@@ -153,6 +146,39 @@
     <string name="invalid_email">Invalid email!</string>
     <string name="logged_in">Logged In</string>
     <string name="authentification_failed">Authentication failed.</string>
+    <string name="disabled_google_play_servise">This device is not supported. Please instal or update Google Play Servise</string>
+    <string name="save_date_message_error_save_rout">Your track contains less than three locations. Please check the quality of the gps signal and try again</string>
+    <string name="permission_location">Allow location?</string>
+    <string name="cancel">Cancel</string>
+    <string name="settings_gps_message">GPS is not enabled. Do you want to go to settings Menu?</string>
+    <string name="action_mode_title_new_region">New Region</string>
+    <string name="action_mode_tsubitle_new_region">tab to select</string>
+    <string name="need_internet_to_use">This action need Internet connection. Please check your connection</string>
+    <string name="dialog_new_place">New Place</string>
+    <string name="dialog_new_places_message">Please select a data entry method!</string>
+    <string name="dialog_new_rout">New Rout</string>
+    <string name="dialog_new_rout_message">Do you want to create a new rout?</string>
+    <string name="gps_mode">Mode GPS</string>
+    <string name="hands_mode">Mode Hands</string>
+    <string name="action_mode_title_gps_connection">GPS Connection</string>
+    <string name="action_mode_subtitle_gps_connection">please wait</string>
+    <string name="action_mode_title_new_rout">New Rout</string>
+    <string name="subtitle_new_place">please tab to create place</string>
+    <string name="subtitle_new_rout">please tab to create rout</string>
+    <string name="finish">finish</string>
+    <string name="pause">pause</string>
+    <string name="rec">rec</string>
+    <string name="subtitle_tab_to_select">tab to select</string>
+    <string name="title_macke_chois">make choice</string>
 
+
+
+    <string name="title_login_dialog">To access all the features of the program you need to register</string>
+    <string name="error_publisher_2p">No position given</string>
+    <string name="error_publisher_4p">No title photo given</string>
+    <string name="error_publisher_1r">No route given</string>
+    <string name="error_downloading_photo">"Error! Additional photos not loaded "</string>
+    <string name="already_exist">This name is already in use. Please change the name</string>
+    <string name="btn_back">Back</string>
 
 </resources>

@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
@@ -22,7 +21,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -124,7 +122,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	public EditModeFragment editFragment;
     public com.example.key.my_carpathians.models.Position myPosition;
     public String myName;
-    public ArrayList<String> selectedUserRouts = new ArrayList<>();
+    public ArrayList<Rout> selectedUserRouts = new ArrayList<>();
     public Set<String> selectedUserPlacesStringList = new ArraySet<>();
 	public SharedPreferences sharedPreferences;
 	public ArrayList<Place> selectedUserPlacesList = new ArrayList<>();
@@ -163,6 +161,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 
 	@ViewById(R.id.tabLayout)
 	TabLayout tabLayout;
+
 	@ViewById(R.id.viewpager)
 	ViewPager viewPager;
 
@@ -175,7 +174,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         setSupportActionBar(toolbar);
 	    toolbar.showOverflowMenu();
 	    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		setupSizeViews();
+		getSupportActionBar().setDisplayShowTitleEnabled(false);
+	//	setupSizeViews();
         tabLayout.setupWithViewPager(viewPager);
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -186,10 +186,10 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
         myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
         myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
 	    mProduceMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
-		produsedMode();
+		producedMode();
     }
 
-	private void produsedMode() {
+	private void producedMode() {
 		infoFragment = new InfoFragment_().builder()
 				.place(myPlace)
 				.rout(myRout)
@@ -217,15 +217,15 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			placeAroundFragment.setData(myPlace, placeList, myPosition);
 		}
 	}
-
-	private void setupSizeViews() {
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		int height = metrics.heightPixels / 3;
-		CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.MATCH_PARENT, height);
-		appBarLayout.setLayoutParams(params);
-
-	}
+//
+//	private void setupSizeViews() {
+//		DisplayMetrics metrics = new DisplayMetrics();
+//		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+//		int height = (int) ( metrics.heightPixels / 2.5);
+//		CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.MATCH_PARENT, height);
+//		appBarLayout.setLayoutParams(params);
+//
+//	}
 
 	private void setBaseInformation(Place place, Rout rout) {
 		if (place != null  ) {
@@ -243,16 +243,13 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				viewPagerAdapter.notifyDataSetChanged();
 			}
 			if (mRootPathString != null) {
-				Uri photoUri = Uri.parse(mRootPathString);
-
-			File titlePhotoFile = new File(photoUri.buildUpon().appendPath(PHOTO_STR).build().getPath(), myPlace.getNamePlace());
 				Glide
 						.with(ActionActivity.this)
-						.load(titlePhotoFile)
+						.load(place.getUrlPlace())
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
 						.skipMemoryCache(true)
 						.into(imageView);
-				photoUrlList.add(0, Uri.fromFile(titlePhotoFile).getPath());
+				photoUrlList.add(0, place.getUrlPlace());
 				if(photoUrlList.size() == 1){
 					fabChangePhotoRight.setVisibility(View.GONE);
 				}
@@ -286,9 +283,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	            imageView.setVisibility(View.GONE);
             }
             if (mRootPathString != null){
-	            Uri uriRootRout = Uri.parse(mRootPathString);
-	            createDataPoint(uriRootRout.buildUpon().appendPath(ROUT_STR)
-			            .appendPath(myRout.getNameRout()).build().getPath());
+	            createDataPoint(Uri.parse(rout.getUrlRoutsTrack()).getPath());
             }
 			myPosition = rout.getPositionRout();
 			myName = rout.getNameRout();
@@ -471,7 +466,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	    Integer     xi = 0;
 	    for (int i = 1; i < size; i++) {
 		    Integer yi = (int) mPositionList.get(i).getAltitude();
-		    xi = xi + (int) TurfMeasurement.distance(mPositionList.get(i - 1), mPositionList.get(i), TurfConstants.UNIT_METERS);
+		    xi = xi + (int) TurfMeasurement.distance((mPositionList.get(i - 1)), mPositionList.get(i), TurfConstants.UNIT_METERS);
 		    DataPoint v = new DataPoint(xi, yi);
 		    values[i] = v;
 	    }
@@ -490,11 +485,11 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
                 selectedUserPlacesList.add(myPlace);
             }
             if (myRout != null) {
-                selectedUserRouts.add(myRout.getNameRout());
+                selectedUserRouts.add(myRout);
             }
             Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
             mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
-            mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
+            mapIntent.putExtra(SELECTED_USER_ROUTS, selectedUserRouts);
             mapIntent.putExtra(PRODUCE_MODE, mProduceMode);
             startActivity(mapIntent);
         }else{
@@ -502,11 +497,11 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
                 selectedUserPlacesList.add(myPlace);
             }
             if (myRout != null) {
-                selectedUserRouts.add(myRout.getNameRout());
+                selectedUserRouts.add(myRout);
             }
             Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
             mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
-            mapIntent.putStringArrayListExtra(SELECTED_USER_ROUTS, selectedUserRouts);
+            mapIntent.putExtra(SELECTED_USER_ROUTS, selectedUserRouts);
             startActivity(mapIntent);
         }
     }
@@ -618,7 +613,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 											.appendPath(PHOTO_STR).build();
 
 									place.setUrlPlace(downloadUrl.toString());
-									myRef.child(PHOTO_STR).child(place.getNamePlace()).setValue(place);
+									myRef.child(PLACE_STR).child(place.getNamePlace()).setValue(place);
 									for (int i = 1; i <= 3; i++) {
 										File photoFile = new File(rootPathForPhotosString.buildUpon()
 												.appendPath(place.getNamePlace()
@@ -853,10 +848,10 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
     @Override
     public void addToMap(Rout rout, Place place) {
         if (rout != null) {
-            if (selectedUserRouts.contains(rout.getNameRout())) {
-                selectedUserRouts.remove(rout.getNameRout());
+            if (selectedUserRouts.contains(rout)) {
+                selectedUserRouts.remove(rout);
             }else{
-                selectedUserRouts.add(rout.getNameRout());
+                selectedUserRouts.add(rout);
             }
         }
         if (place != null) {
@@ -934,18 +929,19 @@ public void ratingBarDialog(){
 		AltitudeFinder altitudeFinder = new AltitudeFinder();
 		List<com.cocoahero.android.geojson.Position> hadAltitudePosition = altitudeFinder.extractAltitude(mPositionList);
 		List<Position> positions = new ArrayList<>();
-		for (int i = 0; i < hadAltitudePosition.size(); i++){
-			positions.add(Position.fromCoordinates(hadAltitudePosition.get(i).getLatitude(),
-					hadAltitudePosition.get(i).getLongitude(),
-					hadAltitudePosition.get(i).getAltitude()));
-		}
+		if (hadAltitudePosition != null) {
+			for (int i = 0; i < hadAltitudePosition.size(); i++) {
+				positions.add(Position.fromCoordinates(hadAltitudePosition.get(i).getLatitude(),
+						hadAltitudePosition.get(i).getLongitude(),
+						hadAltitudePosition.get(i).getAltitude()));
+			}
 
-		if (hadAltitudePosition .size() > 0){
-			buildGraph(positions);
-			ObjectService objectService = new ObjectService(ActionActivity.this, mRootPathString);
-			objectService.saveRout(myName, null, myRout, true);
+			if (hadAltitudePosition.size() > 0) {
+				buildGraph(positions);
+				ObjectService objectService = new ObjectService(ActionActivity.this, mRootPathString);
+				objectService.saveRout(myName, null, myRout, true);
+			}
 		}
-
 	}
 
 	@Override
@@ -987,12 +983,17 @@ public void ratingBarDialog(){
 					selectedUserPlacesStringList.add(myPlace.getNamePlace());
 				}
 				if (myRout != null) {
-					selectedUserRouts.add(myRout.getNameRout());
+					selectedUserRouts.add(myRout);
 				}
+
 				Set<String> favoritesPlacesList = new HashSet<>(sharedPreferences.getStringSet(FAVORITES_PLACE_LIST, new HashSet<String>()));
 				favoritesPlacesList.addAll(selectedUserPlacesStringList);
 				Set<String> favoritesRoutsList = new HashSet<>(sharedPreferences.getStringSet(FAVORITES_ROUTS_LIST, new HashSet<String>()));
-				favoritesRoutsList.addAll(selectedUserRouts);
+				for (Rout rout :
+						selectedUserRouts) {
+						favoritesRoutsList.add(rout.getNameRout());
+				}
+
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList);
 				editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
