@@ -9,13 +9,9 @@
         android:visible="false"
         app:showAsAction="always"/>
     <item
-        app:showAsAction="never|always"/>
-    <item
         android:id="@+id/actionStartRec"
         android:icon="@android:drawable/ic_media_play"
         android:title="Rec"
-        app:showAsAction="always"/>
-    <item
         app:showAsAction="always"/>
     <item
         android:id="@+id/actionStop"

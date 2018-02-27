@@ -54,9 +54,8 @@ import com.example.key.my_carpathians.interfaces.CommunicatorStartActivity;
 import com.example.key.my_carpathians.interfaces.IRotation;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
-import com.example.key.my_carpathians.utils.ObjectService;
+import com.example.key.my_carpathians.utils.StorageSaveHelper;
 import com.facebook.AccessToken;
-import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -124,7 +123,7 @@ import static com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter.View
 import static com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
 import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
-import static com.example.key.my_carpathians.utils.ObjectService.ERROR;
+import static com.example.key.my_carpathians.utils.StorageSaveHelper.ERROR;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -161,22 +160,6 @@ public class StartActivity extends AppCompatActivity implements
 	public AlertDialog.Builder builder;
 	public ActionBarDrawerToggle actionBarDrawerToggle;
 	public ViewPagerAdapter viewPagerAdapter;
-	private boolean mConnected = false;
-	private String[] mPermissionList = new String[]{
-			ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE
-			, READ_EXTERNAL_STORAGE};
-	private FirebaseAuth.AuthStateListener mAuthListener;
-	private SharedPreferences mSharedPreferences;
-	private CallbackManager mCallbackManager;
-	private FirebaseUser mUser;
-	private FirebaseAuth mAuth;
-	private GoogleApiClient mGoogleApiClient;
-	private String mUserUID = null;
-	private boolean mTypeMode = false;
-	private Uri mRootPath;
-	private int mRegionSelected;
-	private LoginManager mFacebookLoginManager;
-	private String mQuery;
 	@ViewById(R.id.fabRecEditor)
 	FloatingActionButton fabRecEditor;
 	@ViewById(R.id.userAcountImage)
@@ -219,7 +202,22 @@ public class StartActivity extends AppCompatActivity implements
 	ImageButton buttonLogout;
 	@ViewById(R.id.buttonAuthorization)
 	Button buttonAuthorization;
-
+	private boolean mConnected = false;
+	private String[] mPermissionList = new String[]{
+			ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE
+			, READ_EXTERNAL_STORAGE};
+	private FirebaseAuth.AuthStateListener mAuthListener;
+	private SharedPreferences mSharedPreferences;
+	private CallbackManager mCallbackManager;
+	private FirebaseUser mUser;
+	private FirebaseAuth mAuth;
+	private GoogleApiClient mGoogleApiClient;
+//	private String mUserUID = null;
+	private boolean mTypeMode = false;
+	private Uri mRootPath;
+	private int mRegionSelected;
+	private LoginManager mFacebookLoginManager;
+	private String mQuery;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -313,7 +311,7 @@ public class StartActivity extends AppCompatActivity implements
 				downloadPhoto(places);
 
 				if (tabLayout.getTabCount() == 0) {
-					PlacesListFragment placesListFragment = new PlacesListFragment_().builder()
+					PlacesListFragment placesListFragment = PlacesListFragment_.builder()
 							.placeList(places)
 							.mMode(PLACE)
 							.build();
@@ -321,7 +319,10 @@ public class StartActivity extends AppCompatActivity implements
 					viewPagerAdapter.notifyDataSetChanged();
 
 				} else {
-					tabLayout.getTabAt(0).setIcon(null);
+					TabLayout.Tab mTab = tabLayout.getTabAt(0);
+					if (mTab != null) {
+					mTab.setIcon(null);
+					}
 					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter
 							.getItem(0);
 					placesListFragment.setList(places, PLACE);
@@ -349,7 +350,7 @@ public class StartActivity extends AppCompatActivity implements
 				downloadRoutToStorage(routs);
 
 				if (tabLayout.getTabCount() == 1) {
-					RoutsListFragment routsListFragment = new RoutsListFragment_().builder()
+					RoutsListFragment routsListFragment = RoutsListFragment_.builder()
 							.mRoutsList(routs)
 							.mMode(ROUT)
 							.build();
@@ -357,7 +358,10 @@ public class StartActivity extends AppCompatActivity implements
 					viewPagerAdapter.notifyDataSetChanged();
 
 				} else {
-					tabLayout.getTabAt(1).setIcon(null);
+					TabLayout.Tab mTab = tabLayout.getTabAt(1);
+					if (mTab != null) {
+						mTab.setIcon(null);
+					}
 					RoutsListFragment routsListFragment = (RoutsListFragment_) viewPagerAdapter
 							.getItem(1);
 					routsListFragment.setList(routs, ROUT);
@@ -384,14 +388,15 @@ public class StartActivity extends AppCompatActivity implements
 
 	private void checkAllPermission() {
 		List<String> mListPerm = new ArrayList<>();
-		for (int i = 0; i < mPermissionList.length; i++) {
+		for (String permission : mPermissionList) {
+
 			if (ContextCompat.checkSelfPermission(StartActivity.this,
-					mPermissionList[i])
+					permission)
 					!= PackageManager.PERMISSION_GRANTED) {
-				mListPerm.add(mPermissionList[i]);
+				mListPerm.add(permission);
 			} else {
 
-				if (mPermissionList[i].equals(WRITE_EXTERNAL_STORAGE)) {
+				if (permission.equals(WRITE_EXTERNAL_STORAGE)) {
 					if (isExternalStorageWritable()) {
 						mRootPath = Uri.fromFile(context.getExternalFilesDir(
 								Environment.DIRECTORY_DOWNLOADS));
@@ -427,7 +432,7 @@ public class StartActivity extends AppCompatActivity implements
 					}
 
 				} else {
-					Log.d("StartActivity", mPermissionList[i].toString() + " is already granted.");
+					Log.d("StartActivity", permission + " is already granted.");
 				}
 			}
 		}
@@ -462,7 +467,7 @@ public class StartActivity extends AppCompatActivity implements
 					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter
 							.getItem(tabLayout.getSelectedTabPosition());
 					placesListFragment.filter(newText);
-				} else if (tabLayout.getTabCount() > 0 && tabLayout.getSelectedTabPosition() == ROUT){
+				} else if (tabLayout.getTabCount() > 0 && tabLayout.getSelectedTabPosition() == ROUT) {
 					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter
 							.getItem(tabLayout.getSelectedTabPosition());
 					routsListFragment.filter(newText);
@@ -520,24 +525,24 @@ public class StartActivity extends AppCompatActivity implements
 								.getString(R.string.save_date_message_permission));
 						builder.setPositiveButton(getResources().getString(R.string.ok),
 								new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialogInterface, int i) {
-								mRootPath = Uri.fromFile(context.getDir("my_carpathians",
-										Context.MODE_PRIVATE));
-								mSharedPreferences.edit().putString(ROOT_PATH, mRootPath.toString())
-										.apply();
-								getDateFromFirebace();
-								dialogInterface.dismiss();
-							}
-						});
+									@Override
+									public void onClick(DialogInterface dialogInterface, int i) {
+										mRootPath = Uri.fromFile(context.getDir("my_carpathians",
+												Context.MODE_PRIVATE));
+										mSharedPreferences.edit().putString(ROOT_PATH, mRootPath.toString())
+												.apply();
+										getDateFromFirebace();
+										dialogInterface.dismiss();
+									}
+								});
 						builder.setNegativeButton(getResources().getString(R.string.permission),
 								new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialogInterface, int i) {
-								checkAllPermission();
-								dialogInterface.dismiss();
-							}
-						});
+									@Override
+									public void onClick(DialogInterface dialogInterface, int i) {
+										checkAllPermission();
+										dialogInterface.dismiss();
+									}
+								});
 						builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 							@Override
 							public void onDismiss(DialogInterface dialogInterface) {
@@ -548,16 +553,11 @@ public class StartActivity extends AppCompatActivity implements
 						alertDialog.show();
 					}
 				}
-				if (permissions[i].equals(READ_EXTERNAL_STORAGE) && grantResults[i] ==
-						PackageManager.PERMISSION_GRANTED) {
-				} else {
-
-				}
 			}
 
 		} else {
-			Toast.makeText(StartActivity.this,getResources().
-					getString(R.string.no_grandet_permission),  Toast.LENGTH_SHORT).show();
+			Toast.makeText(StartActivity.this, getResources().
+					getString(R.string.no_grandet_permission), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -570,31 +570,37 @@ public class StartActivity extends AppCompatActivity implements
 			showLoginDialog();
 		} else if (mUser.isAnonymous()) {
 			updateUI(getResources().getString(R.string.anonymous), null);
-			mUserUID = mUser.getUid();
+			// mUserUID = mUser.getUid();
 			mTypeMode = false;
 			showInterfaceForAnonymous();
 			produceToolsVisibility(mTypeMode);
 		} else {
-			if (mUser.getProviders().get(0).equals(GOOGLE_PROVIDER)) {
+			if (mUser.getProviders() != null
+					&& mUser.getProviders().size() > 0
+					&& mUser.getProviders().get(0).equals(GOOGLE_PROVIDER)) {
 				produceToolsVisibility(mTypeMode);
 				mTypeMode = true;
 				loginGoogle();
-				mUserUID = mUser.getUid();
+			//	mUserUID = mUser.getUid();
 				updateUI(mUser.getProviderData().get(0).getDisplayName(),
 						String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
 				buttonLogout.setVisibility(View.VISIBLE);
-			} else if (mUser.getProviders().get(0).equals(FACEBOOK_PROVIDER)) {
+			} else if (mUser.getProviders() != null
+					&& mUser.getProviders().size() > 0
+					&& mUser.getProviders().get(0).equals(FACEBOOK_PROVIDER)) {
 				produceToolsVisibility(mTypeMode);
 				mTypeMode = true;
-				mUserUID = mUser.getUid();
+				// mUserUID = mUser.getUid();
 				loginFacebook();
 				updateUI(mUser.getProviderData().get(0).getDisplayName(),
 						String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
 				buttonLogout.setVisibility(View.VISIBLE);
-			} else if (mUser.getProviders().get(0).equals(EMAIL_PROVIDER)) {
+			} else if (mUser.getProviders() != null
+					&& mUser.getProviders().size() > 0
+					&& mUser.getProviders().get(0).equals(EMAIL_PROVIDER)) {
 				produceToolsVisibility(mTypeMode);
 				mTypeMode = true;
-				mUserUID = mUser.getUid();
+				// mUserUID = mUser.getUid();
 				updateUI(mUser.getProviderData().get(0).getEmail(), null);
 				buttonLogout.setVisibility(View.VISIBLE);
 			}
@@ -605,10 +611,7 @@ public class StartActivity extends AppCompatActivity implements
 	/* Checks if external storage is available for read and write */
 	public boolean isExternalStorageWritable() {
 		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-			return true;
-		}
-		return false;
+		return Environment.MEDIA_MOUNTED.equals(state);
 	}
 
 
@@ -653,7 +656,7 @@ public class StartActivity extends AppCompatActivity implements
 				rootPath.mkdirs();
 			}
 			final File localFile = new File(rootPath, rout.getNameRout());
-			if (!localFile.exists() && isOnline() ) {
+			if (!localFile.exists() && isOnline()) {
 				httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
 					@Override
 					public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
@@ -666,7 +669,7 @@ public class StartActivity extends AppCompatActivity implements
 					}
 				});
 			}
-				rout.setUrlRoutsTrack(Uri.fromFile(localFile).toString());
+			rout.setUrlRoutsTrack(Uri.fromFile(localFile).toString());
 		}
 	}
 
@@ -679,25 +682,25 @@ public class StartActivity extends AppCompatActivity implements
 					.getUrlPlace());
 
 
-				File rootPath = new File(this.mRootPath.getPath(), PHOTO_STR);
-				if (!rootPath.exists()) {
-					rootPath.mkdirs();
-				}
+			File rootPath = new File(this.mRootPath.getPath(), PHOTO_STR);
+			if (!rootPath.exists()) {
+				rootPath.mkdirs();
+			}
 
-				final File localFile = new File(rootPath, place.getNamePlace());
-				if (!localFile.exists() && isOnline() ) {
-					httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-						@Override
-						public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-							Log.e("firebase ", ";local tem file  created " + localFile.toString());
-						}
-					}).addOnFailureListener(new OnFailureListener() {
-						@Override
-						public void onFailure(@NonNull Exception exception) {
-							Log.e("firebase ", ";local tem file not created " + exception.toString());
-						}
-					});
-				}
+			final File localFile = new File(rootPath, place.getNamePlace());
+			if (!localFile.exists() && isOnline()) {
+				httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+					@Override
+					public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+						Log.e("firebase ", ";local tem file  created " + localFile.toString());
+					}
+				}).addOnFailureListener(new OnFailureListener() {
+					@Override
+					public void onFailure(@NonNull Exception exception) {
+						Log.e("firebase ", ";local tem file not created " + exception.toString());
+					}
+				});
+			}
 			place.setUrlPlace(Uri.fromFile(localFile).toString());
 		}
 	}
@@ -716,7 +719,7 @@ public class StartActivity extends AppCompatActivity implements
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		if (drawer.isDrawerOpen(GravityCompat.START)) {
 			drawer.closeDrawer(GravityCompat.START);
-		}else{
+		} else {
 			super.onBackPressed();
 		}
 
@@ -741,19 +744,19 @@ public class StartActivity extends AppCompatActivity implements
 
 			builder.setPositiveButton(getResources().getString(R.string.registration)
 					, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int arg1) {
+						public void onClick(DialogInterface dialog, int arg1) {
 
-					mDrawerLayout.openDrawer(Gravity.START);
-				}
-			});
+							mDrawerLayout.openDrawer(Gravity.START);
+						}
+					});
 			builder.setNegativeButton(getResources().getString(R.string.anonymous)
 					, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int arg1) {
-					signInAnonymously();
-					mDrawerLayout.closeDrawer(Gravity.START);
+						public void onClick(DialogInterface dialog, int arg1) {
+							signInAnonymously();
+							mDrawerLayout.closeDrawer(Gravity.START);
 
-				}
-			});
+						}
+					});
 			builder.setCancelable(true);
 			builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 				public void onCancel(DialogInterface dialog) {
@@ -771,18 +774,19 @@ public class StartActivity extends AppCompatActivity implements
 
 			builder.setPositiveButton(getResources().getString(R.string.settings)
 					, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int arg1) {
-					Intent intentSettingsNetwork = new Intent(Intent.ACTION_MAIN);
-					intentSettingsNetwork.setClassName("com.android.phone",
-							"com.android.phone.NetworkSetting");
-					startActivity(intentSettingsNetwork);
-				}
-			});
+						public void onClick(DialogInterface dialog, int arg1) {
+							Intent intentSettingsNetwork = new Intent(Intent.ACTION_MAIN);
+							intentSettingsNetwork.setClassName("com.android.phone",
+									"com.android.phone.NetworkSetting");
+							startActivity(intentSettingsNetwork);
+						}
+					});
 			builder.setCancelable(true);
 			AlertDialog alert = builder.create();
 			alert.show();
 		}
 	}
+
 	private void signInAnonymously() {
 		mAuth.signInAnonymously()
 				.addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -807,11 +811,13 @@ public class StartActivity extends AppCompatActivity implements
 		try {
 			ConnectivityManager connectivityManager = (ConnectivityManager) StartActivity.this
 					.getSystemService(Context.CONNECTIVITY_SERVICE);
+			if (connectivityManager != null) {
+				NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-			NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-			mConnected = networkInfo != null && networkInfo.isAvailable() &&
-					networkInfo.isConnected();
-			return mConnected;
+				mConnected = networkInfo != null && networkInfo.isAvailable() &&
+						networkInfo.isConnected();
+				return mConnected;
+			}
 
 
 		} catch (Exception e) {
@@ -881,15 +887,20 @@ public class StartActivity extends AppCompatActivity implements
 					}
 
 				}
-				if (createdP != null && tabLayout.getTabCount() > 0) {
-					tabLayout.getTabAt(0).setIcon(R.drawable.ic_create_black_24px);
+				if (tabLayout.getTabCount() > 0) {
+					TabLayout.Tab mTab = tabLayout.getTabAt(0);
+					if (mTab != null) {
+					mTab.setIcon(R.drawable.ic_create_black_24px);
+					}
 					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(createdP, MY_PLACE);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 0) {
-					tabLayout.getTabAt(0).setIcon(R.drawable.ic_create_black_24px);
-					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
+					TabLayout.Tab mTab = tabLayout.getTabAt(0);
+					if (mTab != null) {
+						mTab.setIcon(R.drawable.ic_create_black_24px);
+					}					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(new ArrayList<Place>(), MY_PLACE);
 				}
 				dialogFlag++;
@@ -925,15 +936,20 @@ public class StartActivity extends AppCompatActivity implements
 						}
 					}
 				}
-				if (createdR != null && tabLayout.getTabCount() > 1) {
-					tabLayout.getTabAt(1).setIcon(R.drawable.ic_create_black_24px);
+				if (tabLayout.getTabCount() > 1) {
+					TabLayout.Tab mTab = tabLayout.getTabAt(1);
+					if (mTab != null) {
+						mTab.setIcon(R.drawable.ic_create_black_24px);
+					}
 					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(createdR, MY_ROUT);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 1) {
-					tabLayout.getTabAt(1).setIcon(R.drawable.ic_create_black_24px);
-					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
+					TabLayout.Tab mTab = tabLayout.getTabAt(1);
+					if (mTab != null) {
+						mTab.setIcon(R.drawable.ic_create_black_24px);
+					}					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(new ArrayList<Rout>(), MY_ROUT);
 				}
 				dialogFlag++;
@@ -964,14 +980,20 @@ public class StartActivity extends AppCompatActivity implements
 						}
 					}
 				}
-				if (favoriteP != null && tabLayout.getTabCount() > 0) {
-					tabLayout.getTabAt(0).setIcon(R.drawable.ic_favorite_border_black_24px);
+				if (tabLayout.getTabCount() > 0) {
+					TabLayout.Tab mTab = tabLayout.getTabAt(0);
+					if (mTab != null) {
+						mTab.setIcon(R.drawable.ic_favorite_border_black_24px);
+					}
 					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(favoriteP, FA_PLACE);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 0) {
-					tabLayout.getTabAt(0).setIcon(R.drawable.ic_favorite_border_black_24px);
+					TabLayout.Tab mTab = tabLayout.getTabAt(0);
+					if (mTab != null) {
+						mTab.setIcon(R.drawable.ic_favorite_border_black_24px);
+					}
 					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(new ArrayList<Place>(), FA_PLACE);
 				}
@@ -995,19 +1017,27 @@ public class StartActivity extends AppCompatActivity implements
 					}
 
 				}
-				if (favoriteR != null && tabLayout.getTabCount() > 1) {
-					tabLayout.getTabAt(1).setIcon(R.drawable.ic_favorite_border_black_24px);
+				if (tabLayout.getTabCount() > 1 ) {
+					TabLayout.Tab tab = tabLayout.getTabAt(1);
+					if (tab != null) {
+						tab.setIcon(R.drawable.ic_favorite_border_black_24px);
+					}
 					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(favoriteR, FA_ROUT);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 1) {
-					tabLayout.getTabAt(1).setIcon(R.drawable.ic_favorite_border_black_24px);
+					TabLayout.Tab tab = tabLayout.getTabAt(1);
+					if (tab != null) {
+						tab.setIcon(R.drawable.ic_favorite_border_black_24px);
+					}
 					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(new ArrayList<Rout>(), FA_ROUT);
 				}
 				dialogFlag++;
 			}
+
+
 		} else {
 			dialogFlag++;
 		}
@@ -1067,11 +1097,11 @@ public class StartActivity extends AppCompatActivity implements
 		builder.setIcon(R.drawable.ic_favorite_border_black_24px);
 		builder.setPositiveButton(getResources().getString(R.string.ok)
 				, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialogInterface, int i) {
-				dialogInterface.dismiss();
-			}
-		});
+					@Override
+					public void onClick(DialogInterface dialogInterface, int i) {
+						dialogInterface.dismiss();
+					}
+				});
 		AlertDialog dialogAboutEmptyFavoriteList = builder.create();
 		dialogAboutEmptyFavoriteList.show();
 	}
@@ -1087,7 +1117,7 @@ public class StartActivity extends AppCompatActivity implements
 			editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
 			editor.apply();
 			ArrayList<String> mListRouts = null;
-			if (favoritesRoutsList != null) {
+			if (favoritesRoutsList.size() > 0) {
 				mListRouts = new ArrayList<>(favoritesRoutsList);
 			}
 			showFavoriteList(null, mListRouts);
@@ -1099,7 +1129,7 @@ public class StartActivity extends AppCompatActivity implements
 			editor.putStringSet(FAVORITES_PLACE_LIST, favoritesPlacesList);
 			editor.apply();
 			ArrayList<String> mListPlaces = null;
-			if (favoritesPlacesList != null) {
+			if (favoritesPlacesList.size() > 0) {
 				mListPlaces = new ArrayList<>(favoritesPlacesList);
 			}
 			showFavoriteList(mListPlaces, null);
@@ -1113,9 +1143,9 @@ public class StartActivity extends AppCompatActivity implements
 
 		if (type == ROUT) {
 			for (int p = 0; p < names.size(); p++) {
-				ObjectService objectService = new ObjectService(StartActivity.this,
+				StorageSaveHelper storageSaveHelper = new StorageSaveHelper(StartActivity.this,
 						mRootPath.toString());
-				String mOutcome = objectService.deleteRout(names.get(p));
+				String mOutcome = storageSaveHelper.deleteRout(names.get(p));
 				if (!mOutcome.equals(ERROR)) {
 					Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG).show();
 				} else {
@@ -1124,9 +1154,9 @@ public class StartActivity extends AppCompatActivity implements
 			}
 		} else if (type == PLACE) {
 			for (int p = 0; p < names.size(); p++) {
-				ObjectService objectService = new ObjectService(StartActivity.this,
+				StorageSaveHelper storageSaveHelper = new StorageSaveHelper(StartActivity.this,
 						mRootPath.toString());
-				String mOutcome = objectService.deletePlace(names.get(p));
+				String mOutcome = storageSaveHelper.deletePlace(names.get(p));
 				if (!mOutcome.equals(ERROR)) {
 					Toast.makeText(StartActivity.this, mOutcome, Toast.LENGTH_LONG).show();
 				} else {
@@ -1198,18 +1228,18 @@ public class StartActivity extends AppCompatActivity implements
 										builder.setMessage(getResources().getString(R.string.dialog_register_message));
 										builder.setPositiveButton(getResources().getString(R.string.button_create_new),
 												new DialogInterface.OnClickListener() {
-											@Override
-											public void onClick(DialogInterface dialog, int which) {
-												createNewAccount();
-											}
-										});
+													@Override
+													public void onClick(DialogInterface dialog, int which) {
+														createNewAccount();
+													}
+												});
 										builder.setNegativeButton(getResources().getString(R.string.button_check_pass),
 												new DialogInterface.OnClickListener() {
-											@Override
-											public void onClick(DialogInterface dialog, int which) {
-												dialog.dismiss();
-											}
-										});
+													@Override
+													public void onClick(DialogInterface dialog, int which) {
+														dialog.dismiss();
+													}
+												});
 										builder.show();
 									}
 								} else {
@@ -1244,23 +1274,20 @@ public class StartActivity extends AppCompatActivity implements
 						} else {
 							mSharedPreferences.edit().putString(LOGIN_NAME, inputEmail.getText().toString()).apply();
 							updateUI(inputEmail.getText().toString(), null);
-							mUserUID = mAuth.getCurrentUser().getUid();
-							mTypeMode = true;
-							produceToolsVisibility(mTypeMode);
-							progressBar.setVisibility(View.GONE);
+							if (mAuth.getCurrentUser() != null) {
+								// mUserUID = mAuth.getCurrentUser().getUid();
+								mTypeMode = true;
+								produceToolsVisibility(true);
+								progressBar.setVisibility(View.GONE);
+							}
 						}
 					}
 				});
-
-
 	}
 
 	private boolean isValidEmail(CharSequence email) {
-		if (email == null) {
-			return false;
-		} else {
-			return Patterns.EMAIL_ADDRESS.matcher(email).matches();
-		}
+		return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+
 	}
 
 	private void loginFacebook() {
@@ -1268,19 +1295,19 @@ public class StartActivity extends AppCompatActivity implements
 			// loginFacebook.setVisibility(View.VISIBLE);
 
 			// If using in a fragment
-			AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
-				@Override
-				protected void onCurrentAccessTokenChanged(AccessToken accessToken, AccessToken accessToken2) {
-					Log.d(TAG, "onCurrentAccessTokenChanged()");
-					if (accessToken == null) {
-						showLogInGroup(false);
-					} else if (accessToken2 == null) {
-						LoginManager.getInstance().logOut();
-						mAuth.signOut();
-						showLogInGroup(true);
-					}
-				}
-			};
+//			AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
+//				@Override
+//				protected void onCurrentAccessTokenChanged(AccessToken accessToken, AccessToken accessToken2) {
+//					Log.d(TAG, "onCurrentAccessTokenChanged()");
+//					if (accessToken == null) {
+//						showLogInGroup(false);
+//					} else if (accessToken2 == null) {
+//						LoginManager.getInstance().logOut();
+//						mAuth.signOut();
+//						showLogInGroup(true);
+//					}
+//				}
+//			};
 			mCallbackManager = CallbackManager.Factory.create();
 
 			//loginFacebook.setReadPermissions("email");
@@ -1290,7 +1317,7 @@ public class StartActivity extends AppCompatActivity implements
 				@Override
 				public void onSuccess(LoginResult loginResult) {
 					Toast toast = Toast.makeText(StartActivity.this, getResources()
-							.getString(R.string. logged_in), Toast.LENGTH_SHORT);
+							.getString(R.string.logged_in), Toast.LENGTH_SHORT);
 					handleFacebookAccessToken(loginResult.getAccessToken());
 					toast.show();
 				}
@@ -1425,10 +1452,12 @@ public class StartActivity extends AppCompatActivity implements
 							Profile profile = Profile.getCurrentProfile();
 							updateUI(profile.getFirstName(),
 									profile.getProfilePictureUri(200, 200).toString());
-							mUserUID = mAuth.getCurrentUser().getUid();
-							mTypeMode = true;
-							produceToolsVisibility(mTypeMode);
-							progressBar.setVisibility(View.GONE);
+							if (mAuth.getCurrentUser() != null) {
+							//	mUserUID = mAuth.getCurrentUser().getUid();
+								mTypeMode = true;
+								produceToolsVisibility(true);
+								progressBar.setVisibility(View.GONE);
+							}
 						}
 					}
 				});
@@ -1453,9 +1482,11 @@ public class StartActivity extends AppCompatActivity implements
 							// Sign in success, update UI with the signed-in mUser's information
 							Log.d(TAG, "signInWithCredential:success");
 							updateUI(acct.getDisplayName(), String.valueOf(acct.getPhotoUrl()));
-							mUserUID = mAuth.getCurrentUser().getUid();
-							produceToolsVisibility(mTypeMode = true);
-							progressBar.setVisibility(View.GONE);
+							if (mAuth.getCurrentUser() != null) {
+								// mUserUID = mAuth.getCurrentUser().getUid();
+								produceToolsVisibility(mTypeMode = true);
+								progressBar.setVisibility(View.GONE);
+							}
 
 						} else {
 							// If sign in fails, display a message to the mUser.
@@ -1527,12 +1558,19 @@ public class StartActivity extends AppCompatActivity implements
 			if (mUser.isAnonymous()) {
 				signOut();
 			} else {
-				if (mUser.getProviders().get(0).equals(GOOGLE_PROVIDER)) {
+				if (mUser.getProviders() != null
+						&& mUser.getProviders().size() > 0
+						&& mUser.getProviders().get(0).equals(GOOGLE_PROVIDER)) {
 					googleSignOut();
-				} else if (mUser.getProviders().get(0).equals(FACEBOOK_PROVIDER)) {
+				} else if (
+						mUser.getProviders() != null
+								&& mUser.getProviders().size() > 0
+								&& mUser.getProviders().get(0).equals(FACEBOOK_PROVIDER)) {
 					LoginManager.getInstance().logOut();
 					signOut();
-				} else if (mUser.getProviders().get(0).equals(EMAIL_PROVIDER)) {
+				} else if (mUser.getProviders() != null
+						&& mUser.getProviders().size() > 0
+						&& mUser.getProviders().get(0).equals(EMAIL_PROVIDER)) {
 					signOut();
 				}
 			}
@@ -1610,97 +1648,97 @@ public class StartActivity extends AppCompatActivity implements
 		Mapbox.getInstance(this, getString(R.string.access_token));
 		OfflineManager.getInstance(StartActivity.this).listOfflineRegions(
 				new OfflineManager.ListOfflineRegionsCallback() {
-			@Override
-			public void onList(final OfflineRegion[] offlineRegions) {
-				// Check result. If no regions have been
-				// downloaded yet, notify user and return
-				if (offlineRegions == null || offlineRegions.length == 0) {
-					Toast.makeText(getApplicationContext(),
-							getString(R.string.toast_no_regions_yet), Toast.LENGTH_SHORT).show();
-					return;
-				}
+					@Override
+					public void onList(final OfflineRegion[] offlineRegions) {
+						// Check result. If no regions have been
+						// downloaded yet, notify user and return
+						if (offlineRegions == null || offlineRegions.length == 0) {
+							Toast.makeText(getApplicationContext(),
+									getString(R.string.toast_no_regions_yet), Toast.LENGTH_SHORT).show();
+							return;
+						}
 
-				// Add all of the region names to a list
-				ArrayList<String> offlineRegionsNames = new ArrayList<>();
-				for (OfflineRegion offlineRegion : offlineRegions) {
-					offlineRegionsNames.add(getRegionName(offlineRegion));
-				}
-				final CharSequence[] items = offlineRegionsNames
-						.toArray(new CharSequence[offlineRegionsNames.size()]);
+						// Add all of the region names to a list
+						ArrayList<String> offlineRegionsNames = new ArrayList<>();
+						for (OfflineRegion offlineRegion : offlineRegions) {
+							offlineRegionsNames.add(getRegionName(offlineRegion));
+						}
+						final CharSequence[] items = offlineRegionsNames
+								.toArray(new CharSequence[offlineRegionsNames.size()]);
 
-				// Build a dialog containing the list of regions
-				AlertDialog dialog = new AlertDialog.Builder(StartActivity.this)
-						.setTitle(getString(R.string.navigate_title))
-						.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								// Track which region the user selects
-								mRegionSelected = which;
-							}
-						})
-						.setPositiveButton(getString(R.string.navigate_positive_button),
-								new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int id) {
-
-								Toast.makeText(StartActivity.this, items[mRegionSelected],
-										Toast.LENGTH_LONG).show();
-								Intent mapIntent = new Intent(StartActivity.this, MapsActivity_.class);
-								mapIntent.putExtra(OFFLINE_MAP, items[mRegionSelected]);
-								startActivity(mapIntent);
-
-							}
-						})
-						.setNeutralButton(getString(R.string.navigate_neutral_button_title),
-								new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int id) {
-								// Make progressBar indeterminate and
-								// set it to visible to signal that
-								// the deletion process has begun
-								progressBar.setIndeterminate(true);
-								progressBar.setVisibility(View.VISIBLE);
-
-								// Begin the deletion process
-								offlineRegions[mRegionSelected].delete(
-										new OfflineRegion.OfflineRegionDeleteCallback() {
+						// Build a dialog containing the list of regions
+						AlertDialog dialog = new AlertDialog.Builder(StartActivity.this)
+								.setTitle(getString(R.string.navigate_title))
+								.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
 									@Override
-									public void onDelete() {
-										// Once the region is deleted, remove the
-										// progressBar and display a toast
-										progressBar.setVisibility(View.INVISIBLE);
-										progressBar.setIndeterminate(false);
-										Toast.makeText(getApplicationContext(),
-												getString(R.string.toast_region_deleted),
-												Toast.LENGTH_LONG).show();
+									public void onClick(DialogInterface dialog, int which) {
+										// Track which region the user selects
+										mRegionSelected = which;
 									}
+								})
+								.setPositiveButton(getString(R.string.navigate_positive_button),
+										new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface dialog, int id) {
 
-									@Override
-									public void onError(String error) {
-										progressBar.setVisibility(View.INVISIBLE);
-										progressBar.setIndeterminate(false);
-										Log.e(TAG, "Error: " + error);
-									}
-								});
-							}
-						})
-						.setNegativeButton(getString(R.string.navigate_negative_button_title),
-								new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int id) {
-								// When the user cancels, don't do anything.
-								// The dialog will automatically close
-							}
-						}).create();
-				dialog.show();
+												Toast.makeText(StartActivity.this, items[mRegionSelected],
+														Toast.LENGTH_LONG).show();
+												Intent mapIntent = new Intent(StartActivity.this, MapsActivity_.class);
+												mapIntent.putExtra(OFFLINE_MAP, items[mRegionSelected]);
+												startActivity(mapIntent);
 
-			}
+											}
+										})
+								.setNeutralButton(getString(R.string.navigate_neutral_button_title),
+										new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface dialog, int id) {
+												// Make progressBar indeterminate and
+												// set it to visible to signal that
+												// the deletion process has begun
+												progressBar.setIndeterminate(true);
+												progressBar.setVisibility(View.VISIBLE);
 
-			@Override
-			public void onError(String error) {
-				Log.e(TAG, "Error: " + error);
-			}
-		});
+												// Begin the deletion process
+												offlineRegions[mRegionSelected].delete(
+														new OfflineRegion.OfflineRegionDeleteCallback() {
+															@Override
+															public void onDelete() {
+																// Once the region is deleted, remove the
+																// progressBar and display a toast
+																progressBar.setVisibility(View.INVISIBLE);
+																progressBar.setIndeterminate(false);
+																Toast.makeText(getApplicationContext(),
+																		getString(R.string.toast_region_deleted),
+																		Toast.LENGTH_LONG).show();
+															}
+
+															@Override
+															public void onError(String error) {
+																progressBar.setVisibility(View.INVISIBLE);
+																progressBar.setIndeterminate(false);
+																Log.e(TAG, "Error: " + error);
+															}
+														});
+											}
+										})
+								.setNegativeButton(getString(R.string.navigate_negative_button_title),
+										new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface dialog, int id) {
+												// When the user cancels, don't do anything.
+												// The dialog will automatically close
+											}
+										}).create();
+						dialog.show();
+
+					}
+
+					@Override
+					public void onError(String error) {
+						Log.e(TAG, "Error: " + error);
+					}
+				});
 	}
 
 	@SuppressLint("StringFormatInvalid")

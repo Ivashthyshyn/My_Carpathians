@@ -35,7 +35,7 @@ import static com.example.key.my_carpathians.activities.StartActivity.PLACE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.activities.StartActivity.ROOT_PATH;
 import static com.example.key.my_carpathians.activities.StartActivity.ROUT;
-import static com.example.key.my_carpathians.utils.ObjectService.FILE_EXISTS;
+import static com.example.key.my_carpathians.utils.StorageSaveHelper.FILE_EXISTS;
 
 
 public class LocationService extends Service implements
@@ -173,8 +173,8 @@ public class LocationService extends Service implements
 	        mPlace.setNamePlace(mNamePlace);
 	        mPlace.setPositionPlace(new com.example.key.my_carpathians.models.
 			        Position(mLocation.getLatitude(), mLocation.getLongitude()));
-            ObjectService objectService = new ObjectService(getApplicationContext(), mRootPathString);
-            String outcome = objectService.savePlace(mNamePlace, mPlace, false);
+            StorageSaveHelper storageSaveHelper = new StorageSaveHelper(getApplicationContext(), mRootPathString);
+            String outcome = storageSaveHelper.savePlace(mNamePlace, mPlace, false);
             if (outcome.equals(FILE_EXISTS) & owner != null){
                 owner.messageForActivity(ROUT, mNamePlace);
             }else{
@@ -191,8 +191,8 @@ public class LocationService extends Service implements
 	    mRout.setNameRout(mNameRout);
 	    mRout.setPositionRout(new com.example.key.my_carpathians.models.Position(
 	    		mPositionList.get(0).getLatitude(), mPositionList.get(0).getLongitude()));
-        ObjectService objectService = new ObjectService(getApplicationContext(), mRootPathString);
-        String outcome = objectService.saveRout(mNameRout, mPositionList, mRout, false);
+        StorageSaveHelper storageSaveHelper = new StorageSaveHelper(getApplicationContext(), mRootPathString);
+        String outcome = storageSaveHelper.saveRout(mNameRout, mPositionList, mRout, false);
         if (outcome.equals(FILE_EXISTS) & owner != null){
             owner.messageForActivity(ROUT, mNameRout);
         }else{

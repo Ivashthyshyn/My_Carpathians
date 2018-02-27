@@ -31,7 +31,7 @@ import com.example.key.my_carpathians.activities.StartActivity_;
 import com.example.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.example.key.my_carpathians.models.Place;
 import com.example.key.my_carpathians.models.Rout;
-import com.example.key.my_carpathians.utils.ObjectService;
+import com.example.key.my_carpathians.utils.StorageSaveHelper;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.commons.geojson.LineString;
@@ -64,7 +64,7 @@ import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.example.key.my_carpathians.activities.StartActivity.ROOT_PATH;
-import static com.example.key.my_carpathians.utils.ObjectService.ERROR;
+import static com.example.key.my_carpathians.utils.StorageSaveHelper.ERROR;
 
 /**
  .
@@ -447,8 +447,8 @@ public class EditModeFragment extends DialogFragment {
 					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), null, uriPhoto2);
 					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), null, uriPhoto3);
 
-				ObjectService objectService = new ObjectService(getContext(), rootPathString);
-				 String outcome = objectService.saveRout(name, null, mRout, true);
+				StorageSaveHelper storageSaveHelper = new StorageSaveHelper(getContext(), rootPathString);
+				 String outcome = storageSaveHelper.saveRout(name, null, mRout, true);
 				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
 				 if (outcome.equals("Rout saved")) {
 					 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity) getContext();
@@ -462,8 +462,8 @@ public class EditModeFragment extends DialogFragment {
 					 savePhoto(mPlace.getNamePlace() + MORE_PHOTO_2, null, uriPhoto2);
 					 savePhoto(mPlace.getNamePlace() + MORE_PHOTO_3, null, uriPhoto3);
 
-				 ObjectService objectService = new ObjectService(getContext(), rootPathString);
-				 String outcome =  objectService.savePlace( name, mPlace, true);
+				 StorageSaveHelper storageSaveHelper = new StorageSaveHelper(getContext(), rootPathString);
+				 String outcome =  storageSaveHelper.savePlace( name, mPlace, true);
 				 Toast.makeText(getContext(), outcome, Toast.LENGTH_LONG).show();
 				 if (outcome.equals("Place saved")) {
 					 CommunicatorActionActivity communicatorActionActivity = (CommunicatorActionActivity) getContext();
@@ -611,8 +611,8 @@ public class EditModeFragment extends DialogFragment {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
 				if (mRout != null){
-					ObjectService objectService = new ObjectService(getContext(), rootPathString);
-					String mOutcome = objectService.deleteRout(mRout.getNameRout());
+					StorageSaveHelper storageSaveHelper = new StorageSaveHelper(getContext(), rootPathString);
+					String mOutcome = storageSaveHelper.deleteRout(mRout.getNameRout());
 					if(!mOutcome.equals(ERROR)){
 						Toast.makeText(getContext(),mOutcome,Toast.LENGTH_LONG ).show();
 						Intent intent = new Intent(getContext(), StartActivity_.class);
@@ -623,8 +623,8 @@ public class EditModeFragment extends DialogFragment {
 					}
 
 				}else if (mPlace != null) {
-					ObjectService objectService = new ObjectService(getContext(), rootPathString);
-					String mOutcome = objectService.deletePlace(mPlace.getNamePlace());
+					StorageSaveHelper storageSaveHelper = new StorageSaveHelper(getContext(), rootPathString);
+					String mOutcome = storageSaveHelper.deletePlace(mPlace.getNamePlace());
 					if(!mOutcome.equals(ERROR)){
 						Toast.makeText(getContext(),mOutcome,Toast.LENGTH_LONG ).show();
 						Intent intent = new Intent(getContext(), StartActivity_.class);

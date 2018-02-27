@@ -32,13 +32,13 @@ import static com.example.key.my_carpathians.utils.LocationService.CREATED_BY_US
  * Created by key on 29.09.17.
  */
 
-public class ObjectService {
+public class StorageSaveHelper {
 	public static final String FILE_EXISTS = "file_exists";
 	public static final String ERROR = "error";
 	public final String rootPathString;
 	public Context context;
 
-	public ObjectService(Context context, String rootPathString){
+	public StorageSaveHelper(Context context, String rootPathString){
 		this.rootPathString = rootPathString;
 		this.context = context;
 	}
