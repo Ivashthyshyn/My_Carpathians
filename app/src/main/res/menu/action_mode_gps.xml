@@ -11,19 +11,19 @@
     <item
         android:id="@+id/actionStartRec"
         android:icon="@android:drawable/ic_media_play"
-        android:title="Rec"
+        android:title="@string/rec"
         app:showAsAction="always"/>
     <item
         android:id="@+id/actionStop"
         android:icon="@drawable/ic_media_stop_light"
-        android:title="Pause"
+        android:title="@string/pause"
         android:visible="false"
         app:showAsAction="always"/>
     <item
         android:id="@+id/actionSaveRecord"
         android:checkable="false"
         android:icon="@drawable/ic_done_white_24px"
-        android:title="Save Record"
+        android:title="save"
         android:visible="false"
         app:showAsAction="always"/>
 </menu>

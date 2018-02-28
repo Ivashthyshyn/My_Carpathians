@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="level">Level</string>
+    <string name="difficulty">difficulty</string>
+    <string name="length">lenght</string>
+    <string name="add_to_map">"Add to Map "</string>
+    <string name="gps_search">GPS Serching</string>
+    <string name="settings_part_1">Loaded perimeter radius of the default offline Region (km)</string>
+    <string name="settings_part_2">Radius of places nearby (km)</string>
+    <string name="settings_part_3">Radius of Routes nearby  (km)</string>
+    <string name="acaunt_settings">Acaunt setings</string>
+    <string name="delete_acaunt">Delete acaunt</string>
+    <string name="light">light</string>
+    <string name="hard">hard</string>
+    <string name="name">NAME</string>
+    <string name="title_information">Title Information</string>
+    <string name="title_photo">Title Photo</string>
+    <string name="save_record">Save Data</string>
+    <string name="delete">Delete</string>
+    <string name="delete_region">Delete offline region</string>
+    <string name="edit">Edit</string>
+    <string name="create_place">Create Pleace</string>
+    <string name="create_route">Create Rout</string>
+    <string name="create_region">Create Offline Region</string>
+    <string name="list_offline_map">List Offline Map</string>
+    <string name="add_to_map_2">Add to Map routes around</string>
+</resources>

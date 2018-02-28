@@ -3,12 +3,12 @@
     <string name="title_activity_maps">Map</string>
 
     <string name="title_activity_main">MainActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="access_token">pk.eyJ1Ijoidnlsa3kiLCJhIjoiY2pibTI5NDdlMXZkNTMxb2JneXV4MzBwZiJ9.T4Kakw4VplpStA54g19JMA</string>
-    <string name="facebook_app_id">1535201253190515</string>
-    <string name="fb_login_protocol_scheme">fb1535201253190515</string>
-    <string name="places">PLACE</string>
+    <string name="dummy_button" translatable="false">Dummy Button</string>
+    <string name="dummy_content" translatable="false">DUMMY\nCONTENT</string>
+    <string name="access_token" translatable="false">pk.eyJ1Ijoidnlsa3kiLCJhIjoiY2pibTI5NDdlMXZkNTMxb2JneXV4MzBwZiJ9.T4Kakw4VplpStA54g19JMA</string>
+    <string name="facebook_app_id" translatable="false">1535201253190515</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb1535201253190515</string>
+    <string name="places" translatable="false">PLACE</string>
     <string name="routes">ROUTES</string>
     <string name="settings">SETTINGS</string>
 
@@ -120,10 +120,10 @@
     <string name="error_publisher_3r">No title information about place</string>
     <string name="error_publisher_4r">No title information about place</string>
     <string name="error_publisher_5r">"No rout difficulty given "</string>
-    <string name="enother_photo_downlod">Another photo download</string>
+    <string name="enother_photo_download">Another photo download</string>
     <string name="error_uploading">Error! Upload disapproved</string>
     <string name="set_rating">Set rating place</string>
-    <string name="add_to_fevorite">Added to favorite list!</string>
+    <string name="add_to_favorite">Added to favorite list!</string>
     <string name="offline_message">Sorry, no internet access, you will be able to post data later</string>
     <string name="save_date">Save Data to Storage!</string>
     <string name="save_date_message">External memory is not available! And in the interior storage is not enough free space. You can not use this program in offline.</string>
@@ -169,7 +169,7 @@
     <string name="pause">pause</string>
     <string name="rec">rec</string>
     <string name="subtitle_tab_to_select">tab to select</string>
-    <string name="title_macke_chois">make choice</string>
+    <string name="title_make_choice">make choice</string>
 
 
 
@@ -180,5 +180,36 @@
     <string name="error_downloading_photo">"Error! Additional photos not loaded "</string>
     <string name="already_exist">This name is already in use. Please change the name</string>
     <string name="btn_back">Back</string>
+    <string name="place_tab_name">PLACES</string>
+    <string name="rout_tab_name">ROUTES</string>
+    <string name="favorites">Favorites</string>
+    <string name="created">Created</string>
+    <string name="offline_maps">Offline Maps</string>
+    <string name="user_name">User Name</string>
+    <string name="level">Level</string>
+    <string name="difficulty">difficulty</string>
+    <string name="length">length</string>
+    <string name="add_to_map">Add to Map Place around</string>
+    <string name="gps_search">GPS Serching</string>
+    <string name="settings_part_1">Loaded perimeter radius of the default offline Region (km)</string>
+    <string name="settings_part_2">Radius of places nearby (km)</string>
+    <string name="settings_part_3">Radius of Routes nearby  (km)</string>
+    <string name="acaunt_settings">Acaunt setings</string>
+    <string name="delete_acaunt">Delete acaunt</string>
+    <string name="light">light</string>
+    <string name="medium">medium</string>
+    <string name="hard">hard</string>
+    <string name="name">NAME</string>
+    <string name="title_information">Title Information</string>
+    <string name="title_photo">Title Photo</string>
+    <string name="save_record">Save Data</string>
+    <string name="delete">Delete</string>
+    <string name="delete_region">Delete offline region</string>
+    <string name="edit">Edit</string>
+    <string name="create_place">Create Place</string>
+    <string name="create_route">Create Rout</string>
+    <string name="create_region">Create Offline Region</string>
+    <string name="list_offline_map">List Offline Map</string>
+    <string name="add_to_map_2">Add to Map routes around</string>
 
 </resources>

@@ -3,9 +3,7 @@
     <string name="app_name">Мої Карпати</string>
     <string name="title_activity_maps">Карта</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="places" translatable="false">МІСЦЯ</string>
     <string name="routes">МАРШРУТИ</string>
-    <string name="settings" translatable="false">Налаштування</string>
     <string name="emailpassword_title_text">Введіть адрес електронної пошти</string>
     <string name="signed_out">Вийти</string>
     <string name="sign_in">Увійти</string>
@@ -83,12 +81,12 @@
     <string name="error_publisher_3r">Не вказана титульна фотографія</string>
     <string name="error_publisher_4r">Не вказано титульної інформації</string>
     <string name="error_publisher_5r">Не вказано складність маршруту</string>
-    <string name="enother_photo_downlod">Завантажити інші світлини</string>
+    <string name="enother_photo_download">Завантажити інші світлини</string>
     <string name="error_downloading_photo">Виникла помилка прои завантаженні додаткових світлин!</string>
     <string name="error_uploading">Виникла помилка при завантаженні</string>
     <string name="already_exist">Таке імя уже використовується.Будь-ласка змініть назву</string>
     <string name="set_rating">Проголосувати за місце</string>
-    <string name="add_to_fevorite">Додати до улюблених</string>
+    <string name="add_to_favorite">Додати до улюблених</string>
     <string name="offline_message">Немає доступу до мережі інтернет, ви зможете опублікувати дані пізніше</string>
     <string name="save_date">Зберегти дані</string>
     <string name="save_date_message">Зовнішня пам\'ять недоступна! Або у внутрішній памяті не вистачає вільного простору. Ви не можете використовувати цю програму у режимі офлайн.</string>
@@ -135,5 +133,37 @@
     <string name="pause">Пауза</string>
     <string name="rec">Запис</string>
     <string name="subtitle_tab_to_select">торкніться щоб вибрати</string>
-    <string name="title_macke_chois">зробіть вибір</string>
+    <string name="title_make_choice">зробіть вибір</string>
+    <string name="place_tab_name">МІСЦЯ</string>
+    <string name="rout_tab_name">МАРШРУТИ</string>
+    <string name="settings">Налаштування</string>
+    <string name="favorites">Улюблені</string>
+    <string name="created">Створені</string>
+    <string name="offline_maps">Автономні карти</string>
+    <string name="user_name">Імя Користувача</string>
+    <string name="length">Довжина</string>
+    <string name="add_to_map">Додати до карти місця поблизу</string>
+    <string name="gps_search">Пошук GPS</string>
+    <string name="level">Рівень</string>
+    <string name="difficulty">складність</string>
+    <string name="settings_part_1">Радіус автономної карти по замовчуванню (км)</string>
+    <string name="settings_part_2">Радіус пошуку місць поблизу (км)</string>
+    <string name="settings_part_3">Радіус пошуку маршрутів поблизу (км)</string>
+    <string name="acaunt_settings">Налаштування аутентифікації</string>
+    <string name="delete_acaunt">Видалити користувача</string>
+    <string name="light">легкий</string>
+    <string name="medium">середній</string>
+    <string name="hard">тяжкий</string>
+    <string name="name">Назва</string>
+    <string name="title_information">Титульна інформація</string>
+    <string name="title_photo">Титульне фото</string>
+    <string name="save_record">Зберегти дані</string>
+    <string name="delete">Витерти</string>
+    <string name="delete_region">Витерти автономну карту</string>
+    <string name="edit">Змінити</string>
+    <string name="create_place">Створити місце</string>
+    <string name="create_route">Створити маршрут</string>
+    <string name="create_region">Створити автономну карту</string>
+    <string name="list_offline_map">Список автономних карт</string>
+    <string name="add_to_map_2">Додати до карти маршрути поблизу</string>
 </resources>

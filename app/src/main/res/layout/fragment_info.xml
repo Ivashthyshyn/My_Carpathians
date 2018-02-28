@@ -36,7 +36,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Level"/>
+                    android:text="@string/level"/>
 
                 <TextView
                     android:id="@+id/textDifficultyValue"
@@ -44,7 +44,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="difficulty"
+                    android:text="@string/difficulty"
                     android:textColor="@color/color_level_green"/>
 
                 <View
@@ -58,7 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Lenght"/>
+                    android:text="@string/length"/>
 
                 <TextView
                     android:id="@+id/textRoutLength"

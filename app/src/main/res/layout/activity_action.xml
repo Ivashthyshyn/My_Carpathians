@@ -30,18 +30,6 @@
             app:titleEnabled="false"
             app:toolbarId="@+id/toolBarActionActivity">
 
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tabLayout"
-                android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:layout_gravity="bottom"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
-                android:elevation="5dp"
-                >
-
-            </android.support.design.widget.TabLayout>
-
             <android.support.v7.widget.CardView
                 android:id="@+id/cardView"
                 android:layout_width="match_parent"
@@ -65,7 +53,7 @@
                     android:id="@+id/graph"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginBottom="46dp"
                     android:layout_marginTop="50dp"
                     android:elevation="2dp"/>
 
@@ -124,6 +112,18 @@
                 android:padding="0dp"
                 >
             </android.support.v7.widget.Toolbar>
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:elevation="5dp"
+                app:tabGravity="center">
+
+            </android.support.design.widget.TabLayout>
 
             <LinearLayout
                 android:id="@+id/ratingBarrContainer"

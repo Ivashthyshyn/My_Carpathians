@@ -6,20 +6,20 @@
         android:id="@+id/create_place"
         android:checkable="false"
         android:enabled="true"
-        android:title="Create Place"
+        android:title="@string/create_place"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/create_rout"
         android:checkable="false"
         android:enabled="true"
-        android:title="Create Rout"
+        android:title="@string/create_route"
         app:showAsAction="never"/>
     <item
         android:id="@+id/download_region"
         android:checkable="false"
         android:enabled="true"
-        android:title="Create offline region"
+        android:title="@string/create_region"
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_g_p_s"
@@ -28,10 +28,10 @@
         app:showAsAction="always"/>
     <item
         android:id="@+id/offline_regions"
-        android:title=" List Offline Map"/>
+        android:title="@string/list_offline_map"/>
     <item
         android:id="@+id/auto_create_offline_region"
-        android:title="Create Offline Map"
+        android:title="@string/create_region"
         app:showAsAction="never"/>
 
 

@@ -8,20 +8,20 @@
         android:checkable="true"
         android:enabled="true"
         android:icon="@drawable/on_back"
-        android:title="Back"
+        android:title="@string/btn_back"
         app:showAsAction="always"/>
     <item
         android:id="@+id/action_del"
         android:checkable="true"
         android:enabled="true"
         android:icon="@drawable/ic_delete_white_24px"
-        android:title="delete"
+        android:title="@string/delete"
         app:showAsAction="always"/>
     <item
         android:id="@+id/action_save"
         android:checkable="true"
         android:enabled="true"
         android:icon="@drawable/ic_done_white_24px"
-        android:title="Item"
+        android:title="@string/save_date"
         app:showAsAction="never|always|withText"/>
 </menu>

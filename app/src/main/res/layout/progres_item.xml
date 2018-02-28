@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="GPS search"
+        android:text="@string/gps_search"
         android:textSize="18sp"/>
 
 </RelativeLayout>
