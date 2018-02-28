@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -212,13 +213,19 @@ public class StartActivity extends AppCompatActivity implements
 	private FirebaseUser mUser;
 	private FirebaseAuth mAuth;
 	private GoogleApiClient mGoogleApiClient;
-//	private String mUserUID = null;
 	private boolean mTypeMode = false;
 	private Uri mRootPath;
 	private int mRegionSelected;
 	private LoginManager mFacebookLoginManager;
 	private String mQuery;
+	private  int [] mTabIcons = {R.drawable.ic_map_marker, R.drawable.ic_route};
+	private  int [] mTabIconsCreated = {R.drawable.ic_create_black_24px,
+			R.drawable.ic_create_black_24px};
+	private  int [] mTabIconsFavorite = {R.drawable.ic_favorite_border_black_24px,
+			R.drawable.ic_favorite_border_black_24px};
 
+	private int [] mTabName = {R.string.place_tab_name,
+			R.string.rout_tab_name};
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -317,7 +324,6 @@ public class StartActivity extends AppCompatActivity implements
 							.build();
 					viewPagerAdapter.addFragment(placesListFragment, PLACE_STR);
 					viewPagerAdapter.notifyDataSetChanged();
-
 				} else {
 					TabLayout.Tab mTab = tabLayout.getTabAt(0);
 					if (mTab != null) {
@@ -327,6 +333,7 @@ public class StartActivity extends AppCompatActivity implements
 							.getItem(0);
 					placesListFragment.setList(places, PLACE);
 				}
+
 			}
 
 			@Override
@@ -356,6 +363,7 @@ public class StartActivity extends AppCompatActivity implements
 							.build();
 					viewPagerAdapter.addFragment(routsListFragment, ROUT_STR);
 					viewPagerAdapter.notifyDataSetChanged();
+					setupCustomTabView(mTabIcons);
 
 				} else {
 					TabLayout.Tab mTab = tabLayout.getTabAt(1);
@@ -365,7 +373,9 @@ public class StartActivity extends AppCompatActivity implements
 					RoutsListFragment routsListFragment = (RoutsListFragment_) viewPagerAdapter
 							.getItem(1);
 					routsListFragment.setList(routs, ROUT);
+					setupCustomTabView(mTabIcons);
 				}
+
 			}
 
 			@Override
@@ -379,10 +389,25 @@ public class StartActivity extends AppCompatActivity implements
 			mDrawerLayout.openDrawer(Gravity.START, true);
 			checkCurrentUser();
 		}
-		if (viewPager.getAdapter() == null) {
-			viewPager.setAdapter(viewPagerAdapter);
-		}
 
+
+
+
+	}
+
+	private void setupCustomTabView(int[] mTabIcons) {
+		for (int i = 0; i < tabLayout.getTabCount(); i++) {
+			View tabLinearLayout;
+			if (tabLayout.getTabAt(i).getCustomView() == null) {
+				tabLinearLayout = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+			}else {
+				tabLinearLayout = tabLayout.getTabAt(i).getCustomView();
+			}
+			TextView tabContent = (TextView) tabLinearLayout.findViewById(R.id.tabContent);
+			tabContent.setText(" " + getString(mTabName[i]));
+			tabContent.setCompoundDrawablesWithIntrinsicBounds(mTabIcons[i], 0, 0, 0);
+			tabLayout.getTabAt(i).setCustomView(tabContent);
+		}
 	}
 
 
@@ -888,19 +913,12 @@ public class StartActivity extends AppCompatActivity implements
 
 				}
 				if (tabLayout.getTabCount() > 0) {
-					TabLayout.Tab mTab = tabLayout.getTabAt(0);
-					if (mTab != null) {
-					mTab.setIcon(R.drawable.ic_create_black_24px);
-					}
 					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(createdP, MY_PLACE);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 0) {
-					TabLayout.Tab mTab = tabLayout.getTabAt(0);
-					if (mTab != null) {
-						mTab.setIcon(R.drawable.ic_create_black_24px);
-					}					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
+					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(new ArrayList<Place>(), MY_PLACE);
 				}
 				dialogFlag++;
@@ -937,19 +955,12 @@ public class StartActivity extends AppCompatActivity implements
 					}
 				}
 				if (tabLayout.getTabCount() > 1) {
-					TabLayout.Tab mTab = tabLayout.getTabAt(1);
-					if (mTab != null) {
-						mTab.setIcon(R.drawable.ic_create_black_24px);
-					}
 					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(createdR, MY_ROUT);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 1) {
-					TabLayout.Tab mTab = tabLayout.getTabAt(1);
-					if (mTab != null) {
-						mTab.setIcon(R.drawable.ic_create_black_24px);
-					}					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
+					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(new ArrayList<Rout>(), MY_ROUT);
 				}
 				dialogFlag++;
@@ -957,13 +968,14 @@ public class StartActivity extends AppCompatActivity implements
 		} else {
 			dialogFlag++;
 		}
+		setupCustomTabView(mTabIconsCreated);
 		if (dialogFlag > 1) {
 			showFavoriteEmptyDialog(CREATED_STR);
 			setDrawerState(false);
 		} else {
-
 			setDrawerState(false);
 		}
+
 
 	}
 
@@ -981,19 +993,11 @@ public class StartActivity extends AppCompatActivity implements
 					}
 				}
 				if (tabLayout.getTabCount() > 0) {
-					TabLayout.Tab mTab = tabLayout.getTabAt(0);
-					if (mTab != null) {
-						mTab.setIcon(R.drawable.ic_favorite_border_black_24px);
-					}
 					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(favoriteP, FA_PLACE);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 0) {
-					TabLayout.Tab mTab = tabLayout.getTabAt(0);
-					if (mTab != null) {
-						mTab.setIcon(R.drawable.ic_favorite_border_black_24px);
-					}
 					PlacesListFragment placesListFragment = (PlacesListFragment) viewPagerAdapter.getItem(0);
 					placesListFragment.setList(new ArrayList<Place>(), FA_PLACE);
 				}
@@ -1018,19 +1022,11 @@ public class StartActivity extends AppCompatActivity implements
 
 				}
 				if (tabLayout.getTabCount() > 1 ) {
-					TabLayout.Tab tab = tabLayout.getTabAt(1);
-					if (tab != null) {
-						tab.setIcon(R.drawable.ic_favorite_border_black_24px);
-					}
 					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(favoriteR, FA_ROUT);
 				}
 			} else {
 				if (tabLayout.getTabCount() > 1) {
-					TabLayout.Tab tab = tabLayout.getTabAt(1);
-					if (tab != null) {
-						tab.setIcon(R.drawable.ic_favorite_border_black_24px);
-					}
 					RoutsListFragment routsListFragment = (RoutsListFragment) viewPagerAdapter.getItem(1);
 					routsListFragment.setList(new ArrayList<Rout>(), FA_ROUT);
 				}
@@ -1041,6 +1037,7 @@ public class StartActivity extends AppCompatActivity implements
 		} else {
 			dialogFlag++;
 		}
+		setupCustomTabView(mTabIconsFavorite);
 		if (dialogFlag > 1) {
 			showFavoriteEmptyDialog(getResources().getString(R.string.favorite));
 			setDrawerState(false);
@@ -1048,6 +1045,7 @@ public class StartActivity extends AppCompatActivity implements
 
 			setDrawerState(false);
 		}
+
 	}
 
 	@Override

@@ -187,25 +187,28 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				.build();
 
 		if (mProduceMode) {
-			viewPagerAdapter.addFragment(infoFragment, getResources().getString(R.string.title_info));
+			viewPagerAdapter.addFragment(infoFragment, null);
 			viewPager.setAdapter(viewPagerAdapter);
 			viewPager.setCurrentItem(0);
 			ratingBar.setVisibility(View.GONE);
 			setBaseInformation(myPlace, myRout);
+			tabLayout.getTabAt(0).setIcon(R.drawable.ic_info);
 
 		} else {
 			PlaceAroundFragment placeAroundFragment = new PlaceAroundFragment_();
-			viewPagerAdapter.addFragment(placeAroundFragment, getResources().getString(R.string.title_place_around));
-
-			viewPagerAdapter.addFragment(infoFragment, getResources().getString(R.string.title_info));
+			viewPagerAdapter.addFragment(placeAroundFragment, null);
+			viewPagerAdapter.addFragment(infoFragment, null);
 			RoutsAroundFragment routsAroundFragment = new RoutsAroundFragment_();
-			viewPagerAdapter.addFragment(routsAroundFragment, getResources().getString(R.string.title_rout_around));
+			viewPagerAdapter.addFragment(routsAroundFragment, null);
 			viewPager.setAdapter(viewPagerAdapter);
 			viewPager.setCurrentItem(1);
 			viewPager.setOffscreenPageLimit(2);
 			setBaseInformation(myPlace, myRout);
 			routsAroundFragment.setData(myRout, routList, myPosition);
 			placeAroundFragment.setData(myPlace, placeList, myPosition);
+			tabLayout.getTabAt(0).setIcon(R.drawable.ic_map_marker);
+			tabLayout.getTabAt(1).setIcon(R.drawable.ic_info);
+			tabLayout.getTabAt(2).setIcon(R.drawable.ic_route);
 		}
 	}
 
@@ -605,7 +608,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 													uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 														@Override
 														public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-															Toast.makeText(ActionActivity.this, getResources().getString(R.string.enother_photo_downlod), Toast.LENGTH_SHORT).show();
+															Toast.makeText(ActionActivity.this, getResources().getString(R.string.enother_photo_download), Toast.LENGTH_SHORT).show();
 															myRef.child(PHOTO_STR).child(place.getNamePlace())
 																	.child(taskSnapshot.getDownloadUrl()
 																			.getLastPathSegment())
@@ -704,7 +707,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 													uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 														@Override
 														public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-															Toast.makeText(ActionActivity.this, getResources().getString(R.string.enother_photo_downlod), Toast.LENGTH_SHORT).show();
+															Toast.makeText(ActionActivity.this, getResources().getString(R.string.enother_photo_download), Toast.LENGTH_SHORT).show();
 															myRef.child(PHOTO_STR).child(rout.getNameRout()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
 														}
 
@@ -980,7 +983,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 				editor.putStringSet(FAVORITES_ROUTS_LIST, favoritesRoutsList);
 				editor.apply();
 
-				Toast.makeText(ActionActivity.this, getResources().getString(R.string.add_to_fevorite), LENGTH_LONG).show();
+				Toast.makeText(ActionActivity.this, getResources().getString(R.string.add_to_favorite), LENGTH_LONG).show();
 				return true;
 			case R.id.action_edit:
 				editCreatedObject();

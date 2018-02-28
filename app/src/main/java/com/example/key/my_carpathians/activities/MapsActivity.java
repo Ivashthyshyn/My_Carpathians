@@ -1161,7 +1161,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             MenuItem undoAction = mActionMode.getMenu().findItem(R.id.action_beck);
             undoAction.setVisible(false);
             undoAction.setEnabled(false);
-            mActionMode.setTitle(getString(R.string.title_macke_chois));
+            mActionMode.setTitle(getString(R.string.title_make_choice));
         }
     }
 
@@ -1188,7 +1188,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         MenuItem undoAction = mActionMode.getMenu().findItem(R.id.action_beck);
         undoAction.setVisible(false);
         undoAction.setEnabled(false);
-        mActionMode.setTitle(getString(R.string.title_macke_chois));
+        mActionMode.setTitle(getString(R.string.title_make_choice));
         removeAll();
     }
 

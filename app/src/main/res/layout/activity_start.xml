@@ -129,7 +129,7 @@
                             android:layout_alignStart="@+id/userAcountImage"
                             android:layout_marginLeft="20dp"
                             android:layout_weight="1"
-                            android:text="User Name"
+                            android:text="@string/user_name"
                             android:textSize="15sp"
                             android:textStyle="bold|italic"/>
 
@@ -325,7 +325,7 @@
                                 android:background="@null"
                                 android:gravity="left|center_vertical"
                                 android:paddingLeft="10dp"
-                                android:text="Favorites"
+                                android:text="@string/favorites"
                                 android:textColor="@color/white"
                                 android:textSize="18sp"/>
                         </LinearLayout>
@@ -351,7 +351,7 @@
                                 android:background="@null"
                                 android:gravity="left|center_vertical"
                                 android:paddingLeft="10dp"
-                                android:text="Created"
+                                android:text="@string/created"
                                 android:textColor="@color/white"
                                 android:textSize="18sp"/>
 
@@ -379,7 +379,7 @@
                                 android:background="@null"
                                 android:gravity="left|center_vertical"
                                 android:paddingLeft="10dp"
-                                android:text="OfflineMap"
+                                android:text="@string/offline_maps"
                                 android:textColor="@color/white"
                                 android:textSize="18sp"/>
                         </LinearLayout>
@@ -406,7 +406,7 @@
                                 android:background="@null"
                                 android:gravity="left|center_vertical"
                                 android:paddingLeft="10dp"
-                                android:text="Settings"
+                                android:text="@string/settings"
                                 android:textColor="@color/white"
                                 android:textSize="18sp"/>
                         </LinearLayout>

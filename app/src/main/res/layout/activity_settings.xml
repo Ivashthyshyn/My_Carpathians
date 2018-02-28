@@ -16,7 +16,7 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:title="Settings"/>
+        app:title="@string/settings"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,7 +31,7 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:gravity="fill_horizontal"
-            android:text="Loaded perimeter radius of the default offline Region (km)"/>
+            android:text="@string/settings_part_1"/>
 
         <com.shawnlin.numberpicker.NumberPicker
             android:id="@+id/pickerOfRegion"
@@ -68,7 +68,7 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:gravity="fill_horizontal"
-            android:text="Radius of places nearby (km)"/>
+            android:text="@string/settings_part_2"/>
 
         <com.shawnlin.numberpicker.NumberPicker
             android:id="@+id/pickerOfPlacesAround"
@@ -107,7 +107,7 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:gravity="fill_horizontal"
-            android:text="Radius of Routes nearby  (km)"/>
+            android:text="@string/settings_part_3"/>
 
         <com.shawnlin.numberpicker.NumberPicker
             android:id="@+id/pickerOfRoutesAround"
@@ -137,7 +137,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Acaunt setings"/>
+        android:text="@string/acaunt_settings"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -150,7 +150,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Delete acaunt"/>
+            android:text="@string/delete_acaunt"/>
 
         <Button
             android:id="@+id/buttonDeleteAccount"

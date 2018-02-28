@@ -10,10 +10,10 @@
 
     <TextView
         android:id="@+id/textTitleRoutAround"
+        style="@style/list_header_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/list_header_text"
-        android:text="Add to map"/>
+        android:text="@string/add_to_map_2"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerViewRoutAround"
