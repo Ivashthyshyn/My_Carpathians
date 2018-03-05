@@ -77,9 +77,9 @@ public class ToolbarActionModeCallback implements ActionMode.Callback {
 				}else if (mType == MY_ROUT){
 					routsRecyclerAdapter.deleteRoutFromCreated();//delete selected rows
 				}else if (mType == FA_PLACE){
-					 placesRecyclerAdapter.deletePlaceFromFavorit();
+					 placesRecyclerAdapter.deletePlaceFromFavorite();
 				}else if (mType == FA_ROUT){
-					 routsRecyclerAdapter.deleteRoutFromFavorit();
+					 routsRecyclerAdapter.deleteRoutFromFavorite();
 				}
 				break;
 		}

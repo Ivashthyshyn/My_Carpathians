@@ -221,8 +221,8 @@ public class StartActivity extends AppCompatActivity implements
 	private  int [] mTabIcons = {R.drawable.ic_map_marker, R.drawable.ic_route};
 	private  int [] mTabIconsCreated = {R.drawable.ic_create_black_24px,
 			R.drawable.ic_create_black_24px};
-	private  int [] mTabIconsFavorite = {R.drawable.ic_favorite_border_black_24px,
-			R.drawable.ic_favorite_border_black_24px};
+	private  int [] mTabIconsFavorite = {R.drawable.ic_favorite,
+			R.drawable.ic_favorite};
 
 	private int [] mTabName = {R.string.place_tab_name,
 			R.string.rout_tab_name};
@@ -1092,7 +1092,7 @@ public class StartActivity extends AppCompatActivity implements
 		builder.setTitle(nameList);
 		builder.setMessage(getResources().getString(R.string.your) + nameList + " " +
 				getResources().getString(R.string.empty_list));
-		builder.setIcon(R.drawable.ic_favorite_border_black_24px);
+		builder.setIcon(R.drawable.ic_favorite);
 		builder.setPositiveButton(getResources().getString(R.string.ok)
 				, new DialogInterface.OnClickListener() {
 					@Override

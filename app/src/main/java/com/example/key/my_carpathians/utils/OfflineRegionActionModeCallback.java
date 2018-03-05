@@ -14,12 +14,12 @@ import com.example.key.my_carpathians.interfaces.CommunicatorMapActivity;
  * Created by key on 31.10.17.
  */
 
-public class OfflineRegionActionModeCallbac implements ActionMode.Callback {
+public class OfflineRegionActionModeCallback implements ActionMode.Callback {
 	private Context context;
 
 
 
-	public OfflineRegionActionModeCallbac(Context context) {
+	public OfflineRegionActionModeCallback(Context context) {
 		this.context = context;
 
 	}

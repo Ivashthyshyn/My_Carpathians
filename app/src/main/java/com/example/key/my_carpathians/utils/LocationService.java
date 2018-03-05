@@ -54,6 +54,7 @@ public class LocationService extends Service implements
     public static final String CREATED_BY_USER_ROUT_LIST = "created_rout_list";
     public static final int DEFINED_LOCATION = 1;
     public static final String CREATED_BY_USER_PLACE_LIST = "created_place_list";
+    public static final int WAIT_MODE = 101;
 
     private final IBinder myBinder = new MyLocalBinder();
 
@@ -226,7 +227,7 @@ public class LocationService extends Service implements
                 mIntCommand = 0;
                 owner.update(location, PLACE);
             }
-            owner.update(location, 101);
+            owner.update(location, WAIT_MODE);
         }else if(owner == null && mIntCommand != COMMAND_REC_ROUT){
             if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_ACTIVE)
             mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);

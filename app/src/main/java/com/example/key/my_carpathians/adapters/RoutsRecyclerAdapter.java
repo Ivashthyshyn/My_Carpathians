@@ -1,5 +1,6 @@
 package com.example.key.my_carpathians.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
@@ -33,15 +34,11 @@ import static com.example.key.my_carpathians.fragments.EditModeFragment.HARD;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.LIGHT;
 import static com.example.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
 
-/**
- *
- */
-
 public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdapter.RoutsViewHolder> {
     public static final String PUT_EXTRA_POINTS = "put_extra_point_list";
-    SparseBooleanArray mSelectedItemsIds;
+    private SparseBooleanArray mSelectedItemsIds;
     private int mMode;
-    public Context context;
+    private Context context;
     private List<Rout> routs;
     private ActionMode mActionMode;
 
@@ -87,11 +84,12 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
     }
 
     @Override
-    public void onBindViewHolder(RoutsViewHolder holder, int position) {
+    public void onBindViewHolder(RoutsViewHolder holder, @SuppressLint("RecyclerView") int position) {
         holder.mPosition = position;
         holder.mRout = routs.get(position);
         holder.textNameRout.setText(holder.mRout.getNameRout());
-        holder.textLengthTrack.setText(holder.mRout.getLengthRout() + "km");
+        holder.textLengthTrack.setText(holder.mRout.getLengthRout() + " "
+                + context.getResources().getString(R.string.km));
         ratingRout(holder.mRout.getNameRout(), holder.ratingBar);
         switch (holder.mRout.getRoutsLevel()) {
             case LIGHT:
@@ -112,7 +110,6 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference myRef = database.getReference();
             Query myPlace = myRef.child("Rating").child(nameRout);
-
             myPlace.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -148,12 +145,13 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
 
 
 
-    public static class RoutsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+    public static class RoutsViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener, View.OnLongClickListener {
         public static final String PUT_EXTRA_ROUT = "routName";
         private int mPosition;
-        public Button buttonTypeAndLevel;
-        public TextView textNameRout;
-        final public TextView textLengthTrack;
+        private Button buttonTypeAndLevel;
+        private TextView textNameRout;
+        final private TextView textLengthTrack;
         public RatingBar ratingBar;
         private Rout mRout;
         private ClickListener mClickListener;
@@ -193,77 +191,68 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
     }
 
     private void onListItemSelect(int position) {
-        toggleSelection(position);//Toggle the selection
-
-        boolean hasCheckedItems = getSelectedCount() > 0;//Check if any items are already selected or not
-
-
+        toggleSelection(position);
+        boolean hasCheckedItems = getSelectedCount() > 0;
         if (hasCheckedItems && mActionMode == null)
-            // there are some selected items, start the actionMode
-            mActionMode = ((AppCompatActivity) context).startSupportActionMode(new ToolbarActionModeCallback(context,null, this,null, routs , mMode));
+            mActionMode = ((AppCompatActivity) context).startSupportActionMode(
+                    new ToolbarActionModeCallback(context,null,
+                            this,null, routs , mMode));
         else if (!hasCheckedItems && mActionMode != null)
-            // there no selected items, finish the actionMode
             mActionMode.finish();
 
         if (mActionMode != null)
-            //set action mode title on item selection
-            mActionMode.setTitle(String.valueOf(getSelectedCount()) + " selected");
+            mActionMode.setTitle(String.valueOf(getSelectedCount()) + " "
+                    + context.getResources().getString(R.string.selected) );
 
 
     }
     public void deleteRoutFromCreated() {
-        SparseBooleanArray selected = getSelectedIds();//Get selected ids
+        SparseBooleanArray selected = getSelectedIds();
         List<String>deletedRouts = new ArrayList<>();
-        //Loop all selected ids
         for (int i = (selected.size() - 1); i >= 0; i--) {
             if (selected.valueAt(i)) {
-                //If current id is selected remove the item via key
                 deletedRouts.add(routs.get(i).getNameRout());
                 routs.remove(selected.keyAt(i));
-                notifyDataSetChanged();//notify adapter
+                notifyDataSetChanged();
             }
         }
         CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
         communicatorStartActivity.deletedFromCreatedList(deletedRouts, ROUT);
-        Toast.makeText(context, selected.size() + " item deleted.", Toast.LENGTH_SHORT).show();//Show Toast
-        mActionMode.finish();//Finish action mode after use
+        Toast.makeText(context, selected.size() + " "
+                + context.getResources().getString(R.string.item_deleted), Toast.LENGTH_SHORT).show();
+        mActionMode.finish();
 
     }
-    //Delete selected rows
-    public void deleteRoutFromFavorit() {
-        SparseBooleanArray selected = getSelectedIds();//Get selected ids
+    public void deleteRoutFromFavorite() {
+        SparseBooleanArray selected = getSelectedIds();
         List<String>deletedRouts = new ArrayList<>();
-        //Loop all selected ids
         for (int i = (selected.size() - 1); i >= 0; i--) {
             if (selected.valueAt(i)) {
-                //If current id is selected remove the item via key
                 deletedRouts.add(routs.get(i).getNameRout());
                 routs.remove(selected.keyAt(i));
-                notifyDataSetChanged();//notify adapter
+                notifyDataSetChanged();
             }
         }
         CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
         communicatorStartActivity.deletedFromFavoriteList(deletedRouts, ROUT);
-        Toast.makeText(context, selected.size() + " item deleted.", Toast.LENGTH_SHORT).show();//Show Toast
-        mActionMode.finish();//Finish action mode after use
+        Toast.makeText(context, selected.size() + " "
+                + context.getResources().getString(R.string.item_deleted), Toast.LENGTH_SHORT).show();
+        mActionMode.finish();
 
     }
-    //Remove selected selections
     public void removeSelection() {
         mSelectedItemsIds = new SparseBooleanArray();
         notifyDataSetChanged();
     }
-    //Set action mode null after use
     public void setNullToActionMode() {
         if (mActionMode != null)
             mActionMode.finish();
             mActionMode = null;
     }
-    //Toggle selection methods
-    public void toggleSelection(int position) {
+    private void toggleSelection(int position) {
         selectView(position, !mSelectedItemsIds.get(position));
     }
-    public void selectView(int position, boolean value) {
+    private void selectView(int position, boolean value) {
         if (value)
             mSelectedItemsIds.put(position, value);
         else
@@ -272,19 +261,14 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         notifyDataSetChanged();
     }
 
-    //Get total selected count
-    public int getSelectedCount() {
+
+    private int getSelectedCount() {
         return mSelectedItemsIds.size();
     }
-    //Return all selected ids
-    public SparseBooleanArray getSelectedIds() {
+    private SparseBooleanArray getSelectedIds() {
             return mSelectedItemsIds;
     }
     public boolean ismMode(){
-        if (mActionMode != null){
-            return true;
-        }else{
-            return false;
-        }
+        return mActionMode != null;
     }
 }

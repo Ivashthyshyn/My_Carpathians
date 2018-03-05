@@ -79,7 +79,7 @@ public class EditModeFragment extends DialogFragment {
 	private static final int MORE_PHOTO_1 = 1;
 	private static final int MORE_PHOTO_2 = 2;
 	private static final int MORE_PHOTO_3 = 3;
-	private int mPhotoSwicher = 0;
+	private int mPhotoSwitcher = 0;
 	private String mTrackLength = null;
 	private com.example.key.my_carpathians.models.Position mPositionRout = null;
 	private Rout mRout = null ;
@@ -149,7 +149,6 @@ public class EditModeFragment extends DialogFragment {
 	@ViewById(R.id.groupMorePhoto)
 	LinearLayout groupMorePhoto;
 	private String rootPathString;
-	private SharedPreferences sharedPreferences;
 	private String mRootPathString;
 
 
@@ -183,7 +182,7 @@ public class EditModeFragment extends DialogFragment {
 
 	@AfterViews
 	void afterView(){
-		sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		SharedPreferences sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		mRootPathString = sharedPreferences.getString(ROOT_PATH, null);
 			if(mPlace != null){
 				name = mPlace.getNamePlace();
@@ -258,7 +257,7 @@ public class EditModeFragment extends DialogFragment {
 				editGroup.setVisibility(View.VISIBLE);
 				groupMorePhoto.setVisibility(View.VISIBLE);
 
-				switch (mPhotoSwicher){
+				switch (mPhotoSwitcher){
 					case TITLE_PHOTO:
 						uriTitlePhoto = savePhoto(name, cropImageView.getCroppedImage(), null);
 						if (mPlace !=  null){
@@ -311,12 +310,12 @@ public class EditModeFragment extends DialogFragment {
 		List<Position> points = new ArrayList<>();
 
 		try {
-			// Load GeoJSON file
 			File file = new File(uri);
 			if (file.exists()) {
 
 				InputStream fileInputStream = new FileInputStream(file);
-				BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream, Charset.forName("UTF-8")));
+				BufferedReader rd = new BufferedReader(new InputStreamReader(fileInputStream,
+						Charset.forName("UTF-8")));
 				StringBuilder sb = new StringBuilder();
 				int cp;
 				while ((cp = rd.read()) != -1) {
@@ -324,7 +323,6 @@ public class EditModeFragment extends DialogFragment {
 				}
 
 				fileInputStream.close();
-				// Parse JSON
 				JSONObject json = new JSONObject(sb.toString());
 				JSONArray features = json.getJSONArray("features");
 				JSONObject feature = features.getJSONObject(0);
@@ -339,15 +337,17 @@ public class EditModeFragment extends DialogFragment {
 						JSONArray coordinates = geometry.getJSONArray("coordinates");
 						for (int lc = 0; lc < coordinates.length(); lc++) {
 							JSONArray coordinate = coordinates.getJSONArray(lc);
-							Position position = Position.fromCoordinates(coordinate.getDouble(1), coordinate.getDouble(0), coordinate.getDouble(2));
+							Position position = Position.fromCoordinates(coordinate.getDouble(1),
+									coordinate.getDouble(0), coordinate.getDouble(2));
 							points.add(position);
 						}
 					}
 				}
 			}
 		} catch (Exception exception) {
-			Toast.makeText(getContext(),"Не вдалось визначити довжину трека", Toast.LENGTH_SHORT).show();
-			mTrackLength = "unknown";
+			Toast.makeText(getContext(),getString(R.string.route_length_not_avalible),
+					Toast.LENGTH_SHORT).show();
+			mTrackLength = getString(R.string.unknown);
 		}
 
 
@@ -364,17 +364,19 @@ public class EditModeFragment extends DialogFragment {
 			}
 			DecimalFormat df = new DecimalFormat("#.#");
 			df.setRoundingMode(RoundingMode.CEILING);
-			mTrackLength = (df.format(dis) + "km");
+			mTrackLength = (df.format(dis) + getString(R.string.km));
 		} else {
-			mTrackLength = "unknown";
+			mTrackLength = getString(R.string.unknown);
 		}
 	}
 
 	private void morePhotos(String name) {
-			Uri rootPathForPhotosString = Uri.parse(mRootPathString).buildUpon().appendPath("Photos").build();
+			Uri rootPathForPhotosString = Uri.parse(mRootPathString).buildUpon()
+					.appendPath("Photos").build();
 
 			for (int i = 1; i <= 3; i++) {
-				File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(name + String.valueOf(i)).build().getPath());
+				File photoFile = new File(rootPathForPhotosString.buildUpon()
+						.appendPath(name + String.valueOf(i)).build().getPath());
 				if (photoFile.exists()) {
 					Uri uri = Uri.fromFile(photoFile);
 					switch (i){
@@ -400,18 +402,19 @@ public class EditModeFragment extends DialogFragment {
 	    }
 	}
 	@Click(R.id.buttonAddPhoto)
-	public void buttonAddPhotoWasClicked(View view){
+	public void buttonAddPhotoWasClicked(){
 		if(uriTitlePhoto != null){
-			mPhotoSwicher = TITLE_PHOTO;
+			mPhotoSwitcher = TITLE_PHOTO;
 			showAlertDialog(uriTitlePhoto, true);
 		}else {
-			mPhotoSwicher = TITLE_PHOTO;
+			mPhotoSwitcher = TITLE_PHOTO;
 			searchPhotoInGallery();
 		}
 		}
 
 	private void searchPhotoInGallery() {
-		Intent intentFromGallery =new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		Intent intentFromGallery = new Intent(Intent.ACTION_PICK,
+				android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 		intentFromGallery.setType("image/*");
 		startActivityForResult(intentFromGallery, GALLERY_REQUEST);
 	}
@@ -426,16 +429,21 @@ public class EditModeFragment extends DialogFragment {
 
 	@Click(R.id.buttonSaveData)
 	public void buttonSaveDataWasClicked(){
-		InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
+		InputMethodManager imm = (InputMethodManager) getContext()
+				.getSystemService(Activity.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 			 if (editTextName.getText().toString().isEmpty()) {
-				Toast.makeText(getContext(), "Будь ласка вкажіть назву, це поле є обов'зковим для введення", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getContext(), getString(R.string.enter_name),
+						Toast.LENGTH_SHORT).show();
 			} else if (editTextTitle.getText().toString().isEmpty()) {
-				Toast.makeText(getContext(), "Будь ласка коротко опишіть обєкт, це поле є обов'зковим для введення", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getContext(), getString(R.string.enter_title_info),
+						Toast.LENGTH_SHORT).show();
 			} else if (routsLevel == 0 && mRout != null) {
-				Toast.makeText(getContext(), "Складність є важливим критерієм для вашого обєкта, визначте його", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getContext(), getString(R.string.enter_difficulty),
+						Toast.LENGTH_SHORT).show();
 			} else if (uriTitlePhoto == null){
-				Toast.makeText(getContext(), "Без титульної фотографії ваш обєкт буде не цілим", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getContext(), getString(R.string.enter_title_photo),
+						Toast.LENGTH_SHORT).show();
 			}else if (mRout != null){
 				mRout.setNameRout(editTextName.getText().toString());
 				mRout.setTitleRout(editTextTitle.getText().toString());
@@ -443,9 +451,12 @@ public class EditModeFragment extends DialogFragment {
 				mRout.setPositionRout(mPositionRout);
 				mRout.setRoutsLevel(routsLevel);
 				mRout.setUrlRout(savePhoto(mRout.getNameRout(), null, uriTitlePhoto));
-					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_1), null, uriPhoto1);
-					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2), null, uriPhoto2);
-					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3), null, uriPhoto3);
+					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_1),
+							 null, uriPhoto1);
+					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_2),
+							 null, uriPhoto2);
+					 savePhoto(mRout.getNameRout() + String.valueOf(MORE_PHOTO_3),
+							 null, uriPhoto3);
 
 				StorageSaveHelper storageSaveHelper = new StorageSaveHelper(getContext(), rootPathString);
 				 String outcome = storageSaveHelper.saveRout(name, null, mRout, true);
@@ -488,17 +499,20 @@ public class EditModeFragment extends DialogFragment {
 					bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fileOutputStream);
 					fileOutputStream.flush();
 					fileOutputStream.close();
-					Toast.makeText(getContext(), "Photo saved", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getContext(), getString(R.string.photo_saved),
+							Toast.LENGTH_SHORT).show();
 				} catch (IOException e) {
 					e.printStackTrace();
-					Toast.makeText(getContext(), "Photo do not saved", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getContext(), getString(R.string.photo_not_saved),
+							Toast.LENGTH_SHORT).show();
 					return null;
 				}
 			} else if(uri != null ) {
 				File file = new File(uri);
 				File newFile ;
 				if (file.exists()) {
-					Uri rootPathForTitlePhotoString = Uri.parse(mRootPathString).buildUpon().appendPath("Photos").build();
+					Uri rootPathForTitlePhotoString = Uri.parse(mRootPathString).buildUpon()
+							.appendPath("Photos").build();
 					newFile = new File(rootPathForTitlePhotoString.buildUpon().appendPath(name).build().getPath());
 					file.renameTo(newFile);
 					uri = Uri.fromFile(newFile).getPath();
@@ -521,7 +535,7 @@ public class EditModeFragment extends DialogFragment {
 				cropToolsFrame.setVisibility(View.VISIBLE);
 				buttonSaveData.setVisibility(View.GONE);
 				cropImageView.setImageUriAsync(selectedImage);
-				progressViewText.setText("Loading...");
+				progressViewText.setText(getString(R.string.loading));
 				progressView.setVisibility(View.VISIBLE);
 			}
 		}
@@ -536,33 +550,33 @@ public class EditModeFragment extends DialogFragment {
 		editGroup.setVisibility(View.VISIBLE);
 	}
 	@Click(R.id.imageAdd1)
-	public void imageAdd1WasClicked(View view){
+	public void imageAdd1WasClicked(){
 		if (uriPhoto1 != null){
-			mPhotoSwicher = MORE_PHOTO_1;
+			mPhotoSwitcher = MORE_PHOTO_1;
 			showAlertDialog(uriPhoto1, false);
 		}else {
-			mPhotoSwicher = MORE_PHOTO_1;
+			mPhotoSwitcher = MORE_PHOTO_1;
 			searchPhotoInGallery();
 		}
 	}
 
 	private void showAlertDialog(final String uriPhoto, boolean necessarily) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-		builder.setTitle("Photo");
+		builder.setTitle(getString(R.string.photo));
 		if (necessarily){
-			builder.setMessage("Титульна фотографія є обов'язковую якщо ви зашочете зробити свій обєкт публічним");
+			builder.setMessage(getString(R.string.photo_message_necesserly));
 		}else{
-			builder.setMessage("Додаткові фотографії не є обовязковими для публікації");
+			builder.setMessage(getString(R.string.aditional_photo_message_necesserly));
 		}
 
-		builder.setPositiveButton("Вибрати", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(getString(R.string.select), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
 				searchPhotoInGallery();
 				dialogInterface.dismiss();
 			}
 		});
-		builder.setNegativeButton("Видалити", new DialogInterface.OnClickListener() {
+		builder.setNegativeButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
 				File file = new File(uriPhoto);
@@ -578,22 +592,22 @@ public class EditModeFragment extends DialogFragment {
 	}
 
 	@Click(R.id.imageAdd2)
-	public void imageAdd2WasClicked(View view){
+	public void imageAdd2WasClicked(){
 		if (uriPhoto2 != null){
-			mPhotoSwicher = MORE_PHOTO_2;
+			mPhotoSwitcher = MORE_PHOTO_2;
 			showAlertDialog(uriPhoto2, false);
 		}else {
-			mPhotoSwicher = MORE_PHOTO_2;
+			mPhotoSwitcher = MORE_PHOTO_2;
 			searchPhotoInGallery();
 		}
 	}
 	@Click(R.id.imageAdd3)
-	public void imageAdd3WasClicked(View view){
+	public void imageAdd3WasClicked(){
 		if (uriPhoto3 != null){
-			mPhotoSwicher = MORE_PHOTO_3;
+			mPhotoSwitcher = MORE_PHOTO_3;
 			showAlertDialog(uriPhoto3, false);
 		}else {
-			mPhotoSwicher = MORE_PHOTO_3;
+			mPhotoSwitcher = MORE_PHOTO_3;
 			searchPhotoInGallery();
 		}
 	}
@@ -602,12 +616,12 @@ public class EditModeFragment extends DialogFragment {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 		builder.setTitle("Deleting!");
 		if (mRout != null){
-			builder.setMessage("Do You really want to delete Rout " + mRout.getNameRout() );
+			builder.setMessage(getString(R.string.delete_asc_route) +" " + mRout.getNameRout() + "?");
 
 		}else if (mPlace != null) {
-			builder.setMessage("Do You really want to delete Place " + mPlace.getNamePlace() );
+			builder.setMessage(getString(R.string.delete_ask_place) + " " + mPlace.getNamePlace() + "?");
 		}
-		builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialogInterface, int i) {
 				if (mRout != null){

@@ -101,7 +101,8 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 		if (routs != null) {
 			holder.mRout = routs.get(position);
 			holder.checkBox.setText(holder.mRout.getNameRout());
-			holder.textLengthTrack.setText(holder.mRout.getLengthRout() + "km");
+			holder.textLengthTrack.setText(holder.mRout.getLengthRout() + ""
+					+ context.getResources().getString(R.string.km));
 			ratingRout(holder.mRout.getNameRout(), holder.ratingBar);
 			switch (holder.mRout.getRoutsLevel()) {
 				case LIGHT:

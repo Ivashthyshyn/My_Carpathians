@@ -16,7 +16,7 @@
         android:id="@+id/action_edit"
         android:checkable="false"
         android:enabled="true"
-        android:icon="@android:drawable/ic_menu_edit"
+        android:icon="@drawable/ic_edit"
         android:title="@string/edit"
         app:showAsAction="always"/>
 
@@ -24,7 +24,7 @@
         android:id="@+id/action_publish"
         android:checkable="false"
         android:enabled="true"
-        android:icon="@drawable/upload"
+        android:icon="@drawable/ic_upload"
         android:title="@string/publish"
         app:showAsAction="always"/>
     <item

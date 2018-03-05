@@ -1,5 +1,6 @@
 package com.example.key.my_carpathians.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
@@ -44,9 +45,6 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
     private List<Place> places;
     private int mMode;
 	SparseBooleanArray mSelectedItemsIds;
-    /**
-     * use context to intent Url
-     */
     public Context context;
 	private ActionMode mActionMode;
 
@@ -66,16 +64,17 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 	}
 
 
-	public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
+	public static class ViewHolder extends RecyclerView.ViewHolder
+			implements View.OnClickListener, View.OnLongClickListener{
         public final static String PUT_EXTRA_PLACE = "placeName";
-        public ImageView placeImage;
-        public TextView textName;
-        public RatingBar ratingBar;
+        private ImageView placeImage;
+        private TextView textName;
+        private RatingBar ratingBar;
         private  ClickListener mClickListener;
         private Place mPlace;
 	    private int mPosition;
 
-        public ViewHolder(View itemView, ClickListener listener) {
+        ViewHolder(View itemView, ClickListener listener) {
             super(itemView);
             mClickListener = listener;
             ratingBar = (RatingBar)itemView.findViewById(R.id.ratingBarForPlaceList);
@@ -112,9 +111,6 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
         View mView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_for_place, parent, false);
         context = mView.getContext();
-        if (places.size() == 0){
-            
-        }
 
         ViewHolder mHolder = new ViewHolder(mView, new ViewHolder.ClickListener() {
             @Override
@@ -142,20 +138,22 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 
 
 		@Override
-    public void onBindViewHolder(PlacesRecyclerAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(PlacesRecyclerAdapter.ViewHolder holder,
+		                         @SuppressLint("RecyclerView") int position) {
 			holder.mPosition = position;
             holder.mPlace = places.get(position);
             holder.textName.setText(holder.mPlace.getNamePlace());
             ratingPlace(holder.mPlace.getNamePlace(), holder.ratingBar);
-			String mRootPath = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(ROOT_PATH, null);
+			String mRootPath = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+					.getString(ROOT_PATH, null);
 			if (mRootPath != null) {
 				Uri root = Uri.parse(mRootPath);
 				Glide
 						.with(context)
-						.load(root.buildUpon().appendPath("Photos").appendPath(holder.mPlace.getNamePlace()).build())
+						.load(root.buildUpon().appendPath("Photos")
+						.appendPath(holder.mPlace.getNamePlace()).build())
 						.into(holder.placeImage);
 			}
-	    /** Change background_image color of the selected items in list view  **/
 	    holder.itemView
 			    .setBackgroundColor(mSelectedItemsIds.get(position) ? 0x9934B5E4
 					    : Color.TRANSPARENT);
@@ -191,82 +189,76 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
 
     }
 	private void onListItemSelect(int position) {
-		toggleSelection(position);//Toggle the selection
-
-		boolean hasCheckedItems = getSelectedCount() > 0;//Check if any items are already selected or not
-
-
+		toggleSelection(position);
+		boolean hasCheckedItems = getSelectedCount() > 0;
 		if (hasCheckedItems && mActionMode == null)
-			// there are some selected items, start the actionMode
-			mActionMode = ((AppCompatActivity) context).startSupportActionMode(new ToolbarActionModeCallback(context,this, null,places, null , mMode));
+			mActionMode = ((AppCompatActivity) context).startSupportActionMode(
+					new ToolbarActionModeCallback(context,this,
+							null,places, null , mMode));
 		else if (!hasCheckedItems && mActionMode != null)
-			// there no selected items, finish the actionMode
 			mActionMode.finish();
 
 		if (mActionMode != null)
-			//set action mode title on item selection
-			mActionMode.setTitle(String.valueOf(getSelectedCount()) + " selected");
+			mActionMode.setTitle(String.valueOf(getSelectedCount()) + " "
+					+ context.getResources().getString(R.string.selected));
 
 
 	}
 	public void deletePlaceFromCreated() {
-		SparseBooleanArray selected = getSelectedIds();//Get selected ids
+		SparseBooleanArray selected = getSelectedIds();
 		List<String>deletedPlace = new ArrayList<>();
-		//Loop all selected ids
 		for (int i = (selected.size() - 1); i >= 0; i--) {
 			if (selected.valueAt(i)) {
-				//If current id is selected remove the item via key
 				deletedPlace.add(places.get(i).getNamePlace());
 				places.remove(selected.keyAt(i));
-				notifyDataSetChanged();//notify adapter
+				notifyDataSetChanged();
 			}
 		}
 		CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
 		communicatorStartActivity.deletedFromCreatedList(deletedPlace, PLACE);
-		Toast.makeText(context, selected.size() + " item deleted.", Toast.LENGTH_SHORT).show();//Show Toast
+		Toast.makeText(context, selected.size() + " "
+				+ context.getResources().getString(R.string. item_deleted),
+				Toast.LENGTH_SHORT).show();
 		mActionMode.finish();
-		setNullToActionMode();//Finish action mode after use
+		setNullToActionMode();
 
 	}
-	//Delete selected rows
-	public void deletePlaceFromFavorit() {
-		SparseBooleanArray selected = getSelectedIds();//Get selected ids
+	public void deletePlaceFromFavorite() {
+		SparseBooleanArray selected = getSelectedIds();
 		List<String>deletedPlace = new ArrayList<>();
-		//Loop all selected ids
 		for (int i = (selected.size() - 1); i >= 0; i--) {
 			if (selected.valueAt(i)) {
-				//If current id is selected remove the item via key
 				deletedPlace.add(places.get(i).getNamePlace());
 				places.remove(selected.keyAt(i));
-				notifyDataSetChanged();//notify adapter
+				notifyDataSetChanged();
 			}
 		}
 		CommunicatorStartActivity communicatorStartActivity = (CommunicatorStartActivity)context;
 		communicatorStartActivity.deletedFromFavoriteList(deletedPlace, PLACE);
-		Toast.makeText(context, selected.size() + " item deleted.", Toast.LENGTH_SHORT).show();//Show Toast
-		mActionMode.finish();//Finish action mode after use
+		Toast.makeText(context, selected.size() +  " "
+				+ context.getResources().getString(R.string. item_deleted),
+				Toast.LENGTH_SHORT).show();
+		mActionMode.finish();
 
 	}
-	//Remove selected selections
+
 	public void removeSelection() {
 		mSelectedItemsIds = new SparseBooleanArray();
 		notifyDataSetChanged();
 
 	}
-	//Set action mode null after use
 	public void setNullToActionMode() {
 		if (mActionMode != null)
 			mActionMode.finish();
 			mActionMode = null;
 
 	}
-	//Toggle selection methods
-	public void toggleSelection(int position) {
+
+	private void toggleSelection(int position) {
 		selectView(position, !mSelectedItemsIds.get(position));
 	}
 
-	//Put or delete selected position into SparseBooleanArray
-	public void selectView(int position, boolean value) {
+	private void selectView(int position, boolean value) {
 		if (value)
 			mSelectedItemsIds.put(position, value);
 		else
@@ -280,20 +272,14 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
         return places.size();
     }
 
-	//Get total selected count
-	public int getSelectedCount() {
+	private int getSelectedCount() {
 		return mSelectedItemsIds.size();
 	}
-	//Return all selected ids
-	public SparseBooleanArray getSelectedIds() {
+	private SparseBooleanArray getSelectedIds() {
 			return mSelectedItemsIds;
 
 	}
 	public boolean ismMode(){
-		if (mActionMode != null){
-			return true;
-		}else{
-			return false;
-		}
+		return mActionMode != null;
 	}
 }

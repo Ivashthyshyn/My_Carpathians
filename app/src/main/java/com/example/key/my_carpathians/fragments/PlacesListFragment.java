@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.PlacesRecyclerAdapter;
@@ -22,6 +23,11 @@ import org.androidannotations.annotations.FragmentArg;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.key.my_carpathians.activities.StartActivity.FA_PLACE;
+import static com.example.key.my_carpathians.activities.StartActivity.FA_ROUT;
+import static com.example.key.my_carpathians.activities.StartActivity.MY_PLACE;
+import static com.example.key.my_carpathians.activities.StartActivity.MY_ROUT;
 
 
 /**
@@ -38,6 +44,7 @@ public class PlacesListFragment extends Fragment implements IRotation {
 	ArrayList<Place> placeList;
 	@FragmentArg
 	int mMode;
+	private ImageView imageForEmptyView;
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +57,7 @@ public class PlacesListFragment extends Fragment implements IRotation {
 	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 		fragmentView = inflater.inflate(R.layout.fragment_places_list, container, false);
 		emptyView = (CardView) fragmentView.findViewById(R.id.emptyViewForPlace);
+		imageForEmptyView = (ImageView)fragmentView.findViewById(R.id.emptyImage);
 		recyclerView = (RecyclerView) fragmentView.findViewById(R.id.recyclerViewForPlace);
 		return fragmentView;
 	}
@@ -89,12 +97,22 @@ public class PlacesListFragment extends Fragment implements IRotation {
 			recyclerView.removeAllViews();
 			if (placeList.size() == 0) {
 				emptyView.setVisibility(View.VISIBLE);
+				imageForEmptyView.setImageResource(selectImageResourceFromMode(mode));
 			} else {
 				emptyView.setVisibility(View.GONE);
 			}
 		} else if (fragmentView != null) {
 			createList();
 		}
+	}
+
+	private int selectImageResourceFromMode(int mode) {
+		if (mode == MY_PLACE | mode == MY_ROUT ) {
+			return R.drawable.ic_create_black_24px;
+		}else if (mode == FA_PLACE | mode == FA_ROUT){
+			return R.drawable.ic_favorite;
+		}
+		return R.drawable.ic_map_marker;
 	}
 
 

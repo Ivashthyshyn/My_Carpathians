@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.key.my_carpathians.R;
 import com.example.key.my_carpathians.adapters.RoutsRecyclerAdapter;
@@ -23,6 +24,11 @@ import org.androidannotations.annotations.FragmentArg;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.key.my_carpathians.activities.StartActivity.FA_PLACE;
+import static com.example.key.my_carpathians.activities.StartActivity.FA_ROUT;
+import static com.example.key.my_carpathians.activities.StartActivity.MY_PLACE;
+import static com.example.key.my_carpathians.activities.StartActivity.MY_ROUT;
+
 @EFragment
 public class RoutsListFragment extends Fragment implements IRotation {
 	RecyclerView recyclerView;
@@ -34,6 +40,7 @@ public class RoutsListFragment extends Fragment implements IRotation {
 	int mMode;
 	private List<Rout> mSearchList;
 	private View fragmentView;
+	private ImageView imageForEmptyView;
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,6 +54,7 @@ public class RoutsListFragment extends Fragment implements IRotation {
 			savedInstanceState) {
 		fragmentView = inflater.inflate(R.layout.fragment_routs_list, container, false);
 		emptyView = (CardView) fragmentView.findViewById(R.id.emptyViewForRout);
+		imageForEmptyView = (ImageView)fragmentView.findViewById(R.id.emptyImageRoutesList);
 		recyclerView = (RecyclerView) fragmentView.findViewById(R.id.recyclerViewForRout);
 
 		return fragmentView;
@@ -73,6 +81,7 @@ public class RoutsListFragment extends Fragment implements IRotation {
 			recyclerView.removeAllViews();
 			if (routList.size() == 0) {
 				emptyView.setVisibility(View.VISIBLE);
+				imageForEmptyView.setImageResource(selectImageResourceFromMode(mode));
 			} else {
 				emptyView.setVisibility(View.GONE);
 			}
@@ -80,7 +89,14 @@ public class RoutsListFragment extends Fragment implements IRotation {
 			createList();
 		}
 	}
-
+	private int selectImageResourceFromMode(int mode) {
+		if (mode == MY_PLACE | mode == MY_ROUT ) {
+			return R.drawable.ic_create_black_24px;
+		}else if (mode == FA_PLACE | mode == FA_ROUT){
+			return R.drawable.ic_favorite;
+		}
+		return R.drawable.ic_route;
+	}
 
 	public void dismissActionMode() {
 

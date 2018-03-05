@@ -1,8 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.example.key.my_carpathians.RoutsListFragment">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -12,7 +12,8 @@
         android:layout_height="match_parent"
         android:layout_margin="20dp"
         android:background="@color/tabTransparant"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/tabTransparant">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -21,10 +22,10 @@
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/imageView3"
-                android:src="@drawable/ic_star_rate_black_18px"
+                android:id="@+id/emptyImageRoutesList"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"/>
+                android:layout_height="100dp"
+                android:src="@drawable/ic_route"/>
 
             <TextView
                 android:id="@+id/textView2"
@@ -33,7 +34,7 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:padding="20dp"
-                android:text="LIST IS EMPTY"
+                android:text="@string/list_is_empty"
                 android:textColor="@color/white"
                 android:textSize="24sp"
                 android:textStyle="bold"/>

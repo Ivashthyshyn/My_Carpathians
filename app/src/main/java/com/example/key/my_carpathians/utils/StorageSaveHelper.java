@@ -60,7 +60,6 @@ public class StorageSaveHelper {
 				feature.setIdentifier("key.my_carpathians");
 				geoJSON.put("features", new JSONArray().put(feature.toJSON()));
 				geoJSON.put("type", "FeatureCollection");
-
 				File rootPath = new File(mRootPathToSaveTrack);
 				if (!rootPath.exists()) {
 					rootPath.mkdirs();

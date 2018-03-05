@@ -2,7 +2,7 @@
     <string name="app_name">My Carpathians</string>
     <string name="title_activity_maps">Map</string>
 
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main" translatable="false">MainActivity</string>
     <string name="dummy_button" translatable="false">Dummy Button</string>
     <string name="dummy_content" translatable="false">DUMMY\nCONTENT</string>
     <string name="access_token" translatable="false">pk.eyJ1Ijoidnlsa3kiLCJhIjoiY2pibTI5NDdlMXZkNTMxb2JneXV4MzBwZiJ9.T4Kakw4VplpStA54g19JMA</string>
@@ -53,7 +53,7 @@
 
     <!--Strings for OfflineManager activity-->
     <string name="dialog_title">New Region name!</string>
-    <string name="dialog_message">Downloads the map region you currently are viewing</string>
+    <string name="dialog_message">Downloads the map region you currently are viewing. To change the size of the offline map, go to the settings.</string>
     <string name="dialog_positive_button">Download</string>
     <string name="dialog_negative_button">Cancel</string>
     <string name="dialog_toast">Region name cannot be empty.</string>
@@ -88,7 +88,7 @@
     <string name="btn_link_to_login" translatable="false">Already registered. Login Me!</string>
     <string name="title_activity_reset_password" translatable="false">ResetPasswordActivity</string>
     <string name="btn_forgot_password">Forgot your password?</string>
-    <string name="btn_reset_password">Reset Password</string>
+    <string name="btn_reset_password">Reset Password!</string>
     <string name="hint_new_email">New Email</string>
     <string name="btn_change">Change</string>
     <string name="btn_send">Send</string>
@@ -109,19 +109,19 @@
     <string name="message_login_dialog">Choose a registration method</string>
     <string name="registration">Sign up</string>
     <string name="no">No</string>
-    <string name="internet">The Internet.</string>
+    <string name="internet">The Internet!</string>
     <string name="no_internet">"Unfortunately you are not connected to the Internet now! "</string>
     <string name="no_internet2">"Authentication management is not available! "</string>
     <string name="publish">Publish</string>
-    <string name="error_publisher">To upload, you need to fill in all the data</string>
+    <string name="error_publisher">To upload, you need to fill in all the data!</string>
     <string name="error_publisher_1p">No name given</string>
-    <string name="error_publisher_3p">No title information about place</string>
+    <string name="error_publisher_3p">No title information about place!</string>
     <string name="error_publisher_2r">No position given</string>
     <string name="error_publisher_3r">No title information about place</string>
     <string name="error_publisher_4r">No title information about place</string>
     <string name="error_publisher_5r">"No rout difficulty given "</string>
     <string name="enother_photo_download">Another photo download</string>
-    <string name="error_uploading">Error! Upload disapproved</string>
+    <string name="error_uploading">Error! Upload disapproved.</string>
     <string name="set_rating">Set rating place</string>
     <string name="add_to_favorite">Added to favorite list!</string>
     <string name="offline_message">Sorry, no internet access, you will be able to post data later</string>
@@ -132,8 +132,8 @@
     <string name="no_grandet_permission">You do not gave any permission</string>
     <string name="anonymous">Anonymous</string>
     <string name="button_authorization">Authentication</string>
-    <string name="dialog_get_registr">To access all the features of the program you need to register</string>
-    <string name="dialog_get_registr_message">Choose a method to register</string>
+    <string name="dialog_get_registr">To access all the features of the program you need to register.</string>
+    <string name="dialog_get_registr_message">Choose a method to register!</string>
     <string name="favorite">Favorite</string>
     <string name="your">Your</string>
     <string name="empty_list">List is empty!</string>
@@ -174,7 +174,7 @@
 
 
     <string name="title_login_dialog">To access all the features of the program you need to register</string>
-    <string name="error_publisher_2p">No position given</string>
+    <string name="error_publisher_2p">No position given!</string>
     <string name="error_publisher_4p">No title photo given</string>
     <string name="error_publisher_1r">No route given</string>
     <string name="error_downloading_photo">"Error! Additional photos not loaded "</string>
@@ -211,5 +211,37 @@
     <string name="create_region">Create Offline Region</string>
     <string name="list_offline_map">List Offline Map</string>
     <string name="add_to_map_2">Add to Map routes around</string>
+    <string name="selected">selected</string>
+    <string name="item_deleted">item deleted</string>
+    <string name="km">km</string>
+    <string name="delete_ask_place">Do You really want to delete Place</string>
+    <string name="delete_asc_route">Do You really want to delete Rout?</string>
+    <string name="select">Select</string>
+    <string name="photo">Photo</string>
+    <string name="photo_message_necesserly">Title photo is a must-have if you want to make your object public</string>
+    <string name="aditional_photo_message_necesserly">Additional photos are not required for publication</string>
+    <string name="loading">Loading</string>
+    <string name="photo_not_saved">Photo do not saved</string>
+    <string name="photo_saved">Photo saved!</string>
+    <string name="enter_name">"Please enter a name, this field is required for input "</string>
+    <string name="enter_title_info">Please briefly describe the object, this field is mandatory for input</string>
+    <string name="enter_difficulty">Difficulty is an important criterion for your object, define it</string>
+    <string name="enter_title_photo">Без титульної фотографії ваш обєкт буде не цілим</string>
+    <string name="unknown">unknown</string>
+    <string name="route_length_not_avalible">Failed to determine the length of the track</string>
+    <string name="list_is_empty">LIST IS EMPTY</string>
+    <string name="gps_signal">GPS signal</string>
+    <string name="gps_signal_message">Please, make sure you are in the open air and try again</string>
+    <string name="wait">Wait</string>
+    <string name="location_defin">location defined</string>
+    <string name="start_rec">please start rec</string>
+    <string name="start">Початок</string>
+    <string name="region_download">Region downloaded successfully.</string>
+    <string name="error_message_name_alredy_used">Вибачте але це імя вже використовується</string>
+    <string name="save_new_rout">Save New Route</string>
+    <string name="save_new_rout_message">Введіть назву вашого маршруту</string>
+    <string name="save_new_place">Save New Place</string>
+    <string name="save_new_place_message">Введіть назву вашого місця</string>
+    <string name="cancelled_by_user">Canceled by user!</string>
 
 </resources>

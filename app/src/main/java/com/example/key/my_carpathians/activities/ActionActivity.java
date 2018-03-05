@@ -177,14 +177,14 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
 		myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
 		mProduceMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
-		producedMode();
+		prepareFragments();
 	}
 
-	private void producedMode() {
-		infoFragment = InfoFragment_.builder()
-				.place(myPlace)
-				.rout(myRout)
-				.build();
+	private void prepareFragments() {
+			infoFragment = InfoFragment_.builder()
+					.place(myPlace)
+					.rout(myRout)
+					.build();
 
 		if (mProduceMode) {
 			viewPagerAdapter.addFragment(infoFragment, null);
@@ -822,7 +822,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		myRout = rout;
 		myPlace = place;
 		photoUrlList.clear();
-		setBaseInformation(place, rout);
+		prepareFragments();
 		mActionMode.finish();
 	}
 

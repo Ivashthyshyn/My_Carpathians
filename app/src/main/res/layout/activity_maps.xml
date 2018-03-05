@@ -77,13 +77,14 @@
 
     <SeekBar
         android:id="@+id/seekBar"
+        style="@android:style/Widget.SeekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="39dp"
-        android:layout_marginRight="39dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:progressBackgroundTint="@color/region_background"
         android:visibility="gone"/>
 
 

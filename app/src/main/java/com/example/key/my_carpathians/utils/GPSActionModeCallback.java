@@ -19,7 +19,6 @@ import static com.example.key.my_carpathians.activities.StartActivity.ROUT;
 
 public class GPSActionModeCallback implements ActionMode.Callback {
 	private Context context;
-
 	private int mType;
 
 
