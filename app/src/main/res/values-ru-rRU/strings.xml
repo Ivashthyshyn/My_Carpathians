@@ -93,7 +93,7 @@
     <string name="dialog_get_registr_message">Выберите способ регистрации!</string>
     <string name="favorite">Избранное</string>
     <string name="your">Твой</string>
-    <string name="empty_list">"  список пуст!"</string>
+    <string name="empty_list">Cписок пуст!</string>
     <string name="enter_email">Введите адрес электронной почты!</string>
     <string name="enter_pass">Введите пароль!</string>
     <string name="dialog_register">Зарегистрироваться!</string>
@@ -183,17 +183,20 @@
     <string name="unknown">неизвестно</string>
     <string name="route_length_not_avalible">"Не удалось определить длину трека "</string>
     <string name="list_is_empty">список пуст</string>
-    <string name="gps_signal">GPS signal</string>
+    <string name="gps_signal">GPS сигнал</string>
     <string name="gps_signal_message">Please, make sure you are in the open air and try again</string>
-    <string name="wait">Wait</string>
-    <string name="location_defin">location defined</string>
-    <string name="start_rec">please start rec</string>
-    <string name="start">Початок</string>
-    <string name="region_download">Region downloaded successfully.</string>
-    <string name="error_message_name_alredy_used">Вибачте але це імя вже використовується</string>
-    <string name="save_new_rout">Save New Route</string>
-    <string name="save_new_rout_message">Введіть назву вашого маршруту</string>
-    <string name="save_new_place">Save New Place</string>
-    <string name="save_new_place_message">Введіть назву вашого місця</string>
-    <string name="cancelled_by_user">Canceled by user!</string>
+    <string name="start_rec">местоположение найдено</string>
+    <string name="start">Начало</string>
+    <string name="region_download">Оффлайн карта загружена!</string>
+    <string name="error_message_name_alredy_used">Простите но это название уже используется</string>
+    <string name="save_new_rout">Сохранить новый Маршрут?</string>
+    <string name="save_new_rout_message">Введите название маршрута</string>
+    <string name="save_new_place">Сохранить новое Место?</string>
+    <string name="save_new_place_message">Сохранить новое Место?</string>
+    <string name="cancelled_by_user">Отменено пользователем!</string>
+    <string name="wait">Подождите!</string>
+    <string name="location_defin">местоположение найдено</string>
+    <string name="btn_back">Назад</string>
+    <string name="edit_message">заполните все поля</string>
+
 </resources>

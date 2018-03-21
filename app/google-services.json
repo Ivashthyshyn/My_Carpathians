@@ -10,16 +10,116 @@
       "client_info": {
         "mobilesdk_app_id": "1:539020489538:android:7cf53c385c444e1f",
         "android_client_info": {
-          "package_name": "com.example.key.my_carpathians"
+          "package_name": "com.keyVas.key.my_carpathians"
         }
       },
       "oauth_client": [
         {
+          "client_id": "539020489538-ak2ul7l9ob09101054jb9iak04juilkq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keyVas.key.my_carpathians",
+            "certificate_hash": "316448cfd7efb805d261837b65cb7e2535504a58"
+          }
+        },
+        {
+          "client_id": "539020489538-4sne9bf7nc84ch9rgde0p01frgkrbdq9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keyVas.key.my_carpathians",
+            "certificate_hash": "348c2cd29bab3a7f11da3c90ea58cdbf5b127571"
+          }
+        },
+        {
+          "client_id": "539020489538-h43nndht4nso98lsrttiad1koaq7cd8m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keyVas.key.my_carpathians",
+            "certificate_hash": "ff9089210aa95bf1782ddd27815c75230f11daf3"
+          }
+        },
+        {
+          "client_id": "539020489538-7pp90s2v1fh3nor2vqrgjvtulbs65om1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keyVas.key.my_carpathians",
+            "certificate_hash": "dd0c8ed32fa93fa4ac8e942828060ccaeca09e32"
+          }
+        },
+        {
+          "client_id": "539020489538-etddr2rb5ocju5sk33mteibj0e340d9d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keyVas.key.my_carpathians",
+            "certificate_hash": "b69e0155ecc814afaafba3d1e1313a0f6c45be97"
+          }
+        },
+        {
+          "client_id": "539020489538-8h3at2e0mb8ds7p86lijk65t6jjrmo54.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keyVas.key.my_carpathians",
+            "certificate_hash": "12da08d98f2d1009a82c67d03c148530334402b4"
+          }
+        },
+        {
           "client_id": "539020489538-jfrsedo9r7m92e3ed1p53tbicicqglhh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.key.my_carpathians",
+            "package_name": "com.keyVas.key.my_carpathians",
             "certificate_hash": "3fc332252a4863290e5acdce3ee81cac2c50d632"
+          }
+        },
+        {
+          "client_id": "539020489538-g0fgafova9pef2hglpo0mp9pr0d68fju.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0VCVu0hMgtJFuJ821yanVWpGOF9Rx7rY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "539020489538-g0fgafova9pef2hglpo0mp9pr0d68fju.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:539020489538:android:15e7725cfb3f008b",
+        "android_client_info": {
+          "package_name": "com.keyVas.key.my_carpathians"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "539020489538-d0h8hlqe5fqn5q658sd8m3d51sap26bo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keyVas.key.my_carpathians",
+            "certificate_hash": "12da08d98f2d1009a82c67d03c148530334402b4"
+          }
+        },
+        {
+          "client_id": "539020489538-03jdrp41g78s6megru8t6t48f7eitag6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keyVas.key.my_carpathians",
+            "certificate_hash": "348c2cd29bab3a7f11da3c90ea58cdbf5b127571"
           }
         },
         {

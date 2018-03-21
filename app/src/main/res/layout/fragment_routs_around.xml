@@ -4,7 +4,7 @@
               android:layout_height="match_parent"
               android:orientation="vertical"
               android:background="@color/secondaryBackgroundColor"
-              tools:context="com.example.key.my_carpathians.fragments.RoutsAroundFragment">
+              tools:context="com.keyVas.key.my_carpathians.fragments.RoutsAroundFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
