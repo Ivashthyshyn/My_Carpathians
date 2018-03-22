@@ -13,10 +13,10 @@
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:mapbox_styleUrl="@string/mapboxStyle"
         mapbox:mapbox_cameraTargetLat="49.11053"
         mapbox:mapbox_cameraTargetLng="24.30765"
-        mapbox:mapbox_cameraZoom="12"
-        mapbox:mapbox_styleUrl="mapbox://styles/vylky/cj6z0f00y2pii2rnrrshfx481">
+        mapbox:mapbox_cameraZoom="12">
 
     </com.mapbox.mapboxsdk.maps.MapView>
 
