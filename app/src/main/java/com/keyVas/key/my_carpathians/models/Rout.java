@@ -14,8 +14,8 @@ import static com.keyVas.key.my_carpathians.models.Place.UA;
  */
 @IgnoreExtraProperties
 public class Rout implements Serializable {
-	private HashMap name;
-	private HashMap title;
+	private HashMap<String, String> name;
+	private HashMap<String, String> title;
 	private String publisher;
 	private String urlRout;
 	private int region;
@@ -82,7 +82,7 @@ public class Rout implements Serializable {
 		return (String)name.get(languageKey);
 	}
 	public String routKey() {
-		return (String)name.get(EN);
+		return name.get(EN);
 	}
 	public void setNameRout(String name) {
 		if (name != null) {
@@ -102,16 +102,22 @@ public class Rout implements Serializable {
 		}
 	}
 	public String getTitleRout(String languageKey) {
-		return (String)title.get(languageKey);
+		if (title != null) {
+			return title.get(languageKey);
+		}
+		return null;
 	}
 
 	public void setTitleRout(String title){
-		if (title != null) {
+		if (this.title != null) {
+			this.title.clear();
+		}else {
 			this.title = new HashMap<>();
+		}
 			this.title.put(UA, title);
 			this.title.put(RU, title);
 			this.title.put(EN, title);
-		}
+
 	}
 	public void setTitleRout(String title, String LanguageKey) {
 		if (title != null) {
@@ -128,19 +134,19 @@ public class Rout implements Serializable {
 		this.urlRout = urlRout;
 	}
 
-	public HashMap getName() {
+	public HashMap<String, String> getName() {
 		return name;
 	}
 
-	public void setName(HashMap name) {
+	public void setName(HashMap<String, String> name) {
 		this.name = name;
 	}
 
-	public HashMap getTitle() {
+	public HashMap<String, String> getTitle() {
 		return title;
 	}
 
-	public void setTitle(HashMap title) {
+	public void setTitle(HashMap<String, String> title) {
 		this.title = title;
 	}
 

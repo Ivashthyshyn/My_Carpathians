@@ -198,5 +198,13 @@
     <string name="start_rec">будь-ласка почніть запис</string>
     <string name="btn_back">Назад</string>
     <string name="edit_message">заповніть всі поля</string>
+    <string name="language">Language</string>
+    <string name="uk">UK</string>
+    <string name="ru">RU</string>
+    <string name="en">EN</string>
+    <string name="mapboxStyle">mapbox://styles/vylky/cj6z0f00y2pii2rnrrshfx481</string>
+    <string name="upload_dialog_title">Публікація!</string>
+    <string name="upload_dialog_message">Завантажити дані?</string>
+    <string name="publication_trems">Дякуємо! Ваші дані будуть перевірені модератором і  опубліковані на протязі тижня за відсутності помилок.</string>
 
 </resources>

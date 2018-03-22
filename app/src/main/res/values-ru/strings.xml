@@ -198,5 +198,13 @@
     <string name="location_defin">местоположение найдено</string>
     <string name="btn_back">Назад</string>
     <string name="edit_message">заполните все поля</string>
+    <string name="language">Language</string>
+    <string name="uk">UK</string>
+    <string name="ru">RU</string>
+    <string name="en">EN</string>
+    <string name="mapboxStyle">mapbox://styles/vylky/cjf2ktw9n825m2sligm85pfxa</string>
+    <string name="upload_dialog_title">Публикация!</string>
+    <string name="upload_dialog_message">Загрузить данные?</string>
+    <string name="publication_trems">Спасибо! Ваши данные будут проверены модератором и опубликованы в течение недели при отсутствии ошибок.</string>
 
 </resources>

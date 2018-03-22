@@ -14,8 +14,8 @@ public class Place implements Serializable {
 	public static final String RU = "ru";
 	public static final String EN = "en";
 
-	private HashMap name;
-	private HashMap title;
+	private HashMap<String, String> name;
+	private HashMap<String, String> title;
 	private String urlPlace;
 	private int region;
 	private String publisher;
@@ -55,7 +55,7 @@ public class Place implements Serializable {
 		return (String)name.get(languageKey);
 	}
 	public String placeKey() {
-		return (String)name.get(EN);
+		return name.get(EN);
 	}
 	public void setNamePlace(String name) {
 		if (name != null) {
@@ -75,15 +75,21 @@ public class Place implements Serializable {
 		}
 	}
 	public String getTitlePlace(String languageKey) {
-		return (String)title.get(languageKey);
+		if (title != null) {
+			return title.get(languageKey);
+		}
+		return null;
 	}
 	public void setTitlePlace(String title){
-		if (title != null) {
+		if (this.title != null) {
+			this.title.clear();
+		}else {
 			this.title = new HashMap<>();
+		}
 			this.title.put(UA, title);
 			this.title.put(RU, title);
 			this.title.put(EN, title);
-		}
+
 	}
 
 	public void setTitlePlace(String title, String LanguageKey) {
@@ -113,19 +119,19 @@ public class Place implements Serializable {
 		this.region = region;
 	}
 
-	public HashMap getName() {
+	public HashMap<String, String> getName() {
 		return name;
 	}
 
-	public void setName(HashMap name) {
+	public void setName(HashMap<String, String> name) {
 		this.name = name;
 	}
 
-	public HashMap getTitle() {
+	public HashMap<String, String> getTitle() {
 		return title;
 	}
 
-	public void setTitle(HashMap title) {
+	public void setTitle(HashMap<String, String> title) {
 		this.title = title;
 	}
 }

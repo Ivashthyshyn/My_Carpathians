@@ -1,54 +1,54 @@
-<code_scheme name="Default (1)">
-  <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
-  <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
-  <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
+<code_scheme nameRout="Default (1)">
+  <option nameRout="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
+  <option nameRout="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
+  <option nameRout="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
     <value />
   </option>
-  <option name="IMPORT_LAYOUT_TABLE">
+  <option nameRout="IMPORT_LAYOUT_TABLE">
     <value>
-      <package name="android" withSubpackages="true" static="false" />
+      <package nameRout="android" withSubpackages="true" static="false" />
       <emptyLine />
-      <package name="com" withSubpackages="true" static="false" />
+      <package nameRout="com" withSubpackages="true" static="false" />
       <emptyLine />
-      <package name="junit" withSubpackages="true" static="false" />
+      <package nameRout="junit" withSubpackages="true" static="false" />
       <emptyLine />
-      <package name="net" withSubpackages="true" static="false" />
+      <package nameRout="net" withSubpackages="true" static="false" />
       <emptyLine />
-      <package name="org" withSubpackages="true" static="false" />
+      <package nameRout="org" withSubpackages="true" static="false" />
       <emptyLine />
-      <package name="java" withSubpackages="true" static="false" />
+      <package nameRout="java" withSubpackages="true" static="false" />
       <emptyLine />
-      <package name="javax" withSubpackages="true" static="false" />
+      <package nameRout="javax" withSubpackages="true" static="false" />
       <emptyLine />
-      <package name="" withSubpackages="true" static="false" />
+      <package nameRout="" withSubpackages="true" static="false" />
       <emptyLine />
-      <package name="" withSubpackages="true" static="true" />
+      <package nameRout="" withSubpackages="true" static="true" />
       <emptyLine />
     </value>
   </option>
-  <option name="RIGHT_MARGIN" value="100" />
+  <option nameRout="RIGHT_MARGIN" value="100" />
   <AndroidXmlCodeStyleSettings>
-    <option name="USE_CUSTOM_SETTINGS" value="true" />
+    <option nameRout="USE_CUSTOM_SETTINGS" value="true" />
   </AndroidXmlCodeStyleSettings>
   <Objective-C-extensions>
     <file>
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Import" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Macro" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Typedef" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Enum" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Constant" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Global" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Struct" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="FunctionPredecl" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Function" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Import" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Macro" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Typedef" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Enum" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Constant" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Global" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Struct" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="FunctionPredecl" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Function" />
     </file>
     <class>
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Property" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Synthesize" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="InitMethod" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="StaticMethod" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="InstanceMethod" />
-      <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="DeallocMethod" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Property" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Synthesize" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="InitMethod" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="StaticMethod" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="InstanceMethod" />
+      <option nameRout="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="DeallocMethod" />
     </class>
     <extensions>
       <pair source="cpp" header="h" />
@@ -56,18 +56,18 @@
     </extensions>
   </Objective-C-extensions>
   <XML>
-    <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
+    <option nameRout="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
   </XML>
   <codeStyleSettings language="JAVA">
     <indentOptions>
-      <option name="USE_TAB_CHARACTER" value="true" />
-      <option name="SMART_TABS" value="true" />
+      <option nameRout="USE_TAB_CHARACTER" value="true" />
+      <option nameRout="SMART_TABS" value="true" />
     </indentOptions>
   </codeStyleSettings>
   <codeStyleSettings language="XML">
-    <option name="FORCE_REARRANGE_MODE" value="1" />
+    <option nameRout="FORCE_REARRANGE_MODE" value="1" />
     <indentOptions>
-      <option name="CONTINUATION_INDENT_SIZE" value="4" />
+      <option nameRout="CONTINUATION_INDENT_SIZE" value="4" />
     </indentOptions>
     <arrangement>
       <rules>
@@ -106,7 +106,7 @@
           <rule>
             <match>
               <AND>
-                <NAME>.*:name</NAME>
+                <NAME>.*:nameRout</NAME>
                 <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
               </AND>
             </match>
@@ -116,7 +116,7 @@
           <rule>
             <match>
               <AND>
-                <NAME>name</NAME>
+                <NAME>nameRout</NAME>
                 <XML_NAMESPACE>^$</XML_NAMESPACE>
               </AND>
             </match>

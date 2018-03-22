@@ -226,7 +226,7 @@
     <string name="enter_name">"Please enter a name, this field is required for input "</string>
     <string name="enter_title_info">Please briefly describe the object, this field is mandatory for input</string>
     <string name="enter_difficulty">Difficulty is an important criterion for your object, define it</string>
-    <string name="enter_title_photo">Без титульної фотографії ваш обєкт буде не цілим</string>
+    <string name="enter_title_photo">Without a title photo, your object will not be whole</string>
     <string name="unknown">unknown</string>
     <string name="route_length_not_avalible">Failed to determine the length of the track</string>
     <string name="list_is_empty">LIST IS EMPTY</string>
@@ -236,7 +236,7 @@
     <string name="location_defin">location defined</string>
     <string name="start_rec">please start rec</string>
     <string name="region_download">Region downloaded successfully.</string>
-    <string name="error_message_name_alredy_used">Вибачте але це імя вже використовується</string>
+    <string name="error_message_name_alredy_used">Sorry, but this name is already in use</string>
     <string name="save_new_rout">Save New Route</string>
     <string name="save_new_rout_message">Введіть назву вашого маршруту</string>
     <string name="save_new_place">Save New Place</string>
@@ -244,6 +244,14 @@
     <string name="cancelled_by_user">Canceled by user!</string>
     <string name="start">Start</string>
     <string name="edit_message">please fill in the form</string>
+    <string name="language">Language</string>
+    <string name="uk">UK</string>
+    <string name="ru">RU</string>
+    <string name="en">EN</string>
+    <string name="mapboxStyle">mapbox://styles/vylky/cjf2kn7op4zab2sr2fsztwfg4</string>
+    <string name="upload_dialog_title">Publication</string>
+    <string name="upload_dialog_message">Upload data</string>
+    <string name="publication_trems">Thank you! Your data will be verified by the moderator and published within a week if there are no errors.</string>
 
 
 </resources>

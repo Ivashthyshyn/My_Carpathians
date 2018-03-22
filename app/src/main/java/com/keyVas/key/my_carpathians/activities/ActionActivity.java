@@ -91,6 +91,7 @@ import java.util.Set;
 import static android.widget.Toast.LENGTH_LONG;
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 import static com.keyVas.key.my_carpathians.R.id.graph;
+import static com.keyVas.key.my_carpathians.activities.StartActivity.CREATED_STR;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.FAVORITES_PLACE_LIST;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.FAVORITES_ROUTS_LIST;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.PREFS_NAME;
@@ -565,8 +566,9 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		return problem;
 	}
 
+
 	@Background
-	public void saveToFireBase(final Place place, final Rout rout) {
+	public void uploadToFireBase(final Place place, final Rout rout) {
 		if (place != null) {
 			database = FirebaseDatabase.getInstance();
 			myRef = database.getReference();
@@ -610,7 +612,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 													.appendPath(PHOTO_STR).build();
 
 											place.setUrlPlace(downloadUrl.toString());
-											myRef.child(PLACE_STR).child(place.placeKey()).setValue(place);
+											myRef.child(CREATED_STR).child(PLACE_STR).child(place.placeKey()).setValue(place);
+											showPublicationTermsDialog();
 											for (int i = 1; i <= 3; i++) {
 												File photoFile = new File(rootPathForPhotosString.buildUpon()
 														.appendPath(place.placeKey()
@@ -713,7 +716,8 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 											Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
 													Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath(PHOTO_STR).build();
 											rout.setUrlRout(downloadUrl.toString());
-											myRef.child(ROUT_STR).child(rout.routKey()).setValue(rout);
+											myRef.child(CREATED_STR).child(ROUT_STR).child(rout.routKey()).setValue(rout);
+											showPublicationTermsDialog();
 											for (int i = 1; i <= 3; i++) {
 												File photoFile = new File(rootPathForPhotosString.buildUpon().appendPath(rout.routKey() + String.valueOf(i)).build().getPath());
 												if (photoFile.exists()) {
@@ -760,6 +764,18 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 						}
 					});
 		}
+	}
+	@UiThread
+	public void showPublicationTermsDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(getString(R.string.upload_dialog_title))
+				.setMessage(getString(R.string.publication_trems))
+				.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				}).create().show();
 	}
 
 	private void showAlreadyExistDialog(String name) {
@@ -1000,7 +1016,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			case R.id.action_publish:
 				if (isOnline()) {
 					if (dataIntegrityCheck(myPlace, myRout) == 0) {
-						saveToFireBase(myPlace, myRout);
+						showUploadDialog();
 					}
 				} else {
 					showPublisherDialog(getResources().getString(R.string.offline_message));
@@ -1010,6 +1026,24 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			default:
 				return super.onOptionsItemSelected(item);
 		}
+	}
+
+	private void showUploadDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(getString(R.string.upload_dialog_title))
+				.setMessage(getString(R.string.upload_dialog_message))
+				.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						uploadToFireBase(myPlace, myRout);
+					}
+				})
+				.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				}).create().show();
 	}
 
 	private void editCreatedObject() {

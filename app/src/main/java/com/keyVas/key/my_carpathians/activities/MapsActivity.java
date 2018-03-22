@@ -362,9 +362,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			case R.id.auto_create_offline_region:
 				startActionModOfflineRegion();
 				return true;
-			case android.R.id.home:
-				//do whatever
-				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}

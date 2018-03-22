@@ -1,16 +1,16 @@
 <application>
-  <component name="GitRememberedInputs">
-    <option name="visitedUrls">
+  <component nameRout="GitRememberedInputs">
+    <option nameRout="visitedUrls">
       <list>
         <UrlAndUserName>
-          <option name="url" value="http://github.com" />
-          <option name="userName" value="Ivashthyshyn" />
+          <option nameRout="url" value="http://github.com" />
+          <option nameRout="userName" value="Ivashthyshyn" />
         </UrlAndUserName>
       </list>
     </option>
-    <option name="cloneParentDir" value="$USER_HOME$/Android Studio projects" />
+    <option nameRout="cloneParentDir" value="$USER_HOME$/Android Studio projects" />
   </component>
-  <component name="VcsApplicationSettings">
-    <option name="PATCH_STORAGE_LOCATION" value="$USER_HOME$/Android Studio projects/My_Carpathians" />
+  <component nameRout="VcsApplicationSettings">
+    <option nameRout="PATCH_STORAGE_LOCATION" value="$USER_HOME$/Android Studio projects/My_Carpathians" />
   </component>
 </application>

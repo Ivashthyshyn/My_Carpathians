@@ -1,9 +1,9 @@
 <application>
-  <component name="LanguageInjectionConfiguration">
-    <option name="INSTRUMENTATION" value="ASSERT" />
-    <option name="LANGUAGE_ANNOTATION" value="org.intellij.lang.annotations.Language" />
-    <option name="PATTERN_ANNOTATION" value="org.intellij.lang.annotations.Pattern" />
-    <option name="SUBST_ANNOTATION" value="org.intellij.lang.annotations.Subst" />
-    <option name="RESOLVE_REFERENCES" value="true" />
+  <component nameRout="LanguageInjectionConfiguration">
+    <option nameRout="INSTRUMENTATION" value="ASSERT" />
+    <option nameRout="LANGUAGE_ANNOTATION" value="org.intellij.lang.annotations.Language" />
+    <option nameRout="PATTERN_ANNOTATION" value="org.intellij.lang.annotations.Pattern" />
+    <option nameRout="SUBST_ANNOTATION" value="org.intellij.lang.annotations.Subst" />
+    <option nameRout="RESOLVE_REFERENCES" value="true" />
   </component>
 </application>

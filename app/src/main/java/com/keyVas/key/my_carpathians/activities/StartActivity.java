@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
@@ -29,6 +31,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
@@ -235,7 +238,8 @@ public class StartActivity extends AppCompatActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_start);
-
+		mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		determineUserLocale();
 		setSupportActionBar(toolbar);
 		toolbar.showOverflowMenu();
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -274,10 +278,7 @@ public class StartActivity extends AppCompatActivity implements
 				R.string.app_name, R.string.app_name);
 		mDrawerLayout.addDrawerListener(actionBarDrawerToggle);
 		actionBarDrawerToggle.syncState();
-
-		mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		checkCurrentUser();
-		determineUserLocale();
 		mAuthListener = new FirebaseAuth.AuthStateListener() {
 			@Override
 			public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -306,23 +307,31 @@ public class StartActivity extends AppCompatActivity implements
 		}
 
 	}
-
 	private void determineUserLocale() {
-				switch (Locale.getDefault().getLanguage()){
-					case UA : setupAppLanguage(UA);
-						break;
-					case RU : setupAppLanguage(RU);
-						break;
-					case EN : setupAppLanguage(EN);
-						break;
-					default: setupAppLanguage(EN);
-						break;
-				}
+			String appLanguage = mSharedPreferences.getString(USER_LANGUAGE, null);
+			if (( getLocale() != null) && (appLanguage == null || (appLanguage != null && getLocale().getLanguage().equals(appLanguage)))) {
+			switch (Locale.getDefault().getLanguage()) {
+				case UA:
+					setupAppLanguage(UA);
+					break;
+				case RU:
+					setupAppLanguage(RU);
+					break;
+				case EN:
+					setupAppLanguage(EN);
+					break;
+				default:
+					setupAppLanguage(EN);
+					break;
+			}
+		} else {
+				setupLocale(appLanguage);
+
+		}
 
 	}
 
 	private void setupAppLanguage(String language) {
-		mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		mSharedPreferences.edit().putString(USER_LANGUAGE, language).apply();
 	}
 
@@ -1788,5 +1797,39 @@ public class StartActivity extends AppCompatActivity implements
 	@Click(R.id.buttonSettings)
 	public void buttonSettingsWasClicked() {
 		startActivity(new Intent(StartActivity.this, SettingsActivity_.class));
+	}
+	@SuppressWarnings("deprecation")
+	public Locale getLocale() {
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			return context.getResources().getConfiguration().getLocales().get(0);
+		}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
+			return Locale.getDefault();
+		}
+		return null;
+	}
+	@SuppressWarnings("deprecation")
+	public void setupLocale(String apLocale) {
+		Locale myLocale;
+		if (apLocale == null){
+			myLocale = new Locale(EN);
+		}else {
+			myLocale = new Locale(apLocale);
+		}
+		Resources resources = getResources();
+		Configuration configuration = resources.getConfiguration();
+		DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
+			configuration.setLocale(myLocale);
+		} else{
+			configuration.locale = myLocale;
+		}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+			context.createConfigurationContext(configuration);
+		} else {
+			resources.updateConfiguration(configuration,displayMetrics);
+		}
+
 	}
 }
