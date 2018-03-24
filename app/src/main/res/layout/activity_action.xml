@@ -161,17 +161,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
+
     </android.support.v4.widget.NestedScrollView>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/buttonShowOnMap"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:layout_margin="20dp"
@@ -180,6 +181,6 @@
         android:scrollbarAlwaysDrawHorizontalTrack="false"
         android:src="@drawable/ic_map24px"
         app:elevation="0dp"
-        app:fabSize="normal"/>
+        app:fabSize="normal" />
 
 </android.support.design.widget.CoordinatorLayout>

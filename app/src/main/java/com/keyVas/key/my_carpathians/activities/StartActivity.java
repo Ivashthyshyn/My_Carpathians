@@ -7,11 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
@@ -31,7 +29,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
@@ -92,6 +89,7 @@ import com.keyVas.key.my_carpathians.interfaces.CommunicatorStartActivity;
 import com.keyVas.key.my_carpathians.interfaces.IRotation;
 import com.keyVas.key.my_carpathians.models.Place;
 import com.keyVas.key.my_carpathians.models.Rout;
+import com.keyVas.key.my_carpathians.utils.LocaleHelper;
 import com.keyVas.key.my_carpathians.utils.StorageSaveHelper;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
@@ -110,7 +108,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -126,9 +123,6 @@ import static com.keyVas.key.my_carpathians.activities.MapsActivity.JSON_CHARSET
 import static com.keyVas.key.my_carpathians.activities.MapsActivity.JSON_FIELD_REGION_NAME;
 import static com.keyVas.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.keyVas.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
-import static com.keyVas.key.my_carpathians.models.Place.EN;
-import static com.keyVas.key.my_carpathians.models.Place.RU;
-import static com.keyVas.key.my_carpathians.models.Place.UA;
 import static com.keyVas.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
 import static com.keyVas.key.my_carpathians.utils.LocationService.CREATED_BY_USER_ROUT_LIST;
 import static com.keyVas.key.my_carpathians.utils.StorageSaveHelper.ERROR;
@@ -162,7 +156,6 @@ public class StartActivity extends AppCompatActivity implements
 	public static final String FACEBOOK_PROVIDER = "facebook.com";
 	public static final String EMAIL_PROVIDER = "password";
 	public static final String CREATED_STR = "Created";
-	public static final String USER_LANGUAGE = "user_language";
 	public Context context = StartActivity.this;
 	public ArrayList<Place> places = new ArrayList<>();
 	public ArrayList<Rout> routs = new ArrayList<>();
@@ -239,9 +232,9 @@ public class StartActivity extends AppCompatActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_start);
 		mSharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		determineUserLocale();
 		setSupportActionBar(toolbar);
 		toolbar.showOverflowMenu();
+		setTitle(getString(R.string.app_name));
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		tabLayout.setupWithViewPager(viewPager);
 		viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -307,33 +300,11 @@ public class StartActivity extends AppCompatActivity implements
 		}
 
 	}
-	private void determineUserLocale() {
-			String appLanguage = mSharedPreferences.getString(USER_LANGUAGE, null);
-			if (( getLocale() != null) && (appLanguage == null || (appLanguage != null && getLocale().getLanguage().equals(appLanguage)))) {
-			switch (Locale.getDefault().getLanguage()) {
-				case UA:
-					setupAppLanguage(UA);
-					break;
-				case RU:
-					setupAppLanguage(RU);
-					break;
-				case EN:
-					setupAppLanguage(EN);
-					break;
-				default:
-					setupAppLanguage(EN);
-					break;
-			}
-		} else {
-				setupLocale(appLanguage);
-
-		}
-
+	@Override
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(LocaleHelper.onAttach(base));
 	}
 
-	private void setupAppLanguage(String language) {
-		mSharedPreferences.edit().putString(USER_LANGUAGE, language).apply();
-	}
 
 	public void getDateFromFirebace() {
 		FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -1798,38 +1769,5 @@ public class StartActivity extends AppCompatActivity implements
 	public void buttonSettingsWasClicked() {
 		startActivity(new Intent(StartActivity.this, SettingsActivity_.class));
 	}
-	@SuppressWarnings("deprecation")
-	public Locale getLocale() {
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			return context.getResources().getConfiguration().getLocales().get(0);
-		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
-			return Locale.getDefault();
-		}
-		return null;
-	}
-	@SuppressWarnings("deprecation")
-	public void setupLocale(String apLocale) {
-		Locale myLocale;
-		if (apLocale == null){
-			myLocale = new Locale(EN);
-		}else {
-			myLocale = new Locale(apLocale);
-		}
-		Resources resources = getResources();
-		Configuration configuration = resources.getConfiguration();
-		DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
-			configuration.setLocale(myLocale);
-		} else{
-			configuration.locale = myLocale;
-		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
-			context.createConfigurationContext(configuration);
-		} else {
-			resources.updateConfiguration(configuration,displayMetrics);
-		}
-
-	}
 }

@@ -30,7 +30,7 @@ public class CarpathianApp extends Application {
     }
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
+        super.attachBaseContext(LocaleHelper.onAttach(base, LocaleHelper.checkCurrentLocale()));
         MultiDex.install(this);
     }
 }

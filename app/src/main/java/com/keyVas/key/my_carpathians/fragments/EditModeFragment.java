@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -66,8 +67,8 @@ import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.ROOT_PATH;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.USER_LANGUAGE;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
+import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 import static com.keyVas.key.my_carpathians.utils.StorageSaveHelper.ERROR;
 
 /**
@@ -190,7 +191,7 @@ public class EditModeFragment extends DialogFragment implements View.OnFocusChan
 	@AfterViews
 	public void afterView(){
 		SharedPreferences sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		mUserLanguage = sharedPreferences.getString(USER_LANGUAGE, EN);
+		mUserLanguage = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(SELECTED_LANGUAGE, EN);
 		mRootPathString = sharedPreferences.getString(ROOT_PATH, null);
 		editTextName.setOnFocusChangeListener(this);
 		editTextTitle.setOnFocusChangeListener(this);

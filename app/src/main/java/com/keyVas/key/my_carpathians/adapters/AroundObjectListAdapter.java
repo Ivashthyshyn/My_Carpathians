@@ -1,6 +1,7 @@
 package com.keyVas.key.my_carpathians.adapters;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,13 +24,11 @@ import com.keyVas.key.my_carpathians.models.Rout;
 
 import java.util.List;
 
-import static android.content.Context.MODE_PRIVATE;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.USER_LANGUAGE;
 import static com.keyVas.key.my_carpathians.fragments.EditModeFragment.HARD;
 import static com.keyVas.key.my_carpathians.fragments.EditModeFragment.LIGHT;
 import static com.keyVas.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
+import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
 
 public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectListAdapter.ViewHolder> {
@@ -89,7 +88,7 @@ public class AroundObjectListAdapter extends RecyclerView.Adapter<AroundObjectLi
 		View mView = LayoutInflater.from(parent.getContext())
 				.inflate(R.layout.lis_item_for_rout, parent, false);
 		context = mView.getContext();
-		mUserLanguage = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(USER_LANGUAGE, EN);
+		mUserLanguage = PreferenceManager.getDefaultSharedPreferences(context).getString(SELECTED_LANGUAGE, EN);
 
 		return new ViewHolder(mView, new ViewHolder.ClickListener() {
 			@Override

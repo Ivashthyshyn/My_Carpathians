@@ -28,7 +28,7 @@
     <string name="navigate_negative_button_title">Відмінити</string>
     <string name="navigate_title">Автономні карти</string>
     <string name="region_name">Назва автономної карти</string>
-    <string name="set_region_name_hint">Введіть імя ругіону.</string>
+    <string name="set_region_name_hint">Введіть імя автономної карти.</string>
     <string name="list_button_text">Автономны карти</string>
     <string name="download_button_text">Завантажити карту</string>
     <string name="action_sign_in_short">Реєстрація</string>

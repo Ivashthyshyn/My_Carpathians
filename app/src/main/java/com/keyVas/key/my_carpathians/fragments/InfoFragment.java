@@ -1,6 +1,7 @@
 package com.keyVas.key.my_carpathians.fragments;
 
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,13 +18,11 @@ import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.FragmentArg;
 import org.androidannotations.annotations.ViewById;
 
-import static android.content.Context.MODE_PRIVATE;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.USER_LANGUAGE;
 import static com.keyVas.key.my_carpathians.fragments.EditModeFragment.HARD;
 import static com.keyVas.key.my_carpathians.fragments.EditModeFragment.LIGHT;
 import static com.keyVas.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
+import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
 /**
  */
@@ -70,7 +69,7 @@ public class InfoFragment extends Fragment {
 	}
 	@AfterViews
 	void afterViews(){
-		mUserLanguage = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(USER_LANGUAGE, EN);
+		mUserLanguage = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(SELECTED_LANGUAGE, EN);
 		if (place != null) {
 			groupForRout.setVisibility(View.GONE);
 			textViewNameObject.setText(place.getNamePlace(mUserLanguage));

@@ -17,6 +17,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -48,6 +49,7 @@ import com.keyVas.key.my_carpathians.models.Rout;
 import com.keyVas.key.my_carpathians.utils.AltitudeFinder;
 import com.keyVas.key.my_carpathians.utils.GPSActionModeCallback;
 import com.keyVas.key.my_carpathians.utils.HandActionModeCallback;
+import com.keyVas.key.my_carpathians.utils.LocaleHelper;
 import com.keyVas.key.my_carpathians.utils.LocationService;
 import com.keyVas.key.my_carpathians.utils.OfflineRegionActionModeCallback;
 import com.keyVas.key.my_carpathians.utils.StorageSaveHelper;
@@ -103,8 +105,8 @@ import static com.keyVas.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.PRODUCE_MODE;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.ROOT_PATH;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.ROUT;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.USER_LANGUAGE;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
+import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 import static com.keyVas.key.my_carpathians.utils.LocationService.WAIT_MODE;
 import static com.keyVas.key.my_carpathians.utils.StorageSaveHelper.FILE_EXISTS;
 
@@ -177,7 +179,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		location();
 		sharedPreferences = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		mRootPathString = sharedPreferences.getString(ROOT_PATH, null);
-		mUserLanguage = sharedPreferences.getString(USER_LANGUAGE, EN);
+		mUserLanguage = PreferenceManager.getDefaultSharedPreferences(this).getString(SELECTED_LANGUAGE, EN);
 
 		selectUserRouts = (List<Rout>) getIntent().getSerializableExtra(SELECTED_USER_ROUTS);
 		selectUserPlacesList = (List<Place>) getIntent().getSerializableExtra(SELECTED_USER_PLACES);
@@ -187,6 +189,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		setContentView(R.layout.activity_maps);
 		setSupportActionBar(toolbar);
 		toolbar.showOverflowMenu();
+		setTitle(R.string.title_activity_maps);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mOfflineManager = OfflineManager.getInstance(MapsActivity.this);
 		mMapView = (MapView) findViewById(R.id.mapView);
@@ -1776,6 +1779,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			mOfflinePolygon = null;
 			mPolygonOptions = null;
 		}
+	}
+	@Override
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(LocaleHelper.onAttach(base));
 	}
 }
 

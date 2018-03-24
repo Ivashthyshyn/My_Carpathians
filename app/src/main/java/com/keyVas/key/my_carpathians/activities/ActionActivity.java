@@ -10,6 +10,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -63,6 +64,7 @@ import com.keyVas.key.my_carpathians.models.Place;
 import com.keyVas.key.my_carpathians.models.Rout;
 import com.keyVas.key.my_carpathians.utils.AltitudeFinder;
 import com.keyVas.key.my_carpathians.utils.EditObjectActionModeCallback;
+import com.keyVas.key.my_carpathians.utils.LocaleHelper;
 import com.keyVas.key.my_carpathians.utils.StorageSaveHelper;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
@@ -99,11 +101,11 @@ import static com.keyVas.key.my_carpathians.activities.StartActivity.PRODUCE_MOD
 import static com.keyVas.key.my_carpathians.activities.StartActivity.PUT_EXTRA_PLACE_LIST;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.PUT_EXTRA_ROUTS_LIST;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.ROOT_PATH;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.USER_LANGUAGE;
 import static com.keyVas.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.keyVas.key.my_carpathians.adapters.RoutsRecyclerAdapter.PUT_EXTRA_POINTS;
 import static com.keyVas.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
+import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
 @EActivity
 public class ActionActivity extends AppCompatActivity implements CommunicatorActionActivity {
@@ -181,7 +183,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		myPlace = (Place) getIntent().getSerializableExtra(PUT_EXTRA_PLACE);
 		myRout = (Rout) getIntent().getSerializableExtra(PUT_EXTRA_ROUT);
 		mProduceMode = getIntent().getBooleanExtra(PRODUCE_MODE, false);
-		mUserLanguage = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(USER_LANGUAGE, EN);
+		mUserLanguage = PreferenceManager.getDefaultSharedPreferences(this).getString(SELECTED_LANGUAGE, EN);
 		prepareFragments();
 	}
 
@@ -1062,5 +1064,10 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		} else {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 		}
+	}
+
+	@Override
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(LocaleHelper.onAttach(base));
 	}
 }

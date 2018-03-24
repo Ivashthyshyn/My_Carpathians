@@ -4,18 +4,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,6 +43,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.keyVas.key.my_carpathians.R;
+import com.keyVas.key.my_carpathians.utils.LocaleHelper;
 import com.shawnlin.numberpicker.NumberPicker;
 
 import org.androidannotations.annotations.Click;
@@ -53,15 +51,14 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 import static com.keyVas.key.my_carpathians.activities.StartActivity.LOGIN_NAME;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.RC_SIGN_IN;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.USER_LANGUAGE;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
 import static com.keyVas.key.my_carpathians.models.Place.RU;
 import static com.keyVas.key.my_carpathians.models.Place.UA;
+import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
 @EActivity
 public class SettingsActivity extends AppCompatActivity implements
@@ -93,6 +90,7 @@ public class SettingsActivity extends AppCompatActivity implements
 		setContentView(R.layout.activity_settings);
 		setSupportActionBar(toolbar);
 		toolbar.showOverflowMenu();
+		setTitle(R.string.settings);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		setupLanguageRadioGroup();
@@ -120,7 +118,9 @@ public class SettingsActivity extends AppCompatActivity implements
 	}
 
 	private void setupLanguageRadioGroup() {
-		switch (sharedPreferences.getString(USER_LANGUAGE, EN)){
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+		switch (preferences.getString(SELECTED_LANGUAGE, EN)){
 			case UA : radioGroup.check(R.id.radioButtonUk);
 				break;
 			case RU : radioGroup.check(R.id.radioButtonRu);
@@ -392,35 +392,29 @@ public class SettingsActivity extends AppCompatActivity implements
 
 	@Override
 	public void onCheckedChanged(RadioGroup group, int checkedId) {
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = preferences.edit();
 		switch (checkedId){
-			case R.id.radioButtonUk :changeLang(UA);
+			case R.id.radioButtonUk :
+				editor.putString(SELECTED_LANGUAGE, UA);
+				editor.apply();
 				break;
-			case R.id.radioButtonRu : changeLang(RU);
+			case R.id.radioButtonRu :
+				editor.putString(SELECTED_LANGUAGE, RU);
+				editor.apply();
 				break;
-			case R.id.radioButtonEn : changeLang(EN);
+			case R.id.radioButtonEn :
+				editor.putString(SELECTED_LANGUAGE, EN);
+				editor.apply();
 				break;
 		}
-	}
-	@SuppressWarnings("deprecation")
-	private void changeLang(String lang) {
-		Locale myLocale = new Locale(lang);
-		Resources resources = getResources();
-		Configuration configuration = resources.getConfiguration();
-		DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
-			configuration.setLocale(myLocale);
-		} else{
-			configuration.locale = myLocale;
-		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
-			getApplicationContext().createConfigurationContext(configuration);
-		} else {
-			resources.updateConfiguration(configuration,displayMetrics);
-		}
-		sharedPreferences.edit().putString(USER_LANGUAGE, lang).apply();
 		Intent refresh = new Intent(this, SettingsActivity_.class);
 		startActivity(refresh);
 		finish();
+	}
+	@Override
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(LocaleHelper.onAttach(base));
 	}
 }
 

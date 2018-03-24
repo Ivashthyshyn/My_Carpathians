@@ -1,5 +1,6 @@
 package com.keyVas.key.my_carpathians.activities;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -9,10 +10,11 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.keyVas.key.my_carpathians.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.keyVas.key.my_carpathians.R;
+import com.keyVas.key.my_carpathians.utils.LocaleHelper;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
@@ -63,8 +65,11 @@ public class ResetPasswordActivity extends AppCompatActivity {
                 });
     }
     @Click(R.id.buutonBack)
-    public void buutonBackWasClicked(){
+    public void buttonBackWasClicked(){
         finish();
     }
-
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base));
+    }
 }

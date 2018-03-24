@@ -3,6 +3,7 @@ package com.keyVas.key.my_carpathians.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
@@ -29,14 +30,12 @@ import com.keyVas.key.my_carpathians.utils.ToolbarActionModeCallback;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.Context.MODE_PRIVATE;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.ROUT;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.USER_LANGUAGE;
 import static com.keyVas.key.my_carpathians.fragments.EditModeFragment.HARD;
 import static com.keyVas.key.my_carpathians.fragments.EditModeFragment.LIGHT;
 import static com.keyVas.key.my_carpathians.fragments.EditModeFragment.MEDIUM;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
+import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
 public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdapter.RoutsViewHolder> {
     public static final String PUT_EXTRA_POINTS = "put_extra_point_list";
@@ -64,7 +63,7 @@ public class RoutsRecyclerAdapter extends RecyclerView.Adapter<RoutsRecyclerAdap
         View mView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.lis_item_for_rout, parent, false);
         context = mView.getContext();
-        mUserLanguage = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(USER_LANGUAGE, EN);
+        mUserLanguage = PreferenceManager.getDefaultSharedPreferences(context).getString(SELECTED_LANGUAGE, EN);
 
         RoutsViewHolder mHolder = new RoutsViewHolder(mView, new RoutsViewHolder.ClickListener() {
             @Override

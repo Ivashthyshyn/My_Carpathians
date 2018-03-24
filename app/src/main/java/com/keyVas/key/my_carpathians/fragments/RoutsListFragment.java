@@ -1,6 +1,8 @@
 package com.keyVas.key.my_carpathians.fragments;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -24,14 +26,12 @@ import org.androidannotations.annotations.FragmentArg;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.Context.MODE_PRIVATE;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.FA_PLACE;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.FA_ROUT;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.MY_PLACE;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.MY_ROUT;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.PREFS_NAME;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.USER_LANGUAGE;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
+import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
 @EFragment
 public class RoutsListFragment extends Fragment implements IRotation {
@@ -46,6 +46,7 @@ public class RoutsListFragment extends Fragment implements IRotation {
 	private View fragmentView;
 	private ImageView imageForEmptyView;
 	private String mUserLanguage;
+	private boolean isPortrait;
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,8 +76,8 @@ public class RoutsListFragment extends Fragment implements IRotation {
 
 	@AfterViews
 	public void afterViews(){
-		mUserLanguage = getActivity().getSharedPreferences(
-				PREFS_NAME, MODE_PRIVATE).getString(USER_LANGUAGE, EN);
+		checkOrientation(getResources().getConfiguration());
+		mUserLanguage = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(SELECTED_LANGUAGE, EN);
 		updateLayoutManager();
 		createList();
 	}
@@ -112,7 +113,18 @@ public class RoutsListFragment extends Fragment implements IRotation {
 			recyclerAdapter.setNullToActionMode();
 		}
 	}
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		checkOrientation(newConfig);
 
+	}
+	private void checkOrientation(Configuration configuration) {
+		int currentOrientation = configuration.orientation;
+
+		isPortrait = (currentOrientation == Configuration.ORIENTATION_PORTRAIT);
+
+	}
 	public void filter(String query) {
 		if (query != null && !query.equals("")) {
 			query = query.toLowerCase();
@@ -135,7 +147,7 @@ public class RoutsListFragment extends Fragment implements IRotation {
 	}
 
 	private void updateLayoutManager() {
-		boolean isPortrait = getResources().getBoolean(R.bool.orientation_portrait);
+
 		getActivity().getChangingConfigurations();
 		if (isPortrait) {
 			LinearLayoutManager mLayoutManager = new LinearLayoutManager(this.getActivity());

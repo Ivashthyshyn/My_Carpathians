@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
@@ -35,8 +36,8 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.PLACE;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.PREFS_NAME;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.ROOT_PATH;
-import static com.keyVas.key.my_carpathians.activities.StartActivity.USER_LANGUAGE;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
+import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
 
 /**
@@ -114,7 +115,7 @@ public class PlacesRecyclerAdapter extends RecyclerView.Adapter<PlacesRecyclerAd
         View mView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_for_place, parent, false);
         context = mView.getContext();
-	    mUserLanguage = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(USER_LANGUAGE, EN);
+	    mUserLanguage = PreferenceManager.getDefaultSharedPreferences(context).getString(SELECTED_LANGUAGE, EN);
 
         ViewHolder mHolder = new ViewHolder(mView, new ViewHolder.ClickListener() {
             @Override
