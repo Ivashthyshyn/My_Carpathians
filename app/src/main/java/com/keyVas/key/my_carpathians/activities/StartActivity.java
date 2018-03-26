@@ -588,7 +588,7 @@ public class StartActivity extends AppCompatActivity implements
 
 		} else {
 			Toast.makeText(StartActivity.this, getResources().
-					getString(R.string.no_grandet_permission), Toast.LENGTH_SHORT).show();
+					getString(R.string.no_granded_permission), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -1222,7 +1222,7 @@ public class StartActivity extends AppCompatActivity implements
 							@Override
 							public void onComplete(@NonNull Task<AuthResult> task) {
 								if (!task.isSuccessful()) {
-									// there was an error
+									progressBar.setVisibility(View.GONE);
 									if (password.length() < 6) {
 										inputPassword.setError(getString(R.string.minimum_password));
 									} else {
@@ -1262,23 +1262,19 @@ public class StartActivity extends AppCompatActivity implements
 
 	private void createNewAccount() {
 		progressBar.setVisibility(View.VISIBLE);
-		//create user
 		mAuth.createUserWithEmailAndPassword(inputEmail.getText().toString(), inputPassword.getText().toString())
 				.addOnCompleteListener(StartActivity.this, new OnCompleteListener<AuthResult>() {
 					@Override
 					public void onComplete(@NonNull Task<AuthResult> task) {
 						progressBar.setVisibility(View.GONE);
-						// If sign in fails, display a message to the user. If sign in succeeds
-						// the auth state listener will be notified and logic to handle the
-						// signed in user can be handled in the listener.
 						if (!task.isSuccessful()) {
 							Toast.makeText(StartActivity.this, "Authentication failed." + task.getException(),
 									Toast.LENGTH_LONG).show();
 						} else {
 							mSharedPreferences.edit().putString(LOGIN_NAME, inputEmail.getText().toString()).apply();
 							updateUI(inputEmail.getText().toString(), null);
+							showLogInGroup(false);
 							if (mAuth.getCurrentUser() != null) {
-								// mUserUID = mAuth.getCurrentUser().getUid();
 								mTypeMode = true;
 								produceToolsVisibility(true);
 								progressBar.setVisibility(View.GONE);
@@ -1295,26 +1291,9 @@ public class StartActivity extends AppCompatActivity implements
 
 	private void loginFacebook() {
 		if (isOnline()) {
-			// loginFacebook.setVisibility(View.VISIBLE);
 
-			// If using in a fragment
-//			AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
-//				@Override
-//				protected void onCurrentAccessTokenChanged(AccessToken accessToken, AccessToken accessToken2) {
-//					Log.d(TAG, "onCurrentAccessTokenChanged()");
-//					if (accessToken == null) {
-//						showLogInGroup(false);
-//					} else if (accessToken2 == null) {
-//						LoginManager.getInstance().logOut();
-//						mAuth.signOut();
-//						showLogInGroup(true);
-//					}
-//				}
-//			};
 			mCallbackManager = CallbackManager.Factory.create();
 
-			//loginFacebook.setReadPermissions("email");
-			// Callback registration
 			mFacebookLoginManager = LoginManager.getInstance();
 			mFacebookLoginManager.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
 				@Override
@@ -1389,7 +1368,7 @@ public class StartActivity extends AppCompatActivity implements
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
+
 
 		// Pass the activity result back to the Facebook SDK
 		if (mCallbackManager != null) {
@@ -1402,7 +1381,7 @@ public class StartActivity extends AppCompatActivity implements
 				// Google Sign In was successful, authenticate with Firebase
 
 				GoogleSignInAccount account = result.getSignInAccount();
-				firebaseAuthWithGoogle(account);
+				firebaceAuthWithGoogle(account);
 			} else {
 				// Google Sign In failed, update UI appropriately
 				// [START_EXCLUDE]
@@ -1411,6 +1390,7 @@ public class StartActivity extends AppCompatActivity implements
 				// [END_EXCLUDE]
 			}
 		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	private void updateUI(String email, String photoUrl) {
@@ -1463,7 +1443,6 @@ public class StartActivity extends AppCompatActivity implements
 							//	mUserUID = mAuth.getCurrentUser().getUid();
 								mTypeMode = true;
 								produceToolsVisibility(true);
-								updateUI(null, null);
 							}
 						}
 					}
@@ -1477,8 +1456,8 @@ public class StartActivity extends AppCompatActivity implements
 	}
 
 
-	private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
-		Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+	private void firebaceAuthWithGoogle(final GoogleSignInAccount acct) {
+		Log.d(TAG, "firebaceAuthWithGoogle:" + acct.getId());
 
 		AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
 		mAuth.signInWithCredential(credential)

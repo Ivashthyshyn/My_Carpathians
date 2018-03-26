@@ -63,7 +63,7 @@ public class HandActionModeCallback implements ActionMode.Callback {
 			MenuItem actionDelete =menu.findItem(R.id.action_del);
 			actionDelete.setVisible(false);
 			actionDelete.setEnabled(false);
-			mode.setTitle("make choice");
+			mode.setTitle(context.getString(R.string.title_make_choice));
 		}else if(mType == ROUT){
 			MenuItem undoAction = menu.findItem(R.id.action_beck);
 			undoAction.setVisible(false);
@@ -74,7 +74,7 @@ public class HandActionModeCallback implements ActionMode.Callback {
 			MenuItem actionDelete =menu.findItem(R.id.action_del);
 			actionDelete.setVisible(false);
 			actionDelete.setEnabled(false);
-			mode.setTitle("make choice");
+			mode.setTitle(context.getString(R.string.title_make_choice));
 		}
 
 
@@ -103,7 +103,7 @@ public class HandActionModeCallback implements ActionMode.Callback {
 					MenuItem actionDelete =menu.findItem(R.id.action_del);
 					actionDelete.setVisible(false);
 					actionDelete.setEnabled(false);
-					mode.setTitle("make choice");
+					mode.setTitle(context.getString(R.string.title_make_choice));
 					break;
 			}
 		}else if(mType == ROUT){

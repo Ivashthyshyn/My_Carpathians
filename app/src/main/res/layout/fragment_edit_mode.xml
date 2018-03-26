@@ -309,17 +309,17 @@
     <LinearLayout
         android:id="@+id/cropToolsFrame"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
+        android:background="@color/secondaryBackgroundColor"
         android:elevation="3dp"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <FrameLayout
             android:id="@+id/croperGroup"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:visibility="visible">
 
             <com.theartofdev.edmodo.cropper.CropImageView
@@ -333,7 +333,7 @@
                 app:cropMinCropResultHeightPX="300"
                 app:cropMinCropResultWidthPX="700"
                 app:cropMultiTouchEnabled="true"
-                app:cropShowProgressBar="false"/>
+                app:cropShowProgressBar="false" />
 
             <!-- <color  name="color">#99EEEEEE</color> (in styles.xml) -->
             <LinearLayout
@@ -350,13 +350,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:textSize="24dp"/>
+                    android:textSize="24dp" />
 
                 <ProgressBar
                     android:id="@+id/progressCropBar"
                     style="?android:attr/progressBarStyle"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
         </FrameLayout>
@@ -364,12 +364,10 @@
         <LinearLayout
             android:id="@+id/cropTools"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="15"
+            android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimaryDark"
             android:elevation="3dp"
-            android:orientation="horizontal"
-            >
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/buttonBakCrop"
@@ -378,7 +376,7 @@
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_left_arrow"/>
+                android:src="@drawable/ic_left_arrow" />
 
             <ImageButton
                 android:id="@+id/buttonRotationCrop"
@@ -387,8 +385,7 @@
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:src="@drawable/crop_image_menu_rotate_right"
-                />
+                android:src="@drawable/crop_image_menu_rotate_right" />
 
             <ImageButton
                 android:id="@+id/buttonCrop"
@@ -398,7 +395,7 @@
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_done_white_24px"
-                android:text="обрізати"/>
+                android:text="обрізати" />
         </LinearLayout>
 
     </LinearLayout>

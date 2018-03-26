@@ -161,41 +161,44 @@ public class SettingsActivity extends AppCompatActivity implements
 
 	private void showDeleteAccountDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Reauthentication!");
+		builder.setTitle(getString(R.string.reauthentication));
 		if (isOnline()) {
-			builder.setMessage("You must pass authentication ");
-			builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+			builder.setMessage(getString(R.string.reauthentication_message));
+			builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					if (mUser == null) {
-						Toast.makeText(SettingsActivity.this, "You are not autentification", Toast.LENGTH_SHORT).show();
+						Toast.makeText(SettingsActivity.this,
+								getString(R.string.non_authentication), Toast.LENGTH_SHORT).show();
 					} else if (mUser.isAnonymous()) {
-						Toast.makeText(SettingsActivity.this, "You are not autentification", Toast.LENGTH_SHORT).show();
+						Toast.makeText(SettingsActivity.this,
+								getString(R.string.non_authentication), Toast.LENGTH_SHORT).show();
 					} else {
-						if (mUser.getProviders().get(0).equals("google.com")) {
+						if (mUser.getProviderData().get(0).equals("google.com")) {
 							loginGoogle();
 
-						} else if (mUser.getProviders().get(0).equals("facebook.com")) {
+						} else if (mUser.getProviderData().get(0).equals("facebook.com")) {
 							loginFacebook();
 
-						} else if (mUser.getProviders().get(0).equals("password")) {
+						} else if (mUser.getProviderData().get(0).equals("password")) {
 							showLoginDialog();
 						}
 					}
 				}
 			});
 		}else {
-			builder.setMessage("No access to the internet");
-			builder.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+			builder.setMessage(getString(R.string.no_internet));
+			builder.setPositiveButton(getString(R.string.action_settings), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					Intent intentSettingsNetwork = new Intent(Intent.ACTION_MAIN);
-					intentSettingsNetwork.setClassName("com.android.phone", "com.android.phone.NetworkSetting");
+					intentSettingsNetwork.setClassName("com.android.phone",
+							"com.android.phone.NetworkSetting");
 					startActivity(intentSettingsNetwork);
 				}
 			});
 		}
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
@@ -206,8 +209,8 @@ public class SettingsActivity extends AppCompatActivity implements
 
 	private void showLoginDialog() {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("Log in !");
-			builder.setMessage("Please log in to delete your account");
+			builder.setTitle(getString(R.string.title_login_dialog));
+			builder.setMessage(getString(R.string.delete_acaunt_massege));
 		final EditText emailInput = new EditText(this);
 		final EditText passwordInput = new EditText(this);
 		LinearLayout linearLayout = new LinearLayout(this);
@@ -220,8 +223,8 @@ public class SettingsActivity extends AppCompatActivity implements
 			emailInput.setText(sharedPreferences.getString(LOGIN_NAME, null));
 			passwordInput.setInputType(InputType.TYPE_TEXT_VARIATION_NORMAL);
 
-			builder.setPositiveButton("oK",null);
-			builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+			builder.setPositiveButton(getString(R.string.ok),null);
+			builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialogInterface, int i) {
 					dialogInterface.dismiss();
@@ -232,16 +235,20 @@ public class SettingsActivity extends AppCompatActivity implements
 			alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if (emailInput.getText().toString().equals("") ){
-						emailInput.setError("Enter name");
-					}else if (passwordInput.getText().toString().equals("")) {
-						passwordInput.setError("Enter password");
+					if (emailInput.getText().toString().isEmpty()){
+						emailInput.setError(getString(R.string.enter_name));
+					}else if (passwordInput.getText().toString().isEmpty()) {
+						passwordInput.setError(getString(R.string.enter_pass));
 					}else {
-						AuthCredential credential = EmailAuthProvider.getCredential(emailInput.getText().toString(), passwordInput.getText().toString());
+						AuthCredential credential = EmailAuthProvider.getCredential(
+								emailInput.getText().toString(),
+								passwordInput.getText().toString());
 						mUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
 							@Override
 							public void onSuccess(Void aVoid) {
-								Toast.makeText(SettingsActivity.this, "user was deleted", Toast.LENGTH_SHORT).show();
+								Toast.makeText(SettingsActivity.this,
+										getString(R.string.user_deleted), Toast.LENGTH_SHORT)
+										.show();
 								mUser.delete();
 								sharedPreferences.edit().putString(LOGIN_NAME, null);
 								alert.dismiss();
@@ -251,7 +258,9 @@ public class SettingsActivity extends AppCompatActivity implements
 						}).addOnFailureListener(new OnFailureListener() {
 							@Override
 							public void onFailure(@NonNull Exception e) {
-								Toast.makeText(SettingsActivity.this, "not a valid login or password", Toast.LENGTH_SHORT).show();
+								Toast.makeText(SettingsActivity.this,
+										getString(R.string.invalid_login_password), Toast.LENGTH_SHORT)
+										.show();
 							}
 						});
 					}
@@ -265,7 +274,6 @@ public class SettingsActivity extends AppCompatActivity implements
 				.requestIdToken(getString(R.string.default_web_client_id))
 				.requestEmail()
 				.build();
-		// [END config_signin]
 		if (mGoogleApiClient == null) {
 			mGoogleApiClient = new GoogleApiClient.Builder(this)
 					.enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
@@ -280,20 +288,17 @@ public class SettingsActivity extends AppCompatActivity implements
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
-		// Pass the activity result back to the Facebook SDK
 		if (mCallbackManager != null) {
 			mCallbackManager.onActivityResult(requestCode, resultCode, data);
 		}
-		// Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
 		if (requestCode == RC_SIGN_IN) {
 			GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 			if (result.isSuccess()) {
-				// Google Sign In was successful, authenticate with Firebase
 				GoogleSignInAccount account = result.getSignInAccount();
 				firebaceAuthWithGoogle(account);
 			} else {
 				Toast.makeText(SettingsActivity.this,
-						"Login not success", Toast.LENGTH_SHORT).show();
+						getString(R.string.login_not_successe), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -304,30 +309,29 @@ public class SettingsActivity extends AppCompatActivity implements
 		mUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
 			@Override
 			public void onSuccess(Void aVoid) {
-				Toast.makeText(SettingsActivity.this, "user was deleted", Toast.LENGTH_SHORT).show();
+				Toast.makeText(SettingsActivity.this,
+						getString(R.string.user_deleted), Toast.LENGTH_SHORT).show();
 				mUser.delete();
 				startActivity(new Intent(SettingsActivity.this, SettingsActivity_.class));
 			}
 		}).addOnFailureListener(new OnFailureListener() {
 			@Override
 			public void onFailure(@NonNull Exception e) {
-				Toast.makeText(SettingsActivity.this, "an error occurred", Toast.LENGTH_SHORT).show();
+				Toast.makeText(SettingsActivity.this,
+						getString(R.string.an_error_occurred), Toast.LENGTH_SHORT).show();
 			}
 		});
 	}
 
 	private void loginFacebook() {
-			// loginFacebook.setVisibility(View.VISIBLE);
 
 			mCallbackManager = CallbackManager.Factory.create();
-
-			//loginFacebook.setReadPermissions("email");
-			// Callback registration
 			facebookLoginManager = LoginManager.getInstance();
 			facebookLoginManager.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
 				@Override
 				public void onSuccess(LoginResult loginResult) {
-					Toast toast = Toast.makeText(SettingsActivity.this, "Logged In", Toast.LENGTH_SHORT);
+					Toast toast = Toast.makeText(SettingsActivity.this,
+							getString(R.string.logged_in), Toast.LENGTH_SHORT);
 					handleFacebookAccessToken(loginResult.getAccessToken());
 					toast.show();
 				}
@@ -344,7 +348,8 @@ public class SettingsActivity extends AppCompatActivity implements
 
 			});
 
-		facebookLoginManager.logInWithReadPermissions(SettingsActivity.this, Arrays.asList("public_profile", "email"));
+		facebookLoginManager.logInWithReadPermissions(SettingsActivity.this,
+				Arrays.asList("public_profile", "email"));
 	}
 	private void handleFacebookAccessToken(AccessToken token) {
 		//Log.d(TAG, "handleFacebookAccessToken:" + token)
@@ -353,14 +358,18 @@ public class SettingsActivity extends AppCompatActivity implements
 		mUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
 			@Override
 			public void onSuccess(Void aVoid) {
-				Toast.makeText(SettingsActivity.this, "user was deleted", Toast.LENGTH_SHORT).show();
+				Toast.makeText(SettingsActivity.this,
+						getString(R.string.user_deleted), Toast.LENGTH_SHORT)
+						.show();
 				mUser.delete();
 				startActivity(new Intent(SettingsActivity.this, SettingsActivity_.class));
 			}
 		}).addOnFailureListener(new OnFailureListener() {
 			@Override
 			public void onFailure(@NonNull Exception e) {
-				Toast.makeText(SettingsActivity.this, "an error occurred", Toast.LENGTH_SHORT).show();
+				Toast.makeText(SettingsActivity.this,
+						getString(R.string.an_error_occurred), Toast.LENGTH_SHORT)
+						.show();
 			}
 		});
 
@@ -368,7 +377,9 @@ public class SettingsActivity extends AppCompatActivity implements
 
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-		Toast.makeText(SettingsActivity.this, "connection failed", Toast.LENGTH_SHORT).show();
+		Toast.makeText(SettingsActivity.this,
+				getString(R.string.connection_failed), Toast.LENGTH_SHORT)
+				.show();
 	}
 	public boolean isOnline() {
 		boolean connected = false;

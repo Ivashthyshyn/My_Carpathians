@@ -42,7 +42,6 @@ public class RoutsListFragment extends Fragment implements IRotation {
 	ArrayList<Rout> mRoutsList;
 	@FragmentArg
 	int mMode;
-	private List<Rout> mSearchList;
 	private View fragmentView;
 	private ImageView imageForEmptyView;
 	private String mUserLanguage;
@@ -128,7 +127,7 @@ public class RoutsListFragment extends Fragment implements IRotation {
 	public void filter(String query) {
 		if (query != null && !query.equals("")) {
 			query = query.toLowerCase();
-			mSearchList = new ArrayList<>();
+			List<Rout> mSearchList = new ArrayList<>();
 			for (Rout rout : mRoutsList) {
 				final String text = rout.getNameRout(mUserLanguage).toLowerCase();
 				if (text.contains(query)) {

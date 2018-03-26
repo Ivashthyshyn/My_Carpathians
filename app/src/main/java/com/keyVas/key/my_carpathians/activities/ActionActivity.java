@@ -630,7 +630,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 													uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 														@Override
 														public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-															Toast.makeText(ActionActivity.this, getResources().getString(R.string.enother_photo_download), Toast.LENGTH_SHORT).show();
+															Toast.makeText(ActionActivity.this, getResources().getString(R.string.another_photo_download), Toast.LENGTH_SHORT).show();
 															myRef.child(PHOTO_STR).child(place.placeKey())
 																	.child(taskSnapshot.getDownloadUrl()
 																			.getLastPathSegment())
@@ -730,7 +730,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 													uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 														@Override
 														public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-															Toast.makeText(ActionActivity.this, getResources().getString(R.string.enother_photo_download), Toast.LENGTH_SHORT).show();
+															Toast.makeText(ActionActivity.this, getResources().getString(R.string.another_photo_download), Toast.LENGTH_SHORT).show();
 															myRef.child(PHOTO_STR).child(rout.routKey()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
 														}
 

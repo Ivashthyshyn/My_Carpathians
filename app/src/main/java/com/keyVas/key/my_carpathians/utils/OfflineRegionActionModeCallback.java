@@ -42,7 +42,7 @@ public class OfflineRegionActionModeCallback implements ActionMode.Callback {
 			menu.findItem(R.id.actionDownload).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
 		}
-		mode.setTitle("set a point" );
+		mode.setTitle(context.getString(R.string.set_poin) );
 		return true;
 	}
 

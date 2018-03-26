@@ -60,7 +60,7 @@ public class RoutsAroundFragment extends Fragment {
 	public void afterView(){
 		searchRoutAround();
 		if (routsAround != null && routsAround.size() == 0){
-			textTitleRoutAround.setText("Немає жодного маршруту поруч");
+			textTitleRoutAround.setText(getString(R.string.no_rout_around));
 		}else {
 			AroundObjectListAdapter recyclerAdapter = new AroundObjectListAdapter(null, routsAround);
 			recyclerView.setAdapter(recyclerAdapter);

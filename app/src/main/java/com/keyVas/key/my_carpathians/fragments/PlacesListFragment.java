@@ -34,15 +34,11 @@ import static com.keyVas.key.my_carpathians.models.Place.EN;
 import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
 
-/**
- * Created by Key on 10.06.2017.
- */
 @EFragment
 public class PlacesListFragment extends Fragment implements IRotation {
 	RecyclerView recyclerView;
 	PlacesRecyclerAdapter recyclerAdapter;
 	CardView emptyView;
-	private List<Place> mSearchList;
 	private View fragmentView;
 	@FragmentArg
 	ArrayList<Place> placeList;
@@ -70,8 +66,6 @@ public class PlacesListFragment extends Fragment implements IRotation {
 
 
 	private void updateLayoutManager() {
-//		boolean isPortrait = getResources().getBoolean(R.bool.orientation_portrait);
-//		getActivity().getChangingConfigurations();
 		if (isPortrait) {
 			LinearLayoutManager mLayoutManager = new LinearLayoutManager(this.getActivity());
 			recyclerView.setLayoutManager(mLayoutManager);
@@ -149,7 +143,7 @@ public class PlacesListFragment extends Fragment implements IRotation {
 	public void filter(String query) {
 		if (query != null) {
 			query = query.toLowerCase();
-			mSearchList = new ArrayList<>();
+			List<Place> mSearchList = new ArrayList<>();
 			for (Place place : placeList) {
 				final String text = place.getNamePlace(mUserLanguage).toLowerCase();
 				if (text.contains(query)) {

@@ -49,7 +49,6 @@ public class InfoFragment extends Fragment {
 
 	@FragmentArg
 	Rout rout;
-	private String mUserLanguage;
 
 	public InfoFragment() {
 	}
@@ -69,7 +68,7 @@ public class InfoFragment extends Fragment {
 	}
 	@AfterViews
 	void afterViews(){
-		mUserLanguage = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(SELECTED_LANGUAGE, EN);
+		String mUserLanguage = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(SELECTED_LANGUAGE, EN);
 		if (place != null) {
 			groupForRout.setVisibility(View.GONE);
 			textViewNameObject.setText(place.getNamePlace(mUserLanguage));

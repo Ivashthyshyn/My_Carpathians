@@ -362,7 +362,7 @@ public class EditModeFragment extends DialogFragment implements View.OnFocusChan
 				}
 			}
 		} catch (Exception exception) {
-			Toast.makeText(getContext(),getString(R.string.route_length_not_avalible),
+			Toast.makeText(getContext(),getString(R.string.route_length_not_available),
 					Toast.LENGTH_SHORT).show();
 			mTrackLength = getString(R.string.unknown);
 		}
@@ -581,9 +581,9 @@ public class EditModeFragment extends DialogFragment implements View.OnFocusChan
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 		builder.setTitle(getString(R.string.photo));
 		if (necessarily){
-			builder.setMessage(getString(R.string.photo_message_necesserly));
+			builder.setMessage(getString(R.string.photo_message_necessarily));
 		}else{
-			builder.setMessage(getString(R.string.aditional_photo_message_necesserly));
+			builder.setMessage(getString(R.string.additional_photo_message_necessarily));
 		}
 
 		builder.setPositiveButton(getString(R.string.select), new DialogInterface.OnClickListener() {

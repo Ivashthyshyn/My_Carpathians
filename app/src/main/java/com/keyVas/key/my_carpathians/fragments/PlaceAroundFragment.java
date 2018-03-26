@@ -74,11 +74,6 @@ public class PlaceAroundFragment extends Fragment {
 				placesAroundName.add(mPlace.placeKey());
 			}
 		}
-		if (placesAround.size() != 0) {
-
-		} else {
-
-		}
 	}
 
 	@Override
@@ -97,7 +92,7 @@ public class PlaceAroundFragment extends Fragment {
 	public void afterView(){
 		searchPlacesAround();
 		if(placesAround != null && placesAround.size() == 0) {
-			textTitlePlacesAround.setText("Поблизу немає жодних місць");
+			textTitlePlacesAround.setText(getString(R.string.no_place_around));
 		}else {
 			recyclerAdapter = new AroundObjectListAdapter(placesAround, null);
 			recyclerView.setAdapter(recyclerAdapter);

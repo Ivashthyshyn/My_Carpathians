@@ -46,8 +46,8 @@ android {
         applicationId "com.keyVas.key.my_carpathians"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 5
+        versionName "1.0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -99,7 +99,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:11.8.0'
     implementation 'com.google.android.gms:play-services-location:11.8.0'
     implementation 'com.firebaseui:firebase-ui-storage:0.6.0'
-    implementation 'com.facebook.android:facebook-android-sdk:4.27.0'
+    implementation 'com.facebook.android:facebook-login:[4,5)'
     implementation 'com.google.android.gms:play-services-ads:11.8.0'
     implementation 'com.cocoahero.android:geojson:1.0.1@jar'
     implementation 'de.hdodenhof:circleimageview:2.1.0'

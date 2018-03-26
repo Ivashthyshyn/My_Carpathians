@@ -931,7 +931,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 								if (status.isComplete()) {
 									// Download complete
-									endProgress(getString(R.string.region_download));
+									endProgress(getString(R.string.region_downloads));
 								} else if (status.isRequiredResourceCountPrecise()) {
 									// Switch to determinate state
 									setPercentage((int) Math.round(percentage));
@@ -1237,7 +1237,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		nameInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 		if (text != null) {
 			builder.setTitle(getString(R.string.error));
-			builder.setMessage(getString(R.string.error_message_name_alredy_used));
+			builder.setMessage(getString(R.string.error_message_name_already_used));
 			nameInput.setText(text);
 		} else if (model == ROUT && text == null) {
 			builder.setTitle(getString(R.string.save_new_rout));
@@ -1514,7 +1514,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 				visibleActionsIconForRecPlace(true);
 				mActionMode.setTitle(getString(R.string.dialog_new_place));
-				mActionMode.setSubtitle(getString(R.string.location_defin));
+				mActionMode.setSubtitle(getString(R.string.location_def));
 			} else if (type == WAIT_MODE && mActionMode != null) {
 				visibleActionsIconForRecRout(START);
 				mActionMode.setTitle(getString(R.string.action_mode_title_new_rout));
@@ -1629,6 +1629,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 	@Override
 	public void deleteActionOfflineRegion() {
+		mActionMode = null;
 		removeAll();
 		seekBar.setOnSeekBarChangeListener(null);
 		seekBar.setVisibility(View.INVISIBLE);
