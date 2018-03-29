@@ -713,7 +713,6 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 									uploadTask1.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 										@Override
 										public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-											// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
 											Uri downloadUrl = taskSnapshot.getDownloadUrl();
 											Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
 													Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath(PHOTO_STR).build();

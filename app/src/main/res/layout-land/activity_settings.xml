@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/wallpaper_port"
+    android:background="@drawable/wallpaper_land"
     android:orientation="vertical"
     tools:context="com.keyVas.key.my_carpathians.activities.SettingsActivity">
 
@@ -36,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginRight="@dimen/default_margin"
-            android:background="@color/primaryLightColor"/>
+            android:background="@color/primaryLightColor" />
 
         <RadioGroup
             android:id="@+id/radioGroup"
@@ -50,21 +49,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/uk"/>
+                android:text="@string/uk" />
 
             <RadioButton
                 android:id="@+id/radioButtonRu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/ru"/>
+                android:text="@string/ru" />
 
             <RadioButton
                 android:id="@+id/radioButtonEn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/en"/>
+                android:text="@string/en" />
         </RadioGroup>
 
         <View
@@ -72,7 +71,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginRight="@dimen/default_margin"
-            android:background="@color/primaryLightColor"/>
+            android:background="@color/primaryLightColor" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -87,10 +86,11 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="fill_horizontal"
-                android:text="@string/settings_part_1"/>
+                android:text="@string/settings_part_1" />
 
             <com.shawnlin.numberpicker.NumberPicker
                 android:id="@+id/pickerOfRegion"
+                style="@android:style/Widget.Material.NumberPicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -116,7 +116,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginRight="@dimen/default_margin"
-            android:background="@color/primaryLightColor"/>
+            android:background="@color/primaryLightColor" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -130,10 +130,11 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="fill_horizontal"
-                android:text="@string/settings_part_2"/>
+                android:text="@string/settings_part_2" />
 
             <com.shawnlin.numberpicker.NumberPicker
                 android:id="@+id/pickerOfPlacesAround"
+                style="@android:style/Widget.Material.NumberPicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -160,7 +161,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginRight="@dimen/default_margin"
-            android:background="@color/primaryLightColor"/>
+            android:background="@color/primaryLightColor" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -175,10 +176,11 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="fill_horizontal"
-                android:text="@string/settings_part_3"/>
+                android:text="@string/settings_part_3" />
 
             <com.shawnlin.numberpicker.NumberPicker
                 android:id="@+id/pickerOfRoutesAround"
+                style="@android:style/Widget.Material.NumberPicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -204,7 +206,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginRight="@dimen/default_margin"
-            android:background="@color/primaryLightColor"/>
+            android:background="@color/primaryLightColor" />
 
     </LinearLayout>
 
@@ -213,7 +215,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/account_settings"/>
+        android:text="@string/account_settings" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -226,7 +228,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/delete_account"/>
+            android:text="@string/delete_account" />
 
         <Button
             android:id="@+id/buttonDeleteAccount"
@@ -235,7 +237,7 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:padding="16dp"
-            android:text="@string/ok"/>
+            android:text="@string/ok" />
     </LinearLayout>
 
 </LinearLayout>

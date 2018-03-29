@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/wallpaper"/>
+        app:srcCompat="@drawable/wallpaper_land" />
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolBarActionActivity"

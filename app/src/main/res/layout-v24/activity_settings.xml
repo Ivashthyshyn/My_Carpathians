@@ -91,6 +91,7 @@
 
             <com.shawnlin.numberpicker.NumberPicker
                 android:id="@+id/pickerOfRegion"
+                style="@android:style/Widget.Material.NumberPicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -134,6 +135,7 @@
 
             <com.shawnlin.numberpicker.NumberPicker
                 android:id="@+id/pickerOfPlacesAround"
+                style="@android:style/Widget.Material.NumberPicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -179,6 +181,7 @@
 
             <com.shawnlin.numberpicker.NumberPicker
                 android:id="@+id/pickerOfRoutesAround"
+                style="@android:style/Widget.Material.NumberPicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"

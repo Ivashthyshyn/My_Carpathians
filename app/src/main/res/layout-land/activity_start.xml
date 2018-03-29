@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/wallpaper_port" />
+        app:srcCompat="@drawable/wallpaper_land" />
 
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"

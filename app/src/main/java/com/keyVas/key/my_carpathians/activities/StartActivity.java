@@ -1356,7 +1356,6 @@ public class StartActivity extends AppCompatActivity implements
 				.requestIdToken(getString(R.string.default_web_client_id))
 				.requestEmail()
 				.build();
-		// [END config_signin]
 		if (mGoogleApiClient == null) {
 			mGoogleApiClient = new GoogleApiClient.Builder(this)
 					.enableAutoManage(this /* FragmentActivity */,
@@ -1383,11 +1382,8 @@ public class StartActivity extends AppCompatActivity implements
 				GoogleSignInAccount account = result.getSignInAccount();
 				firebaceAuthWithGoogle(account);
 			} else {
-				// Google Sign In failed, update UI appropriately
-				// [START_EXCLUDE]
 				showLogInGroup(true);
 				updateUI(null,null);
-				// [END_EXCLUDE]
 			}
 		}
 		super.onActivityResult(requestCode, resultCode, data);
@@ -1539,6 +1535,7 @@ public class StartActivity extends AppCompatActivity implements
 
 	@Click(R.id.buttonLogout)
 	void buttonLogoutWasClicked() {
+		mUser = mAuth.getCurrentUser();
 		if (isOnline()) {
 
 			if (mUser.isAnonymous()) {
