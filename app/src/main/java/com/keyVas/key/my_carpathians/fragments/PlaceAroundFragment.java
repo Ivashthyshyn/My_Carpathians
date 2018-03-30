@@ -58,20 +58,22 @@ public class PlaceAroundFragment extends Fragment {
 		}
 		placesAround = new ArrayList<>();
 		List<String> placesAroundName = new ArrayList<>();
-		for (int i = 0; i < placeList.size(); i++) {
-			Place mPlace = placeList.get(i);
-			double lat = mPlace.getPositionPlace().getLatitude();
-			double lng = mPlace.getPositionPlace().getLongitude();
-			SharedPreferences sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-			double perimeterValueForLongitude = CONSTANT_PERIMETER_SIZE *
-					sharedPreferences.getInt(VALUE_PLACE_AROUND_RADIUS, AVERAGE_VALUE);
-			if (position.getLongitude() + perimeterValueForLongitude > lng
-					&& position.getLongitude() - perimeterValueForLongitude < lng
-					&& position.getLatitude() + perimeterValueForLongitude > lat
-					&& position.getLatitude() - perimeterValueForLongitude < lat
-					&& !myName.equals(mPlace.placeKey())) {
-				placesAround.add(mPlace);
-				placesAroundName.add(mPlace.placeKey());
+		if(placeList.size() > 0) {
+			for (int i = 0; i < placeList.size(); i++) {
+				Place mPlace = placeList.get(i);
+				double lat = mPlace.getPositionPlace().getLatitude();
+				double lng = mPlace.getPositionPlace().getLongitude();
+				SharedPreferences sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+				double perimeterValueForLongitude = CONSTANT_PERIMETER_SIZE *
+						sharedPreferences.getInt(VALUE_PLACE_AROUND_RADIUS, AVERAGE_VALUE);
+				if (position.getLongitude() + perimeterValueForLongitude > lng
+						&& position.getLongitude() - perimeterValueForLongitude < lng
+						&& position.getLatitude() + perimeterValueForLongitude > lat
+						&& position.getLatitude() - perimeterValueForLongitude < lat
+						&& !myName.equals(mPlace.placeKey())) {
+					placesAround.add(mPlace);
+					placesAroundName.add(mPlace.placeKey());
+				}
 			}
 		}
 	}

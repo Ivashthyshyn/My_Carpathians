@@ -1546,7 +1546,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					enabledGPS(false);
-					mActionMode.finish();
+					if (mActionMode != null) {
+						mActionMode.finish();
+					}
 					dialog.dismiss();
 				}
 			});

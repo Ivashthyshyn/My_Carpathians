@@ -401,6 +401,7 @@ public class StartActivity extends AppCompatActivity implements
 
 	}
 
+	@SuppressLint("InflateParams")
 	private void setupCustomTabView(int[] mTabIcons) {
 		for (int i = 0; i < tabLayout.getTabCount(); i++) {
 			View tabLinearLayout;
@@ -676,62 +677,65 @@ public class StartActivity extends AppCompatActivity implements
 	@Background
 	public void downloadRoutToStorage(List<Rout> routsList) {
 		for (Rout rout : routs) {
-			FirebaseStorage storage = FirebaseStorage.getInstance();
-			StorageReference httpsReference = storage.getReferenceFromUrl(rout
-					.getUrlRoutsTrack());
-			File rootPath = new File(this.mRootPath.buildUpon().appendPath(ROUT_STR).build()
-					.getPath());
-			if (!rootPath.exists()) {
-				rootPath.mkdirs();
-			}
-			final File localFile = new File(rootPath, rout.routKey());
-			if (!localFile.exists() && isOnline()) {
-				httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-					@Override
-					public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-						Log.e("firebase ", ";local tem file  created " + localFile.toString());
-					}
-				}).addOnFailureListener(new OnFailureListener() {
-					@Override
-					public void onFailure(@NonNull Exception exception) {
-						Log.e("firebase ", ";local tem file not created " + exception.toString());
-					}
-				});
-			}
-			rout.setUrlRoutsTrack(Uri.fromFile(localFile).toString());
-		}
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            if (rout.getUrlRoutsTrack() != null | !rout.getUrlRoutsTrack().isEmpty()) {
+                StorageReference httpsReference = storage.getReferenceFromUrl(rout
+                        .getUrlRoutsTrack());
+                File rootPath = new File(this.mRootPath.buildUpon().appendPath(ROUT_STR).build()
+                        .getPath());
+                if (!rootPath.exists()) {
+                    rootPath.mkdirs();
+                }
+                final File localFile = new File(rootPath, rout.routKey());
+                if (!localFile.exists() && isOnline()) {
+                    httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Log.e("firebase ", ";local tem file  created " + localFile.toString());
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            Log.e("firebase ", ";local tem file not created " + exception.toString());
+                        }
+                    });
+                }
+                rout.setUrlRoutsTrack(Uri.fromFile(localFile).toString());
+            }
+        }
 	}
 
 	@Background
 	public void downloadPhoto(List<Place> placeList) {
 		for (Place place : places) {
 
-			FirebaseStorage storage = FirebaseStorage.getInstance();
-			StorageReference httpsReference = storage.getReferenceFromUrl(place
-					.getUrlPlace());
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            if (place.getUrlPlace() != null | !place.getUrlPlace().isEmpty()) {
+                StorageReference httpsReference = storage.getReferenceFromUrl(place
+                        .getUrlPlace());
 
+                File rootPath = new File(this.mRootPath.getPath(), PHOTO_STR);
+                if (!rootPath.exists()) {
+                    rootPath.mkdirs();
+                }
 
-			File rootPath = new File(this.mRootPath.getPath(), PHOTO_STR);
-			if (!rootPath.exists()) {
-				rootPath.mkdirs();
-			}
-
-			final File localFile = new File(rootPath, place.placeKey());
-			if (!localFile.exists() && isOnline()) {
-				httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-					@Override
-					public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-						Log.e("firebase ", ";local tem file  created " + localFile.toString());
-					}
-				}).addOnFailureListener(new OnFailureListener() {
-					@Override
-					public void onFailure(@NonNull Exception exception) {
-						Log.e("firebase ", ";local tem file not created " + exception.toString());
-					}
-				});
-			}
-			place.setUrlPlace(Uri.fromFile(localFile).toString());
-		}
+                final File localFile = new File(rootPath, place.placeKey());
+                if (!localFile.exists() && isOnline()) {
+                    httpsReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Log.e("firebase ", ";local tem file  created " + localFile.toString());
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            Log.e("firebase ", ";local tem file not created " + exception.toString());
+                        }
+                    });
+                }
+                place.setUrlPlace(Uri.fromFile(localFile).toString());
+            }
+        }
 	}
 
 

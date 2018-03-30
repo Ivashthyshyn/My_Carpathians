@@ -84,20 +84,22 @@ public class RoutsAroundFragment extends Fragment {
 		}
 		routsAround = new ArrayList<>();
 		List<String> routsAroundName = new ArrayList<>();
-		for (int i = 0; i < routList.size(); i++) {
-			Rout mRout = routList.get(i);
-			double lat = mRout.getPositionRout().getLatitude();
-			double lng = mRout.getPositionRout().getLongitude();
-			SharedPreferences sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-			double perimeterValueForLongitude = CONSTANT_PERIMETER_SIZE *
-				sharedPreferences.getInt(VALUE_ROUT_AROUND_RADIUS, AVERAGE_VALUE);
-			if (position.getLongitude() + perimeterValueForLongitude > lng
-					&& position.getLongitude() - perimeterValueForLongitude < lng
-					&& position.getLatitude() + perimeterValueForLongitude > lat
-					&& position.getLatitude() - perimeterValueForLongitude < lat
-					&& !name.equals(mRout.routKey())) {
-				routsAround.add(mRout);
-				routsAroundName.add(mRout.routKey());
+		if (routList.size() > 0) {
+			for (int i = 0; i < routList.size(); i++) {
+				Rout mRout = routList.get(i);
+				double lat = mRout.getPositionRout().getLatitude();
+				double lng = mRout.getPositionRout().getLongitude();
+				SharedPreferences sharedPreferences = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+				double perimeterValueForLongitude = CONSTANT_PERIMETER_SIZE *
+						sharedPreferences.getInt(VALUE_ROUT_AROUND_RADIUS, AVERAGE_VALUE);
+				if (position.getLongitude() + perimeterValueForLongitude > lng
+						&& position.getLongitude() - perimeterValueForLongitude < lng
+						&& position.getLatitude() + perimeterValueForLongitude > lat
+						&& position.getLatitude() - perimeterValueForLongitude < lat
+						&& !name.equals(mRout.routKey())) {
+					routsAround.add(mRout);
+					routsAroundName.add(mRout.routKey());
+				}
 			}
 		}
 		if (routsAround.size() != 0) {

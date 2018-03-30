@@ -52,7 +52,7 @@ public class Place implements Serializable {
 
 	public String getNamePlace(String languageKey) {
 
-		return (String)name.get(languageKey);
+		return name.get(languageKey);
 	}
 	public String placeKey() {
 		return name.get(EN);
