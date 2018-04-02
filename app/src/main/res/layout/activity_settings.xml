@@ -235,7 +235,7 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:padding="16dp"
-            android:text="@string/ok"/>
+            android:text="@string/delete" />
     </LinearLayout>
 
 </LinearLayout>

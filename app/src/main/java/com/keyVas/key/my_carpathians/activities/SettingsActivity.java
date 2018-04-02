@@ -62,370 +62,379 @@ import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE
 
 @EActivity
 public class SettingsActivity extends AppCompatActivity implements
-		GoogleApiClient.OnConnectionFailedListener , RadioGroup.OnCheckedChangeListener{
-	public static final String VALUE_PLACE_AROUND_RADIUS = "value_place_around_radius";
-	public static final String VALUE_ROUT_AROUND_RADIUS = "value_rout_around_radius";
-	public static final String VALUE_OFFLINE_REGION_AROUND_RADIUS = "value_offline_region_radius";
-	public static final int AVERAGE_VALUE = 30;
-	public SharedPreferences sharedPreferences;
-	@ViewById(R.id.radioGroup)
-	RadioGroup radioGroup;
-	@ViewById(R.id.pickerOfPlacesAround)
-	NumberPicker pickerOfPlacesAround;
-	@ViewById(R.id.pickerOfRoutesAround)
-	NumberPicker pickerOfRoutesAround;
-	@ViewById(R.id.pickerOfRegion)
-	NumberPicker pickerOfRegion;
-	@ViewById(R.id.toolbarSettingsActivity)
-	Toolbar toolbar;
-	private CallbackManager mCallbackManager;
-	private GoogleApiClient mGoogleApiClient;
-	private FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
-	private LoginManager facebookLoginManager;
-	private AlertDialog alert;
+        GoogleApiClient.OnConnectionFailedListener, RadioGroup.OnCheckedChangeListener {
+    public static final String VALUE_PLACE_AROUND_RADIUS = "value_place_around_radius";
+    public static final String VALUE_ROUT_AROUND_RADIUS = "value_rout_around_radius";
+    public static final String VALUE_OFFLINE_REGION_AROUND_RADIUS = "value_offline_region_radius";
+    public static final int AVERAGE_VALUE = 30;
+    public SharedPreferences sharedPreferences;
+    @ViewById(R.id.radioGroup)
+    RadioGroup radioGroup;
+    @ViewById(R.id.pickerOfPlacesAround)
+    NumberPicker pickerOfPlacesAround;
+    @ViewById(R.id.pickerOfRoutesAround)
+    NumberPicker pickerOfRoutesAround;
+    @ViewById(R.id.pickerOfRegion)
+    NumberPicker pickerOfRegion;
+    @ViewById(R.id.toolbarSettingsActivity)
+    Toolbar toolbar;
+    private CallbackManager mCallbackManager;
+    private GoogleApiClient mGoogleApiClient;
+    private FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+    private LoginManager facebookLoginManager;
+    private AlertDialog alert;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_settings);
-		setSupportActionBar(toolbar);
-		toolbar.showOverflowMenu();
-		setTitle(R.string.settings);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		setupLanguageRadioGroup();
-		pickerOfRegion.setValue(sharedPreferences.getInt(VALUE_OFFLINE_REGION_AROUND_RADIUS, AVERAGE_VALUE));
-		pickerOfPlacesAround.setValue(sharedPreferences.getInt(VALUE_PLACE_AROUND_RADIUS, AVERAGE_VALUE));
-		pickerOfRoutesAround.setValue(sharedPreferences.getInt(VALUE_ROUT_AROUND_RADIUS, AVERAGE_VALUE));
-		pickerOfRoutesAround.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-			@Override
-			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-				sharedPreferences.edit().putInt(VALUE_ROUT_AROUND_RADIUS,  pickerOfRoutesAround.getValue()).apply();
-			}
-		});
-		pickerOfPlacesAround.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-			@Override
-			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-				sharedPreferences.edit().putInt(VALUE_PLACE_AROUND_RADIUS, pickerOfPlacesAround.getValue()).apply();
-			}
-		});
-		pickerOfRegion.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-			@Override
-			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-				sharedPreferences.edit().putInt(VALUE_OFFLINE_REGION_AROUND_RADIUS,  pickerOfRegion.getValue()).apply();
-			}
-		});
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings);
+        setSupportActionBar(toolbar);
+        toolbar.showOverflowMenu();
+        setTitle(R.string.settings);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        setupLanguageRadioGroup();
+        pickerOfRegion.setValue(sharedPreferences.getInt(VALUE_OFFLINE_REGION_AROUND_RADIUS, AVERAGE_VALUE));
+        pickerOfPlacesAround.setValue(sharedPreferences.getInt(VALUE_PLACE_AROUND_RADIUS, AVERAGE_VALUE));
+        pickerOfRoutesAround.setValue(sharedPreferences.getInt(VALUE_ROUT_AROUND_RADIUS, AVERAGE_VALUE));
+        pickerOfRoutesAround.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                sharedPreferences.edit().putInt(VALUE_ROUT_AROUND_RADIUS, pickerOfRoutesAround.getValue()).apply();
+            }
+        });
+        pickerOfPlacesAround.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                sharedPreferences.edit().putInt(VALUE_PLACE_AROUND_RADIUS, pickerOfPlacesAround.getValue()).apply();
+            }
+        });
+        pickerOfRegion.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                sharedPreferences.edit().putInt(VALUE_OFFLINE_REGION_AROUND_RADIUS, pickerOfRegion.getValue()).apply();
+            }
+        });
+    }
 
-	private void setupLanguageRadioGroup() {
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    private void setupLanguageRadioGroup() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-		switch (preferences.getString(SELECTED_LANGUAGE, EN)){
-			case UA : radioGroup.check(R.id.radioButtonUk);
-				break;
-			case RU : radioGroup.check(R.id.radioButtonRu);
-				break;
-			case EN : radioGroup.check(R.id.radioButtonEn);
-				break;
-			default: radioGroup.check(R.id.radioButtonEn);
-				break;
-		}
-		radioGroup.setOnCheckedChangeListener(this);
-	}
+        switch (preferences.getString(SELECTED_LANGUAGE, EN)) {
+            case UA:
+                radioGroup.check(R.id.radioButtonUk);
+                break;
+            case RU:
+                radioGroup.check(R.id.radioButtonRu);
+                break;
+            case EN:
+                radioGroup.check(R.id.radioButtonEn);
+                break;
+            default:
+                radioGroup.check(R.id.radioButtonEn);
+                break;
+        }
+        radioGroup.setOnCheckedChangeListener(this);
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.settings_menu, menu);
-		return true;
-	}
-
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.action_factory_settings:
-				sharedPreferences.edit().putInt(VALUE_ROUT_AROUND_RADIUS, AVERAGE_VALUE).apply();
-				sharedPreferences.edit().putInt(VALUE_PLACE_AROUND_RADIUS, AVERAGE_VALUE).apply();
-				sharedPreferences.edit().putInt(VALUE_OFFLINE_REGION_AROUND_RADIUS,  AVERAGE_VALUE).apply();
-				buttonDeleteAccountWasClicked();
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
-		}
-	}
-
-	@Click(R.id.buttonDeleteAccount)
-	public void buttonDeleteAccountWasClicked(){
-		showDeleteAccountDialog();
-	}
-
-	private void showDeleteAccountDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(getString(R.string.reauthentication));
-		if (isOnline()) {
-			builder.setMessage(getString(R.string.reauthentication_message));
-			builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					if (mUser == null) {
-						Toast.makeText(SettingsActivity.this,
-								getString(R.string.non_authentication), Toast.LENGTH_SHORT).show();
-					} else if (mUser.isAnonymous()) {
-						Toast.makeText(SettingsActivity.this,
-								getString(R.string.non_authentication), Toast.LENGTH_SHORT).show();
-					} else {
-						if (mUser.getProviderData().get(0).equals("google.com")) {
-							loginGoogle();
-
-						} else if (mUser.getProviderData().get(0).equals("facebook.com")) {
-							loginFacebook();
-
-						} else if (mUser.getProviderData().get(0).equals("password")) {
-							showLoginDialog();
-						}
-					}
-				}
-			});
-		}else {
-			builder.setMessage(getString(R.string.no_internet));
-			builder.setPositiveButton(getString(R.string.action_settings), new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					Intent intentSettingsNetwork = new Intent(Intent.ACTION_MAIN);
-					intentSettingsNetwork.setClassName("com.android.phone",
-							"com.android.phone.NetworkSetting");
-					startActivity(intentSettingsNetwork);
-				}
-			});
-		}
-		builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		builder.create().show();
-	}
-
-	private void showLoginDialog() {
-			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getString(R.string.title_login_dialog));
-			builder.setMessage(getString(R.string.delete_acaunt_massege));
-		final EditText emailInput = new EditText(this);
-		final EditText passwordInput = new EditText(this);
-		LinearLayout linearLayout = new LinearLayout(this);
-		linearLayout.setOrientation(LinearLayout.VERTICAL);
-		linearLayout.addView(emailInput);
-		linearLayout.addView(passwordInput);
-			builder.setView(linearLayout);
-
-			emailInput.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-			emailInput.setText(sharedPreferences.getString(LOGIN_NAME, null));
-			passwordInput.setInputType(InputType.TYPE_TEXT_VARIATION_NORMAL);
-
-			builder.setPositiveButton(getString(R.string.ok),null);
-			builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialogInterface, int i) {
-					dialogInterface.dismiss();
-				}
-			});
-			alert = builder.create();
-			alert.show();
-			alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (emailInput.getText().toString().isEmpty()){
-						emailInput.setError(getString(R.string.enter_name));
-					}else if (passwordInput.getText().toString().isEmpty()) {
-						passwordInput.setError(getString(R.string.enter_pass));
-					}else {
-						AuthCredential credential = EmailAuthProvider.getCredential(
-								emailInput.getText().toString(),
-								passwordInput.getText().toString());
-						mUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
-							@Override
-							public void onSuccess(Void aVoid) {
-								Toast.makeText(SettingsActivity.this,
-										getString(R.string.user_deleted), Toast.LENGTH_SHORT)
-										.show();
-								mUser.delete();
-								sharedPreferences.edit().putString(LOGIN_NAME, null);
-								alert.dismiss();
-								startActivity(new Intent(SettingsActivity.this, SettingsActivity_.class));
-
-							}
-						}).addOnFailureListener(new OnFailureListener() {
-							@Override
-							public void onFailure(@NonNull Exception e) {
-								Toast.makeText(SettingsActivity.this,
-										getString(R.string.invalid_login_password), Toast.LENGTH_SHORT)
-										.show();
-							}
-						});
-					}
-				}
-			});
-	}
-
-	private void loginGoogle() {
-
-		GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-				.requestIdToken(getString(R.string.default_web_client_id))
-				.requestEmail()
-				.build();
-		if (mGoogleApiClient == null) {
-			mGoogleApiClient = new GoogleApiClient.Builder(this)
-					.enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-					.addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-					.build();
-		}
-		Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-		startActivityForResult(signInIntent, RC_SIGN_IN);
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-
-		if (mCallbackManager != null) {
-			mCallbackManager.onActivityResult(requestCode, resultCode, data);
-		}
-		if (requestCode == RC_SIGN_IN) {
-			GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-			if (result.isSuccess()) {
-				GoogleSignInAccount account = result.getSignInAccount();
-				firebaceAuthWithGoogle(account);
-			} else {
-				Toast.makeText(SettingsActivity.this,
-						getString(R.string.login_not_successe), Toast.LENGTH_SHORT).show();
-			}
-		}
-	}
-	private void firebaceAuthWithGoogle(final GoogleSignInAccount acct) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.settings_menu, menu);
+        return true;
+    }
 
 
-		AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-		mUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
-			@Override
-			public void onSuccess(Void aVoid) {
-				Toast.makeText(SettingsActivity.this,
-						getString(R.string.user_deleted), Toast.LENGTH_SHORT).show();
-				mUser.delete();
-				startActivity(new Intent(SettingsActivity.this, SettingsActivity_.class));
-			}
-		}).addOnFailureListener(new OnFailureListener() {
-			@Override
-			public void onFailure(@NonNull Exception e) {
-				Toast.makeText(SettingsActivity.this,
-						getString(R.string.an_error_occurred), Toast.LENGTH_SHORT).show();
-			}
-		});
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_factory_settings:
+                sharedPreferences.edit().putInt(VALUE_ROUT_AROUND_RADIUS, AVERAGE_VALUE).apply();
+                sharedPreferences.edit().putInt(VALUE_PLACE_AROUND_RADIUS, AVERAGE_VALUE).apply();
+                sharedPreferences.edit().putInt(VALUE_OFFLINE_REGION_AROUND_RADIUS, AVERAGE_VALUE).apply();
+                buttonDeleteAccountWasClicked();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
-	private void loginFacebook() {
+    @Click(R.id.buttonDeleteAccount)
+    public void buttonDeleteAccountWasClicked() {
+        if (mUser == null) {
+            Toast.makeText(SettingsActivity.this,
+                    getString(R.string.non_authentication), Toast.LENGTH_LONG).show();
+        } else if (mUser.isAnonymous()) {
+            Toast.makeText(SettingsActivity.this,
+                    getString(R.string.non_authentication), Toast.LENGTH_LONG).show();
+        } else {
+            showDeleteAccountDialog();
+        }
+    }
 
-			mCallbackManager = CallbackManager.Factory.create();
-			facebookLoginManager = LoginManager.getInstance();
-			facebookLoginManager.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-				@Override
-				public void onSuccess(LoginResult loginResult) {
-					Toast toast = Toast.makeText(SettingsActivity.this,
-							getString(R.string.logged_in), Toast.LENGTH_SHORT);
-					handleFacebookAccessToken(loginResult.getAccessToken());
-					toast.show();
-				}
+    private void showDeleteAccountDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.reauthentication));
+        if (isOnline()) {
+            builder.setMessage(getString(R.string.reauthentication_message));
+            builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (mUser.getProviderData().get(0).equals("google.com")) {
+                        loginGoogle();
 
-				@Override
-				public void onCancel() {
+                    } else if (mUser.getProviderData().get(0).equals("facebook.com")) {
+                        loginFacebook();
 
-				}
+                    } else if (mUser.getProviderData().get(0).equals("password")) {
+                        showLoginDialog();
+                    }
 
-				@Override
-				public void onError(FacebookException exception) {
+                }
+            });
+        } else {
+            builder.setMessage(getString(R.string.no_internet));
+            builder.setPositiveButton(getString(R.string.action_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent intentSettingsNetwork = new Intent(Intent.ACTION_MAIN);
+                    intentSettingsNetwork.setClassName("com.android.phone",
+                            "com.android.phone.NetworkSetting");
+                    startActivity(intentSettingsNetwork);
+                }
+            });
+        }
+        builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
 
-				}
+    private void showLoginDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.title_login_dialog));
+        builder.setMessage(getString(R.string.delete_acaunt_massege));
+        final EditText emailInput = new EditText(this);
+        final EditText passwordInput = new EditText(this);
+        LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.addView(emailInput);
+        linearLayout.addView(passwordInput);
+        builder.setView(linearLayout);
 
-			});
+        emailInput.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        emailInput.setText(sharedPreferences.getString(LOGIN_NAME, null));
+        passwordInput.setInputType(InputType.TYPE_TEXT_VARIATION_NORMAL);
 
-		facebookLoginManager.logInWithReadPermissions(SettingsActivity.this,
-				Arrays.asList("public_profile", "email"));
-	}
-	private void handleFacebookAccessToken(AccessToken token) {
-		//Log.d(TAG, "handleFacebookAccessToken:" + token)
+        builder.setPositiveButton(getString(R.string.ok), null);
+        builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        alert = builder.create();
+        alert.show();
+        alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (emailInput.getText().toString().isEmpty()) {
+                    emailInput.setError(getString(R.string.enter_name));
+                } else if (passwordInput.getText().toString().isEmpty()) {
+                    passwordInput.setError(getString(R.string.enter_pass));
+                } else {
+                    AuthCredential credential = EmailAuthProvider.getCredential(
+                            emailInput.getText().toString(),
+                            passwordInput.getText().toString());
+                    mUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(SettingsActivity.this,
+                                    getString(R.string.user_deleted), Toast.LENGTH_SHORT)
+                                    .show();
+                            mUser.delete();
+                            sharedPreferences.edit().putString(LOGIN_NAME, null);
+                            alert.dismiss();
+                            startActivity(new Intent(SettingsActivity.this, SettingsActivity_.class));
 
-		AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-		mUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
-			@Override
-			public void onSuccess(Void aVoid) {
-				Toast.makeText(SettingsActivity.this,
-						getString(R.string.user_deleted), Toast.LENGTH_SHORT)
-						.show();
-				mUser.delete();
-				startActivity(new Intent(SettingsActivity.this, SettingsActivity_.class));
-			}
-		}).addOnFailureListener(new OnFailureListener() {
-			@Override
-			public void onFailure(@NonNull Exception e) {
-				Toast.makeText(SettingsActivity.this,
-						getString(R.string.an_error_occurred), Toast.LENGTH_SHORT)
-						.show();
-			}
-		});
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(SettingsActivity.this,
+                                    getString(R.string.invalid_login_password), Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                    });
+                }
+            }
+        });
+    }
 
-	}
+    private void loginGoogle() {
 
-	@Override
-	public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-		Toast.makeText(SettingsActivity.this,
-				getString(R.string.connection_failed), Toast.LENGTH_SHORT)
-				.show();
-	}
-	public boolean isOnline() {
-		boolean connected = false;
-		try {
-			ConnectivityManager connectivityManager = (ConnectivityManager) SettingsActivity.this
-					.getSystemService(Context.CONNECTIVITY_SERVICE);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .build();
+        }
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
 
-			NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-			connected = networkInfo != null && networkInfo.isAvailable() &&
-					networkInfo.isConnected();
-			return connected;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (mCallbackManager != null) {
+            mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        }
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                GoogleSignInAccount account = result.getSignInAccount();
+                firebaceAuthWithGoogle(account);
+            } else {
+                Toast.makeText(SettingsActivity.this,
+                        getString(R.string.login_not_successe), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void firebaceAuthWithGoogle(final GoogleSignInAccount acct) {
 
 
-		} catch (Exception e) {
-			System.out.println("CheckConnectivity Exception: " + e.getMessage());
-			Log.v("connectivity", e.toString());
-		}
-		return connected;
-	}
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(SettingsActivity.this,
+                        getString(R.string.user_deleted), Toast.LENGTH_SHORT).show();
+                mUser.delete();
+                startActivity(new Intent(SettingsActivity.this, SettingsActivity_.class));
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(SettingsActivity.this,
+                        getString(R.string.an_error_occurred), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void loginFacebook() {
+
+        mCallbackManager = CallbackManager.Factory.create();
+        facebookLoginManager = LoginManager.getInstance();
+        facebookLoginManager.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Toast toast = Toast.makeText(SettingsActivity.this,
+                        getString(R.string.logged_in), Toast.LENGTH_SHORT);
+                handleFacebookAccessToken(loginResult.getAccessToken());
+                toast.show();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+
+            }
+
+        });
+
+        facebookLoginManager.logInWithReadPermissions(SettingsActivity.this,
+                Arrays.asList("public_profile", "email"));
+    }
+
+    private void handleFacebookAccessToken(AccessToken token) {
+        //Log.d(TAG, "handleFacebookAccessToken:" + token)
+
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(SettingsActivity.this,
+                        getString(R.string.user_deleted), Toast.LENGTH_SHORT)
+                        .show();
+                mUser.delete();
+                startActivity(new Intent(SettingsActivity.this, SettingsActivity_.class));
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(SettingsActivity.this,
+                        getString(R.string.an_error_occurred), Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Toast.makeText(SettingsActivity.this,
+                getString(R.string.connection_failed), Toast.LENGTH_SHORT)
+                .show();
+    }
+
+    public boolean isOnline() {
+        boolean connected = false;
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) SettingsActivity.this
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            connected = networkInfo != null && networkInfo.isAvailable() &&
+                    networkInfo.isConnected();
+            return connected;
 
 
-	@Override
-	public void onCheckedChanged(RadioGroup group, int checkedId) {
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		SharedPreferences.Editor editor = preferences.edit();
-		switch (checkedId){
-			case R.id.radioButtonUk :
-				editor.putString(SELECTED_LANGUAGE, UA);
-				editor.apply();
-				break;
-			case R.id.radioButtonRu :
-				editor.putString(SELECTED_LANGUAGE, RU);
-				editor.apply();
-				break;
-			case R.id.radioButtonEn :
-				editor.putString(SELECTED_LANGUAGE, EN);
-				editor.apply();
-				break;
-		}
-		Intent refresh = new Intent(this, SettingsActivity_.class);
-		startActivity(refresh);
-		finish();
-	}
-	@Override
-	protected void attachBaseContext(Context base) {
-		super.attachBaseContext(LocaleHelper.onAttach(base));
-	}
+        } catch (Exception e) {
+            System.out.println("CheckConnectivity Exception: " + e.getMessage());
+            Log.v("connectivity", e.toString());
+        }
+        return connected;
+    }
+
+
+    @Override
+    public void onCheckedChanged(RadioGroup group, int checkedId) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+        switch (checkedId) {
+            case R.id.radioButtonUk:
+                editor.putString(SELECTED_LANGUAGE, UA);
+                editor.apply();
+                break;
+            case R.id.radioButtonRu:
+                editor.putString(SELECTED_LANGUAGE, RU);
+                editor.apply();
+                break;
+            case R.id.radioButtonEn:
+                editor.putString(SELECTED_LANGUAGE, EN);
+                editor.apply();
+                break;
+        }
+        Intent refresh = new Intent(this, SettingsActivity_.class);
+        startActivity(refresh);
+        finish();
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base));
+    }
 }
 
