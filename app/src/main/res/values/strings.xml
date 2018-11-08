@@ -172,7 +172,6 @@
     <string name="title_make_choice">make choice</string>
 
 
-
     <string name="title_login_dialog">To access all the features of the program you need to register</string>
     <string name="error_publisher_2p">No position given!</string>
     <string name="error_publisher_4p">No title photo given</string>
@@ -267,6 +266,7 @@
     <string name="no_place_around">There are no places nearby</string>
     <string name="no_rout_around">There is no route nearby</string>
     <string name="set_poin">set a point</string>
+    <string name="permission_rationale">permission_rationale</string>
 
 
 </resources>

@@ -118,8 +118,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	public static final int COMMAND_REC_ROUT = 4;
 	public static final int COMMAND_REC_PLACE = 5;
 	public static final int CANCEL_REC = 3;
-	public static final String TO_SERVICE_TRACK_NAME = "track_name";
-	public static final int ERROR_TRACK = 10;
 	public static final int COMMAND_PAUSE_REC_ROUT = 6;
 	public static final int START = 100;
 	public static final int REC = 200;
@@ -1239,10 +1237,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 			builder.setTitle(getString(R.string.error));
 			builder.setMessage(getString(R.string.error_message_name_already_used));
 			nameInput.setText(text);
-		} else if (model == ROUT && text == null) {
+		} else if (model == ROUT) {
 			builder.setTitle(getString(R.string.save_new_rout));
 			builder.setMessage(getString(R.string.save_new_rout_message));
-		} else if (model == PLACE && text == null) {
+		} else if (model == PLACE) {
 			builder.setTitle(getString(R.string.save_new_place));
 			builder.setMessage(getString(R.string.save_new_place_message));
 			mCheckForRecButton = true;

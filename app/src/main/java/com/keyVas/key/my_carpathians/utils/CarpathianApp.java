@@ -15,7 +15,7 @@ import io.fabric.sdk.android.Fabric;
  */
 
 public class CarpathianApp extends Application {
-    FirebaseDatabase fb;
+    private FirebaseDatabase fb;
     @Override
     public void onCreate() {
         super.onCreate();

@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
@@ -15,12 +16,15 @@ import com.cocoahero.android.geojson.Position;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.keyVas.key.my_carpathians.interfaces.ILocation;
 
 import java.util.List;
 
+import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 import static com.keyVas.key.my_carpathians.activities.MapsActivity.CANCEL_REC;
 import static com.keyVas.key.my_carpathians.activities.MapsActivity.COMMAND_PAUSE_REC_ROUT;
 import static com.keyVas.key.my_carpathians.activities.MapsActivity.COMMAND_REC_PLACE;
@@ -31,7 +35,6 @@ import static com.keyVas.key.my_carpathians.activities.StartActivity.ROUT;
 
 
 public class LocationService extends Service implements
-        com.google.android.gms.location.LocationListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
@@ -79,16 +82,16 @@ public class LocationService extends Service implements
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        getFusedLocationProviderClient(this).requestLocationUpdates(mLocationRequest, new LocationCallback() {
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+                        // do work here
+                        onLocationChanged(locationResult.getLastLocation());
+                    }
+                },
+                Looper.myLooper());
     }
 
     @Override
@@ -134,7 +137,7 @@ public class LocationService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mIntCommand = intent.getIntExtra(TO_SERVICE_COMMANDS, 0);
-      if (mIntCommand == CANCEL_REC){
+        if (mIntCommand == CANCEL_REC) {
             TrackContainer.getInstance().getPositionList().clear();
             TrackContainer.getInstance().setEnabledGPSRecording(false);
             mLocation = null;
@@ -150,42 +153,42 @@ public class LocationService extends Service implements
         mGoogleApiClient.disconnect();
         super.onDestroy();
     }
+
     /**
      * Callback when the location changes. Inform the owner.
      *
      * @param location
      */
-    @Override
     public void onLocationChanged(Location location) {
-       if (owner != null && mIntCommand != COMMAND_REC_ROUT) {
-            if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_PASSIVE){
+        if (owner != null && mIntCommand != COMMAND_REC_ROUT) {
+            if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_PASSIVE) {
                 mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
                 mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
             }
-            if (mIntCommand == COMMAND_REC_PLACE){
+            if (mIntCommand == COMMAND_REC_PLACE) {
                 mLocation = location;
                 mIntCommand = 0;
                 owner.update(location, PLACE);
             }
             owner.update(location, WAIT_MODE);
-        }else if(owner == null && mIntCommand != COMMAND_REC_ROUT){
+        } else if (owner == null && mIntCommand != COMMAND_REC_ROUT) {
             if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_ACTIVE)
-            mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
+                mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
             mLocationRequest.setFastestInterval(FASTEST_INTERVAL_PASSIVE);
-        }else if (mIntCommand == COMMAND_REC_ROUT) {
+        } else if (mIntCommand == COMMAND_REC_ROUT) {
             mLocationRequest.setInterval(UPDATE_INTERVAL_REC);
             mLocationRequest.setFastestInterval(FASTEST_INTERVAL_REC);
             saveLocationToLocationList(location);
-           if(owner != null) {
-               owner.update(location, ROUT);
-           }
+            if (owner != null) {
+                owner.update(location, ROUT);
+            }
         } else if (mIntCommand == COMMAND_PAUSE_REC_ROUT) {
-           mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
-           mLocationRequest.setFastestInterval(UPDATE_INTERVAL_PASSIVE);
-           if(owner != null) {
-               owner.update(location, ROUT);
-           }
-       }
+            mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
+            mLocationRequest.setFastestInterval(UPDATE_INTERVAL_PASSIVE);
+            if (owner != null) {
+                owner.update(location, ROUT);
+            }
+        }
     }
 
     private void saveLocationToLocationList(Location location) {
@@ -195,11 +198,11 @@ public class LocationService extends Service implements
                 location.getLatitude(),
                 location.getLongitude(),
                 location.getAltitude());
-        if(position.getAltitude() != 0 && mPositionList.size() != 0){
-            if (mPositionList.size() > 0 && position == mPositionList.get(mPositionList.size() - 1)){
+        if (position.getAltitude() != 0 && mPositionList.size() != 0) {
+            if (mPositionList.size() > 0 && position == mPositionList.get(mPositionList.size() - 1)) {
                 mPositionList.add(position);
             }
-        }else if(mPositionList.size() == 0 && position.getAltitude() != 0){
+        } else if (mPositionList.size() == 0 && position.getAltitude() != 0) {
             mPositionList.add(position);
         }
     }

@@ -1,5 +1,6 @@
 package com.keyVas.key.my_carpathians.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -107,6 +108,7 @@ import static com.keyVas.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsV
 import static com.keyVas.key.my_carpathians.models.Place.EN;
 import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
+@SuppressLint("Registered")
 @EActivity
 public class ActionActivity extends AppCompatActivity implements CommunicatorActionActivity {
 
@@ -226,6 +228,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		}
 	}
 
+	@SuppressLint("RestrictedApi")
 	private void setBaseInformation(Place place, Rout rout) {
 		if (place != null) {
 			if (isOnline() | mProduceMode) {
@@ -278,6 +281,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		}
 	}
 
+	@SuppressLint("RestrictedApi")
 	private void morePhotos(String name) {
 		if (mProduceMode) {
 			Uri rootPathForPhotosString = Uri.parse(mRootPathString)
@@ -297,6 +301,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			DatabaseReference myRef = database.getReference();
 			Query myPlace = myRef.child(PHOTO_STR).child(name).child(PLACE_IMAGE_STR);
 			myPlace.addValueEventListener(new ValueEventListener() {
+				@SuppressLint("RestrictedApi")
 				@Override
 				public void onDataChange(DataSnapshot dataSnapshot) {
 					if (dataSnapshot != null) {
@@ -487,7 +492,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			if (myRout != null) {
 				selectedUserRouts.add(myRout);
 			}
-			Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
+			Intent mapIntent = new Intent(ActionActivity.this, NewMapActivity.class);
 			mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
 			mapIntent.putExtra(SELECTED_USER_ROUTS, selectedUserRouts);
 			mapIntent.putExtra(PRODUCE_MODE, mProduceMode);
@@ -499,7 +504,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 			if (myRout != null) {
 				selectedUserRouts.add(myRout);
 			}
-			Intent mapIntent = new Intent(ActionActivity.this, MapsActivity_.class);
+			Intent mapIntent = new Intent(ActionActivity.this, NewMapActivity.class);
 			mapIntent.putExtra(SELECTED_USER_PLACES, selectedUserPlacesList);
 			mapIntent.putExtra(SELECTED_USER_ROUTS, selectedUserRouts);
 			startActivity(mapIntent);
@@ -607,7 +612,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 										public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 											// taskSnapshot.getMetadata() contains file metadata
 											// such as size, content-type, and download URL.
-											Uri downloadUrl = taskSnapshot.getDownloadUrl();
+											Uri downloadUrl = taskSnapshot.getUploadSessionUri();
 											Uri rootPathForPhotosString = Uri.fromFile(ActionActivity
 													.this.getExternalFilesDir(
 													Environment.DIRECTORY_DOWNLOADS)).buildUpon()
@@ -632,9 +637,9 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 														public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 															Toast.makeText(ActionActivity.this, getResources().getString(R.string.another_photo_download), Toast.LENGTH_SHORT).show();
 															myRef.child(PHOTO_STR).child(place.placeKey())
-																	.child(taskSnapshot.getDownloadUrl()
+																	.child(taskSnapshot.getUploadSessionUri()
 																			.getLastPathSegment())
-																	.setValue(taskSnapshot.getDownloadUrl()
+																	.setValue(taskSnapshot.getUploadSessionUri()
 																			.toString());
 														}
 
@@ -688,7 +693,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 									uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 										@Override
 										public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-											rout.setUrlRoutsTrack(taskSnapshot.getDownloadUrl().toString());
+											rout.setUrlRoutsTrack(taskSnapshot.getUploadSessionUri().toString());
 											Toast.makeText(ActionActivity.this, "Track saved", Toast.LENGTH_SHORT).show();
 										}
 									});
@@ -713,7 +718,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 									uploadTask1.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 										@Override
 										public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-											Uri downloadUrl = taskSnapshot.getDownloadUrl();
+											Uri downloadUrl = taskSnapshot.getUploadSessionUri();
 											Uri rootPathForPhotosString = Uri.fromFile(ActionActivity.this.getExternalFilesDir(
 													Environment.DIRECTORY_DOWNLOADS)).buildUpon().appendPath(PHOTO_STR).build();
 											rout.setUrlRout(downloadUrl.toString());
@@ -730,7 +735,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 														@Override
 														public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 															Toast.makeText(ActionActivity.this, getResources().getString(R.string.another_photo_download), Toast.LENGTH_SHORT).show();
-															myRef.child(PHOTO_STR).child(rout.routKey()).child(taskSnapshot.getDownloadUrl().getLastPathSegment()).setValue(taskSnapshot.getDownloadUrl().toString());
+															myRef.child(PHOTO_STR).child(rout.routKey()).child(taskSnapshot.getUploadSessionUri().getLastPathSegment()).setValue(taskSnapshot.getUploadSessionUri().toString());
 														}
 
 													})
@@ -802,6 +807,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 	}
 
 
+	@SuppressLint("RestrictedApi")
 	@Click(R.id.fabChangePhotoRight)
 	public void fabChangePhotoRightWasClicked() {
 		mItemUrlList++;
@@ -822,6 +828,7 @@ public class ActionActivity extends AppCompatActivity implements CommunicatorAct
 		}
 	}
 
+	@SuppressLint("RestrictedApi")
 	@Click(R.id.fabChangePhotoLeft)
 	public void fabChangePhotoLeftWasClicked() {
 

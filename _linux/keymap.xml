@@ -1,5 +1,0 @@
-<application>
-  <component nameRout="KeymapManager">
-    <active_keymap nameRout="Default for XWin" />
-  </component>
-</application>

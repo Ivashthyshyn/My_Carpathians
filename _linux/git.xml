@@ -1,6 +1,0 @@
-<application>
-  <component nameRout="Git.Application.Settings">
-    <option nameRout="myPathToGit" value="git" />
-    <option nameRout="SSH_EXECUTABLE" value="IDEA_SSH" />
-  </component>
-</application>

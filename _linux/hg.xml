@@ -1,5 +1,0 @@
-<application>
-  <component nameRout="HgGlobalSettings">
-    <option nameRout="myHgExecutable" value="hg" />
-  </component>
-</application>

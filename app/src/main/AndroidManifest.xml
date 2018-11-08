@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.keyVas.key.my_carpathians"
-          android:installLocation="auto">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.keyVas.key.my_carpathians"
+    android:installLocation="auto">
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality. 
     -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".utils.CarpathianApp"
@@ -26,7 +26,7 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"
-            tools:replace="android:value"/>
+            tools:replace="android:value" />
 
         <activity
             android:name=".activities.StartActivity_"
@@ -36,45 +36,45 @@
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.StartActivity_"/>
+                android:value=".activities.StartActivity_" />
 
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".activities.MapsActivity_"
             android:label="@string/title_activity_maps"
             android:parentActivityName=".activities.StartActivity_"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".activities.ActionActivity_"
             android:label="@string/title_activity_action"
             android:parentActivityName=".activities.StartActivity_"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".activities.SettingsActivity_"
             android:label="@string/title_activity_login"
             android:parentActivityName=".activities.StartActivity_"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".activities.ResetPasswordActivity_"
             android:label="@string/title_activity_reset_password"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme" />
 
         <service
             android:name=".utils.LocationService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="3cd4e2115409f973dd60f7e2d226f5e282e78129"/>
+            android:value="3cd4e2115409f973dd60f7e2d226f5e282e78129" />
 
-        <activity android:name=".activities.SettingsActivity">
-        </activity>
+        <activity android:name=".activities.SettingsActivity"></activity>
+        <activity android:name=".activities.NewMapActivity"></activity>
     </application>
 
 </manifest>

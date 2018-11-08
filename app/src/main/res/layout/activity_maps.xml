@@ -61,7 +61,7 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:padding="20dp"
-            mapbox:srcCompat="@drawable/gps_image"/>
+            android:src="@drawable/gps_image"/>
 
         <com.victor.loading.rotate.RotateLoading
             android:id="@+id/gpsLoading"

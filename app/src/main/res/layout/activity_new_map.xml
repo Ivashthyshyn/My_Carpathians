@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activities.NewMapActivity">
+
+    <data class="MapBinding" />
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <com.mapbox.mapboxsdk.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:mapbox_styleUrl="@string/mapboxStyle"
+            mapbox:mapbox_cameraTargetLat="49.11053"
+            mapbox:mapbox_cameraTargetLng="24.30765"
+            mapbox:mapbox_cameraZoom="12"/>
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar_map"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
+            app:title="@string/title_activity_maps" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="10dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="false"
+            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
+            android:elevation="4dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/mapView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_map" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>
