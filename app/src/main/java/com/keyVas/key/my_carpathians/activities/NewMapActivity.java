@@ -2,8 +2,6 @@ package com.keyVas.key.my_carpathians.activities;
 
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
@@ -13,18 +11,18 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.keyVas.key.my_carpathians.R;
 import com.keyVas.key.my_carpathians.databinding.MapBinding;
+import com.keyVas.key.my_carpathians.dialogs.DownloadRegionDialog;
+import com.keyVas.key.my_carpathians.dialogs.InternetConnectionDialog;
 import com.keyVas.key.my_carpathians.models.Place;
 import com.keyVas.key.my_carpathians.models.Rout;
 import com.keyVas.key.my_carpathians.utils.ConnectionUtils;
@@ -66,7 +64,7 @@ import static com.keyVas.key.my_carpathians.activities.StartActivity.ROOT_PATH;
 import static com.keyVas.key.my_carpathians.models.Place.EN;
 import static com.keyVas.key.my_carpathians.utils.LocaleHelper.SELECTED_LANGUAGE;
 
-public class NewMapActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class NewMapActivity extends AppCompatActivity implements OnMapReadyCallback, DownloadRegionDialog.DownloadRegionListener, OfflineManager.ListOfflineRegionsCallback {
 
     private static final String TAG = "NewMapActivity";
     public static final String JSON_CHARSET = "UTF-8";
@@ -150,69 +148,27 @@ public class NewMapActivity extends AppCompatActivity implements OnMapReadyCallb
             if (mTypeMode) {
                 // some UI desing
             }
-
-                double valueOfflineRegionPerimeter = CONSTANT_PERIMETER_SIZE
-                        * getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                        .getInt(VALUE_OFFLINE_REGION_AROUND_RADIUS, AVERAGE_VALUE);
-                downloadRegionDialog(valueOfflineRegionPerimeter);
-
+            double valueOfflineRegionPerimeter = CONSTANT_PERIMETER_SIZE
+                    * getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .getInt(VALUE_OFFLINE_REGION_AROUND_RADIUS, AVERAGE_VALUE);
+            showDownloadRegionDialog(valueOfflineRegionPerimeter);
 
 
         } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(getString(R.string.internet));
-            builder.setMessage(getString(R.string.need_internet_to_use));
-            builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            builder.setNegativeButton(getString(R.string.settings), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Intent.ACTION_MAIN);
-                    intent.setClassName("com.android.phone",
-                            "com.android.phone.NetworkSetting");
-                    startActivity(intent);
-                    dialog.dismiss();
-                }
-            });
-            builder.create().show();
+            showConnectionDialog();
         }
     }
 
 
-    private void downloadRegionDialog(final double perimeterValue) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        final EditText regionNameEdit = new EditText(this);
-        regionNameEdit.setHint(getString(R.string.set_region_name_hint));
-        builder.setTitle(getString(R.string.dialog_title))
-                .setView(regionNameEdit)
-                .setMessage(getString(R.string.dialog_message))
-                .setPositiveButton(getString(R.string.dialog_positive_button),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String regionName = regionNameEdit.getText().toString();
-                                if (regionName.length() == 0) {
-                                    Toast.makeText(getApplicationContext(), getString(R.string.dialog_toast), Toast.LENGTH_SHORT).show();
-                                } else {
-                                    // Begin download process
-                                    downloadOfflineRegion(regionName, perimeterValue);
-                                    dialog.dismiss();
-                                }
-                            }
-                        })
-                .setNegativeButton(getString(R.string.dialog_negative_button),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
+    private void showConnectionDialog() {
+        InternetConnectionDialog connectionDialog = new InternetConnectionDialog();
+        connectionDialog.show(getSupportFragmentManager(), InternetConnectionDialog.TAG);
 
-        builder.show();
+    }
+
+    private void showDownloadRegionDialog(final double perimeterValue) {
+        DownloadRegionDialog downloadRegionDialog = DownloadRegionDialog.newInstance(perimeterValue);
+        downloadRegionDialog.show(getSupportFragmentManager(), DownloadRegionDialog.TAG);
     }
 
     private void downloadOfflineRegion(final String regionName, double perimeterValue) {
@@ -320,8 +276,7 @@ public class NewMapActivity extends AppCompatActivity implements OnMapReadyCallb
             }
         }
         if (selectUserPlacesList != null && selectUserPlacesList.size() > 0) {
-            for (Place place :
-                    selectUserPlacesList) {
+            for (Place place : selectUserPlacesList) {
                 mPointPlace = new LatLng();
                 mPointPlace.setLatitude(place.getPositionPlace().getLatitude());
                 mPointPlace.setLongitude(place.getPositionPlace().getLongitude());
@@ -334,48 +289,7 @@ public class NewMapActivity extends AppCompatActivity implements OnMapReadyCallb
             }
         }
         if (mOfflineRegionName != null) {
-            mOfflineManager.listOfflineRegions(new OfflineManager.ListOfflineRegionsCallback() {
-                @Override
-                public void onList(final OfflineRegion[] offlineRegions) {
-                    // Check result. If no regions have been
-                    // downloaded yet, notify user and return
-                    if (offlineRegions == null || offlineRegions.length == 0) {
-                        Toast.makeText(getApplicationContext(),
-                                getString(R.string.toast_no_regions_yet), Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // Add all of the region names to a list
-
-                    for (OfflineRegion offlineRegion : offlineRegions) {
-                        if (mOfflineRegionName.equals(getRegionName(offlineRegion))) {
-                            // Get the region bounds and zoom
-                            LatLngBounds bounds = offlineRegion.getDefinition().getBounds();
-                            double regionZoom = ((OfflineTilePyramidRegionDefinition)
-                                    offlineRegion.getDefinition()).getMinZoom();
-
-                            // Create new camera position
-                            CameraPosition cameraPosition = new CameraPosition.Builder()
-                                    .target(bounds.getCenter())
-                                    .zoom(regionZoom)
-                                    .build();
-
-                            enabledPerimeterOfflineRegion(bounds);
-
-                            // Move camera to new position
-                            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-                            Toast.makeText(getApplicationContext(),
-                                    mOfflineRegionName, Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-                    Log.e(TAG, "Error: " + error);
-                }
-            });
+            mOfflineManager.listOfflineRegions(this);
         }
         if (mTypeMode || mPointPlace != null) {
             mPoint = mPointPlace;
@@ -484,5 +398,46 @@ public class NewMapActivity extends AppCompatActivity implements OnMapReadyCallb
                 }
             }
         }
+    }
+
+    @Override
+    public void onDownloadRegion(String name, double value) {
+        downloadOfflineRegion(name, value);
+    }
+
+    @Override
+    public void onList(OfflineRegion[] offlineRegions) {
+        if (offlineRegions == null || offlineRegions.length == 0) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.toast_no_regions_yet), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        for (OfflineRegion offlineRegion : offlineRegions) {
+            if (mOfflineRegionName.equals(getRegionName(offlineRegion))) {
+                // Get the region bounds and zoom
+                LatLngBounds bounds = offlineRegion.getDefinition().getBounds();
+                double regionZoom = ((OfflineTilePyramidRegionDefinition)
+                        offlineRegion.getDefinition()).getMinZoom();
+
+                // Create new camera position
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(bounds.getCenter())
+                        .zoom(regionZoom)
+                        .build();
+
+                enabledPerimeterOfflineRegion(bounds);
+
+                // Move camera to new position
+                mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                Toast.makeText(getApplicationContext(),
+                        mOfflineRegionName, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @Override
+    public void onError(String error) {
+        Log.e(TAG, "Error: " + error);
     }
 }
