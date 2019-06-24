@@ -1,10 +1,9 @@
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <ImageView
         android:id="@+id/imageView2"
@@ -13,26 +12,26 @@
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/wallpaper_port" />
 
-    <android.support.v4.widget.DrawerLayout
+    <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
         tools:openDrawer="start">
 
-        <android.support.design.widget.CoordinatorLayout
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true">
 
-            <android.support.design.widget.AppBarLayout
+            <com.google.android.material.appbar.AppBarLayout
                 android:id="@+id/appbar"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 android:background="@android:color/transparent"
                 android:fitsSystemWindows="true">
 
-                <android.support.design.widget.CollapsingToolbarLayout
+                <com.google.android.material.appbar.CollapsingToolbarLayout
                     android:id="@+id/toollbarColaps"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -41,13 +40,13 @@
                     app:titleEnabled="false"
                     app:toolbarId="@+id/toolbar">
 
-                    <android.support.v7.widget.Toolbar
+                    <androidx.appcompat.widget.Toolbar
                         android:id="@+id/toolbar"
                         android:layout_width="match_parent"
                         android:layout_height="?attr/actionBarSize"
-                        app:layout_collapseMode="none"></android.support.v7.widget.Toolbar>
+                        app:layout_collapseMode="none"></androidx.appcompat.widget.Toolbar>
 
-                    <android.support.design.widget.TabLayout
+                    <com.google.android.material.tabs.TabLayout
                         android:id="@+id/tabLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -55,27 +54,27 @@
                         app:layout_collapseMode="pin"
                         app:tabGravity="fill">
 
-                    </android.support.design.widget.TabLayout>
+                    </com.google.android.material.tabs.TabLayout>
 
-                </android.support.design.widget.CollapsingToolbarLayout>
+                </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-            </android.support.design.widget.AppBarLayout>
+            </com.google.android.material.appbar.AppBarLayout>
 
-            <android.support.v4.widget.NestedScrollView
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:fillViewport="true"
-                app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
+                app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-            </android.support.v4.widget.NestedScrollView>
+            </androidx.core.widget.NestedScrollView>
 
-            <android.support.v4.view.ViewPager
+            <androidx.viewpager.widget.ViewPager
                 android:id="@+id/viewpagerActionActivity"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabRecEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -83,11 +82,11 @@
                 android:layout_margin="20dp"
                 android:clickable="true"
                 android:src="@drawable/ic_create_black_24px"
-                app:fabSize="normal"/>
+                app:fabSize="normal" />
 
-        </android.support.design.widget.CoordinatorLayout>
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-        <android.support.design.widget.NavigationView
+        <com.google.android.material.navigation.NavigationView
             android:id="@+id/nav_view"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -123,76 +122,77 @@
                             android:id="@+id/textViewEmail"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_alignStart="@+id/userAcountImage"
                             android:layout_alignLeft="@+id/userAcountImage"
                             android:layout_alignParentBottom="true"
-                            android:layout_alignStart="@+id/userAcountImage"
                             android:layout_marginLeft="20dp"
                             android:layout_weight="1"
                             android:text="@string/user_name"
                             android:textSize="15sp"
-                            android:textStyle="bold|italic"/>
+                            android:textStyle="bold|italic" />
 
                         <ImageButton
                             android:id="@+id/buttonLogout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_alignTop="@+id/userAcountImage"
                             android:layout_alignParentEnd="false"
                             android:layout_alignParentRight="false"
-                            android:layout_alignTop="@+id/userAcountImage"
                             android:layout_margin="5dp"
                             android:background="@android:color/transparent"
                             android:visibility="invisible"
-                            app:srcCompat="@drawable/logout"/>
+                            app:srcCompat="@drawable/logout" />
                     </LinearLayout>
 
-                    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                                  android:id="@+id/userAcountImage"
-                                                                  android:layout_width="116dp"
-                                                                  android:layout_height="116dp"
-                                                                  android:layout_above="@+id/linearLayout"
-                                                                  android:layout_alignParentLeft="true"
-                                                                  android:layout_alignParentStart="true"
-                                                                  android:layout_marginBottom="17dp"
-                                                                  android:layout_marginLeft="28dp"
-                                                                  android:layout_marginStart="28dp"
-                                                                  android:src="@drawable/com_facebook_profile_picture_blank_portrait"
-                                                                  app:civ_border_color="@color/colorAccent"
-                                                                  app:civ_border_width="2dp"/>
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/userAcountImage"
+                        android:layout_width="116dp"
+                        android:layout_height="116dp"
+                        android:layout_above="@+id/linearLayout"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginStart="28dp"
+                        android:layout_marginLeft="28dp"
+                        android:layout_marginBottom="17dp"
+                        android:src="@drawable/com_facebook_profile_picture_blank_portrait"
+                        app:civ_border_color="@color/colorAccent"
+                        app:civ_border_width="2dp" />
 
                     <Button
                         android:id="@+id/facebokLoginButton"
                         android:layout_width="46dp"
                         android:layout_height="46dp"
-                        android:layout_alignBottom="@+id/userAcountImage"
-                        android:layout_alignLeft="@+id/googleLoginButton"
                         android:layout_alignStart="@+id/googleLoginButton"
+                        android:layout_alignLeft="@+id/googleLoginButton"
+                        android:layout_alignBottom="@+id/userAcountImage"
                         android:background="@drawable/ic_facebook"
-                        android:visibility="invisible"/>
+                        android:visibility="invisible" />
 
                     <Button
                         android:id="@+id/googleLoginButton"
                         android:layout_width="41dp"
                         android:layout_height="41dp"
+                        android:layout_alignTop="@+id/userAcountImage"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentRight="true"
-                        android:layout_alignTop="@+id/userAcountImage"
                         android:layout_marginEnd="21dp"
                         android:layout_marginRight="21dp"
                         android:background="@drawable/ic_google"
-                        android:visibility="invisible"/>
+                        android:visibility="invisible" />
 
                     <ProgressBar
                         android:id="@+id/progressBar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"
                         android:layout_alignTop="@+id/userAcountImage"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentLeft="true"
                         android:layout_gravity="center|bottom"
-                        android:layout_marginLeft="63dp"
                         android:layout_marginStart="63dp"
+                        android:layout_marginLeft="63dp"
                         android:layout_marginTop="33dp"
-                        android:visibility="invisible"/>
+                        android:visibility="invisible" />
 
                 </RelativeLayout>
 
@@ -200,22 +200,21 @@
                     android:id="@+id/linearLayout3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
                     android:layout_below="@+id/userAcountImage"
-                    android:orientation="vertical"
-                    >
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:orientation="vertical">
 
-                    <android.support.design.widget.TextInputLayout
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/inputEmailLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="false"
-                        android:layout_alignParentLeft="false"
                         android:layout_alignParentStart="false"
+                        android:layout_alignParentLeft="false"
+                        android:layout_alignParentBottom="false"
                         android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
                         android:layout_marginTop="8dp"
+                        android:layout_marginRight="8dp"
                         android:visibility="gone">
 
                         <EditText
@@ -227,16 +226,16 @@
                             android:hint="@string/hint_email"
                             android:inputType="textEmailAddress"
                             android:textColor="@color/color_level_yellow"
-                            android:textColorHint="@android:color/white"/>
-                    </android.support.design.widget.TextInputLayout>
+                            android:textColorHint="@android:color/white" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <android.support.design.widget.TextInputLayout
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/inputPasswordLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
                         android:layout_marginLeft="8dp"
                         android:layout_marginRight="8dp"
+                        android:layout_marginBottom="8dp"
                         android:visibility="gone">
 
                         <EditText
@@ -249,35 +248,35 @@
                             android:inputType="textPassword|textVisiblePassword"
                             android:textColor="@color/color_level_yellow"
                             android:textColorHint="@android:color/white"
-                            android:visibility="visible"/>
-                    </android.support.design.widget.TextInputLayout>
+                            android:visibility="visible" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <Button
                         android:id="@+id/emailLoginButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
                         android:layout_marginLeft="4dp"
-                        android:layout_marginRight="4dp"
                         android:layout_marginTop="5dp"
+                        android:layout_marginRight="4dp"
+                        android:layout_marginBottom="5dp"
                         android:background="@color/colorAccent"
                         android:text="@string/btn_login"
                         android:textColor="@android:color/black"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
 
                     <Button
                         android:id="@+id/buttonResetPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
                         android:layout_marginLeft="4dp"
-                        android:layout_marginRight="4dp"
                         android:layout_marginTop="5dp"
+                        android:layout_marginRight="4dp"
+                        android:layout_marginBottom="5dp"
                         android:background="@null"
                         android:text="@string/btn_forgot_password"
                         android:textAllCaps="false"
                         android:textColor="@color/colorAccent"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
 
                     <Button
                         android:id="@+id/buttonAuthorization"
@@ -287,12 +286,12 @@
                         android:layout_marginRight="4dp"
                         android:background="@color/colorAccent"
                         android:text="Authorization"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
 
                 </LinearLayout>
 
 
-                <android.support.v4.widget.NestedScrollView
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -314,7 +313,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
-                                app:srcCompat="@drawable/ic_favorite"/>
+                                app:srcCompat="@drawable/ic_favorite" />
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -326,7 +325,7 @@
                                 android:paddingLeft="10dp"
                                 android:text="@string/favorites"
                                 android:textColor="@color/white"
-                                android:textSize="18sp"/>
+                                android:textSize="18sp" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -340,7 +339,7 @@
                                 android:id="@+id/imageView6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_create_black_24px"/>
+                                app:srcCompat="@drawable/ic_create_black_24px" />
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -352,7 +351,7 @@
                                 android:paddingLeft="10dp"
                                 android:text="@string/created"
                                 android:textColor="@color/white"
-                                android:textSize="18sp"/>
+                                android:textSize="18sp" />
 
                         </LinearLayout>
 
@@ -367,7 +366,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
-                                app:srcCompat="@drawable/ic_map24px"/>
+                                app:srcCompat="@drawable/ic_map24px" />
 
                             <TextView
                                 android:id="@+id/buttonMapOffline"
@@ -380,7 +379,7 @@
                                 android:paddingLeft="10dp"
                                 android:text="@string/offline_maps"
                                 android:textColor="@color/white"
-                                android:textSize="18sp"/>
+                                android:textSize="18sp" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -394,7 +393,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
-                                app:srcCompat="@drawable/ic_settings_white_24px"/>
+                                app:srcCompat="@drawable/ic_settings_white_24px" />
 
                             <TextView
                                 android:id="@+id/buttonSettings"
@@ -407,18 +406,18 @@
                                 android:paddingLeft="10dp"
                                 android:text="@string/settings"
                                 android:textColor="@color/white"
-                                android:textSize="18sp"/>
+                                android:textSize="18sp" />
                         </LinearLayout>
 
                     </LinearLayout>
-                </android.support.v4.widget.NestedScrollView>
+                </androidx.core.widget.NestedScrollView>
 
             </LinearLayout>
 
-        </android.support.design.widget.NavigationView>
+        </com.google.android.material.navigation.NavigationView>
 
-    </android.support.v4.widget.DrawerLayout>
+    </androidx.drawerlayout.widget.DrawerLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 

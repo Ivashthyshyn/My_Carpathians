@@ -1,6 +1,6 @@
 package com.keyVas.key.my_carpathians.utils;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public class Resource<T> {
     public final @Status

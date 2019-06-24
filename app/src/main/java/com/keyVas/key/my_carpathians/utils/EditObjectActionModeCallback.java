@@ -2,8 +2,9 @@ package com.keyVas.key.my_carpathians.utils;
 
 
 import android.content.Context;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.view.ActionMode;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.appcompat.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -42,7 +43,7 @@ public class EditObjectActionModeCallback implements ActionMode.Callback{
 		menu.findItem(R.id.action_publish).setVisible(false).setEnabled(false);
 		menu.findItem(R.id.action_edit).setVisible(false).setEnabled(false);
 		menu.findItem(R.id.action_del_created_object).setVisible(true).setEnabled(true);
-		android.support.v4.app.FragmentTransaction fragmentTransaction = fm
+		FragmentTransaction fragmentTransaction = fm
 				.beginTransaction();
 		fragmentTransaction.add(R.id.actionActivityContainer, fragment);
 		fragmentTransaction.commit();

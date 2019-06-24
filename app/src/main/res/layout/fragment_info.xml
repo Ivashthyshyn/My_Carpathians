@@ -75,7 +75,7 @@
                 android:layout_height="1dp"
                 android:background="@color/primaryLightColor"/>
 
-            <android.support.v4.widget.NestedScrollView
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:fillViewport="true">
@@ -93,7 +93,7 @@
                         android:padding="@dimen/default_half_margin"
                         android:text="TextView" />
                 </LinearLayout>
-            </android.support.v4.widget.NestedScrollView>
+            </androidx.core.widget.NestedScrollView>
 
         </LinearLayout>
 

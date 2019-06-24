@@ -13,21 +13,21 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.textfield.TextInputLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.core.view.MenuItemCompat;
+import androidx.viewpager.widget.ViewPager;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
@@ -392,7 +392,7 @@ public class StartActivity extends AppCompatActivity implements
 
 
 		if (getIntent().getBooleanExtra(LOGIN, false)) {
-			mDrawerLayout.openDrawer(Gravity.START, true);
+			mDrawerLayout.openDrawer(Gravity.LEFT, true);
 			checkCurrentUser();
 		}
 
@@ -606,18 +606,18 @@ public class StartActivity extends AppCompatActivity implements
 			showInterfaceForAnonymous();
 			produceToolsVisibility(mTypeMode);
 		} else {
-			if (mUser.getProviders() != null
-					&& mUser.getProviders().size() > 0
-					&& mUser.getProviders().get(0).equals(GOOGLE_PROVIDER)) {
+			if (mUser.getProviderData() != null
+					&& mUser.getProviderData().size() > 0
+					&& mUser.getProviderData().get(0).equals(GOOGLE_PROVIDER)) {
 				produceToolsVisibility(mTypeMode);
 				mTypeMode = true;
 				loginGoogle();
 				updateUI(mUser.getProviderData().get(0).getDisplayName(),
 						String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
 				buttonLogout.setVisibility(View.VISIBLE);
-			} else if (mUser.getProviders() != null
-					&& mUser.getProviders().size() > 0
-					&& mUser.getProviders().get(0).equals(FACEBOOK_PROVIDER)) {
+			} else if (mUser.getProviderData() != null
+					&& mUser.getProviderData().size() > 0
+					&& mUser.getProviderData().get(0).equals(FACEBOOK_PROVIDER)) {
 				produceToolsVisibility(mTypeMode);
 				mTypeMode = true;
 				// mUserUID = mUser.getUid();
@@ -625,9 +625,9 @@ public class StartActivity extends AppCompatActivity implements
 				updateUI(mUser.getProviderData().get(0).getDisplayName(),
 						String.valueOf(mUser.getProviderData().get(0).getPhotoUrl()));
 				buttonLogout.setVisibility(View.VISIBLE);
-			} else if (mUser.getProviders() != null
-					&& mUser.getProviders().size() > 0
-					&& mUser.getProviders().get(0).equals(EMAIL_PROVIDER)) {
+			} else if (mUser.getProviderData() != null
+					&& mUser.getProviderData().size() > 0
+					&& mUser.getProviderData().get(0).equals(EMAIL_PROVIDER)) {
 				produceToolsVisibility(mTypeMode);
 				mTypeMode = true;
 				// mUserUID = mUser.getUid();
@@ -779,14 +779,14 @@ public class StartActivity extends AppCompatActivity implements
 					, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int arg1) {
 
-							mDrawerLayout.openDrawer(Gravity.START);
+							mDrawerLayout.openDrawer(Gravity.LEFT);
 						}
 					});
 			builder.setNegativeButton(getResources().getString(R.string.anonymous)
 					, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int arg1) {
 							signInAnonymously();
-							mDrawerLayout.closeDrawer(Gravity.START);
+							mDrawerLayout.closeDrawer(Gravity.LEFT);
 
 						}
 					});
@@ -1362,7 +1362,7 @@ public class StartActivity extends AppCompatActivity implements
 				.build();
 		if (mGoogleApiClient == null) {
 			mGoogleApiClient = new GoogleApiClient.Builder(this)
-					.enableAutoManage(this /* FragmentActivity */,
+					.enableAutoManage( this/* FragmentActivity */,
 							this /* OnConnectionFailedListener */)
 					.addApi(Auth.GOOGLE_SIGN_IN_API, gso)
 					.build();
@@ -1545,19 +1545,19 @@ public class StartActivity extends AppCompatActivity implements
 			if (mUser.isAnonymous()) {
 				signOut();
 			} else {
-				if (mUser.getProviders() != null
-						&& mUser.getProviders().size() > 0
-						&& mUser.getProviders().get(0).equals(GOOGLE_PROVIDER)) {
+				if (mUser.getProviderData() != null
+						&& mUser.getProviderData().size() > 0
+						&& mUser.getProviderData().get(0).equals(GOOGLE_PROVIDER)) {
 					googleSignOut();
 				} else if (
-						mUser.getProviders() != null
-								&& mUser.getProviders().size() > 0
-								&& mUser.getProviders().get(0).equals(FACEBOOK_PROVIDER)) {
+						mUser.getProviderData() != null
+								&& mUser.getProviderData().size() > 0
+								&& mUser.getProviderData().get(0).equals(FACEBOOK_PROVIDER)) {
 					LoginManager.getInstance().logOut();
 					signOut();
-				} else if (mUser.getProviders() != null
-						&& mUser.getProviders().size() > 0
-						&& mUser.getProviders().get(0).equals(EMAIL_PROVIDER)) {
+				} else if (mUser.getProviderData() != null
+						&& mUser.getProviderData().size() > 0
+						&& mUser.getProviderData().get(0).equals(EMAIL_PROVIDER)) {
 					signOut();
 				}
 			}
@@ -1749,5 +1749,4 @@ public class StartActivity extends AppCompatActivity implements
 	public void buttonSettingsWasClicked() {
 		startActivity(new Intent(StartActivity.this, SettingsActivity_.class));
 	}
-
 }
