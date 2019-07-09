@@ -47,11 +47,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.MapsActivity_"
-            android:label="@string/title_activity_maps"
-            android:parentActivityName=".activities.StartActivity_"
-            android:theme="@style/AppTheme" />
-        <activity
             android:name=".activities.ActionActivity_"
             android:label="@string/title_activity_action"
             android:parentActivityName=".activities.StartActivity_"
@@ -80,7 +75,7 @@
             android:value="ca-app-pub-4220838859668441~9282450385"/>
 
         <activity android:name=".activities.SettingsActivity"></activity>
-        <activity android:name=".activities.NewMapActivity"></activity>
+        <activity android:name=".activities.map.NewMapActivity"></activity>
     </application>
 
 </manifest>

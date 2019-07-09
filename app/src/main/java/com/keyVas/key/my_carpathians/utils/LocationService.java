@@ -25,11 +25,6 @@ import com.keyVas.key.my_carpathians.interfaces.ILocation;
 import java.util.List;
 
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
-import static com.keyVas.key.my_carpathians.activities.MapsActivity.CANCEL_REC;
-import static com.keyVas.key.my_carpathians.activities.MapsActivity.COMMAND_PAUSE_REC_ROUT;
-import static com.keyVas.key.my_carpathians.activities.MapsActivity.COMMAND_REC_PLACE;
-import static com.keyVas.key.my_carpathians.activities.MapsActivity.COMMAND_REC_ROUT;
-import static com.keyVas.key.my_carpathians.activities.MapsActivity.TO_SERVICE_COMMANDS;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.PLACE;
 import static com.keyVas.key.my_carpathians.activities.StartActivity.ROUT;
 
@@ -136,15 +131,15 @@ public class LocationService extends Service implements
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mIntCommand = intent.getIntExtra(TO_SERVICE_COMMANDS, 0);
-        if (mIntCommand == CANCEL_REC) {
-            TrackContainer.getInstance().getPositionList().clear();
-            TrackContainer.getInstance().setEnabledGPSRecording(false);
-            mLocation = null;
-            mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
-            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
-            mIntCommand = 0;
-        }
+//        mIntCommand = intent.getIntExtra(TO_SERVICE_COMMANDS, 0);
+//        if (mIntCommand == CANCEL_REC) {
+//            TrackContainer.getInstance().getPositionList().clear();
+//            TrackContainer.getInstance().setEnabledGPSRecording(false);
+//            mLocation = null;
+//            mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
+//            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
+//            mIntCommand = 0;
+//        }
         return START_STICKY;
     }
 
@@ -160,35 +155,35 @@ public class LocationService extends Service implements
      * @param location
      */
     public void onLocationChanged(Location location) {
-        if (owner != null && mIntCommand != COMMAND_REC_ROUT) {
-            if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_PASSIVE) {
-                mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
-                mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
-            }
-            if (mIntCommand == COMMAND_REC_PLACE) {
-                mLocation = location;
-                mIntCommand = 0;
-                owner.update(location, PLACE);
-            }
-            owner.update(location, WAIT_MODE);
-        } else if (owner == null && mIntCommand != COMMAND_REC_ROUT) {
-            if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_ACTIVE)
-                mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
-            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_PASSIVE);
-        } else if (mIntCommand == COMMAND_REC_ROUT) {
-            mLocationRequest.setInterval(UPDATE_INTERVAL_REC);
-            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_REC);
-            saveLocationToLocationList(location);
-            if (owner != null) {
-                owner.update(location, ROUT);
-            }
-        } else if (mIntCommand == COMMAND_PAUSE_REC_ROUT) {
-            mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
-            mLocationRequest.setFastestInterval(UPDATE_INTERVAL_PASSIVE);
-            if (owner != null) {
-                owner.update(location, ROUT);
-            }
-        }
+//        if (owner != null && mIntCommand != COMMAND_REC_ROUT) {
+//            if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_PASSIVE) {
+//                mLocationRequest.setInterval(UPDATE_INTERVAL_ACTIVE);
+//                mLocationRequest.setFastestInterval(FASTEST_INTERVAL_ACTIVE);
+//            }
+//            if (mIntCommand == COMMAND_REC_PLACE) {
+//                mLocation = location;
+//                mIntCommand = 0;
+//                owner.update(location, PLACE);
+//            }
+//            owner.update(location, WAIT_MODE);
+//        } else if (owner == null && mIntCommand != COMMAND_REC_ROUT) {
+//            if (mLocationRequest.getFastestInterval() == FASTEST_INTERVAL_ACTIVE)
+//                mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
+//            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_PASSIVE);
+//        } else if (mIntCommand == COMMAND_REC_ROUT) {
+//            mLocationRequest.setInterval(UPDATE_INTERVAL_REC);
+//            mLocationRequest.setFastestInterval(FASTEST_INTERVAL_REC);
+//            saveLocationToLocationList(location);
+//            if (owner != null) {
+//                owner.update(location, ROUT);
+//            }
+//        } else if (mIntCommand == COMMAND_PAUSE_REC_ROUT) {
+//            mLocationRequest.setInterval(UPDATE_INTERVAL_PASSIVE);
+//            mLocationRequest.setFastestInterval(UPDATE_INTERVAL_PASSIVE);
+//            if (owner != null) {
+//                owner.update(location, ROUT);
+//            }
+//        }
     }
 
     private void saveLocationToLocationList(Location location) {

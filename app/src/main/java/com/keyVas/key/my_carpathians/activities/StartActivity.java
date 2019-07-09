@@ -80,6 +80,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.keyVas.key.my_carpathians.R;
+import com.keyVas.key.my_carpathians.activities.map.NewMapActivity;
 import com.keyVas.key.my_carpathians.adapters.ViewPagerAdapter;
 import com.keyVas.key.my_carpathians.fragments.PlacesListFragment;
 import com.keyVas.key.my_carpathians.fragments.PlacesListFragment_;
@@ -119,8 +120,8 @@ import static com.keyVas.key.my_carpathians.activities.ActionActivity.LOGIN;
 import static com.keyVas.key.my_carpathians.activities.ActionActivity.PHOTO_STR;
 import static com.keyVas.key.my_carpathians.activities.ActionActivity.PLACE_STR;
 import static com.keyVas.key.my_carpathians.activities.ActionActivity.ROUT_STR;
-import static com.keyVas.key.my_carpathians.activities.MapsActivity.JSON_CHARSET;
-import static com.keyVas.key.my_carpathians.activities.MapsActivity.JSON_FIELD_REGION_NAME;
+import static com.keyVas.key.my_carpathians.activities.map.MapFragment.JSON_CHARSET;
+import static com.keyVas.key.my_carpathians.activities.map.MapFragment.JSON_FIELD_REGION_NAME;
 import static com.keyVas.key.my_carpathians.adapters.PlacesRecyclerAdapter.ViewHolder.PUT_EXTRA_PLACE;
 import static com.keyVas.key.my_carpathians.adapters.RoutsRecyclerAdapter.RoutsViewHolder.PUT_EXTRA_ROUT;
 import static com.keyVas.key.my_carpathians.utils.LocationService.CREATED_BY_USER_PLACE_LIST;
@@ -1087,7 +1088,7 @@ public class StartActivity extends AppCompatActivity implements
 			actionBarDrawerToggle.syncState();
 		} else {
 			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-			actionBarDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+			//actionBarDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 			actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
 			actionBarDrawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
 				@Override
@@ -1182,7 +1183,7 @@ public class StartActivity extends AppCompatActivity implements
 	@Click(R.id.fabRecEditor)
 	void fabRecEditorWasClicked() {
 		if (mTypeMode) {
-			Intent intentMapActivity = new Intent(context, MapsActivity_.class);
+			Intent intentMapActivity = new Intent(context, NewMapActivity.class);
 			intentMapActivity.putExtra(PRODUCE_MODE, mTypeMode);
 			startActivity(intentMapActivity);
 		} else {
@@ -1670,7 +1671,7 @@ public class StartActivity extends AppCompatActivity implements
 
 												Toast.makeText(StartActivity.this, items[mRegionSelected],
 														Toast.LENGTH_LONG).show();
-												Intent mapIntent = new Intent(StartActivity.this, MapsActivity_.class);
+												Intent mapIntent = new Intent(StartActivity.this, NewMapActivity.class);
 												mapIntent.putExtra(OFFLINE_MAP, items[mRegionSelected]);
 												startActivity(mapIntent);
 

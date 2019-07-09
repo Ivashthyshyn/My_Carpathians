@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.keyVas.key.my_carpathians.R;
+
 import com.keyVas.key.my_carpathians.activities.StartActivity_;
 import com.keyVas.key.my_carpathians.interfaces.CommunicatorActionActivity;
 import com.keyVas.key.my_carpathians.models.Place;
@@ -266,7 +267,7 @@ public class EditModeFragment extends DialogFragment implements View.OnFocusChan
 			public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
 				progressView.setVisibility(View.INVISIBLE);
 				cropToolsFrame.setVisibility(View.GONE);
-				buttonSaveData.setVisibility(View.VISIBLE);
+				buttonSaveData.show();
 				editGroup.setVisibility(View.VISIBLE);
 				groupMorePhoto.setVisibility(View.VISIBLE);
 
@@ -550,7 +551,7 @@ public class EditModeFragment extends DialogFragment implements View.OnFocusChan
 			if ( selectedImage!= null) {
 				editGroup.setVisibility(View.GONE);
 				cropToolsFrame.setVisibility(View.VISIBLE);
-				buttonSaveData.setVisibility(View.GONE);
+				buttonSaveData.hide();
 				cropImageView.setImageUriAsync(selectedImage);
 				progressViewText.setText(getString(R.string.loading));
 				progressView.setVisibility(View.VISIBLE);
@@ -562,7 +563,7 @@ public class EditModeFragment extends DialogFragment implements View.OnFocusChan
 	public void buttonBakCropWasClicked(){
 		cropImageView.clearImage();
 		cropToolsFrame.setVisibility(View.GONE);
-		buttonSaveData.setVisibility(View.VISIBLE);
+		buttonSaveData.show();
 		groupMorePhoto.setVisibility(View.VISIBLE);
 		editGroup.setVisibility(View.VISIBLE);
 	}
@@ -677,6 +678,4 @@ public class EditModeFragment extends DialogFragment implements View.OnFocusChan
 			mAppBarLayout.setExpanded(false, true);
 		}
 	}
-
-
 }

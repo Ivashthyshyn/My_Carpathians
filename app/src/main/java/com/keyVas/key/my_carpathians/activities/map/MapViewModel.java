@@ -1,20 +1,31 @@
-package com.keyVas.key.my_carpathians.activities;
+package com.keyVas.key.my_carpathians.activities.map;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.MutableLiveData;
-import androidx.annotation.NonNull;
+import android.location.Location;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
 import com.keyVas.key.my_carpathians.utils.Resource;
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.location.LocationEngineRequest;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.mapboxsdk.offline.OfflineRegion;
 import com.mapbox.mapboxsdk.offline.OfflineRegionError;
 import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
-import com.mapbox.services.commons.utils.TextUtils;
+
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,25 +39,65 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewMapActivityVM extends AndroidViewModel {
+import static android.os.Looper.getMainLooper;
 
-    private static final String TAG = "NewMapActivityVM";
+public class MapViewModel extends AndroidViewModel {
+
+    private static final String TAG = "MapViewModel";
+
+    private static final long DEFAULT_INTERVAL_IN_MILLISECONDS = 3000;
+
+    private static final long DEFAULT_MAX_WAIT_TIME = 2000;
 
     private MutableLiveData<List<LatLng>> routPoints = new MutableLiveData<>();
 
+    private MutableLiveData<Location> myLocation = new MutableLiveData<>();
+
     private MutableLiveData<Resource<Integer>> loadingOfflineMap = new MutableLiveData<>();
 
-    public NewMapActivityVM(@NonNull Application application) {
+    private LocationEngine locationEngine;
+
+    public MapViewModel(@NonNull Application application) {
         super(application);
     }
 
-    public MutableLiveData<List<LatLng>> getRoutPoints() {
+    public LiveData<List<LatLng>> getRoutPoints() {
         return routPoints;
     }
 
-    public MutableLiveData<Resource<Integer>> getLoadingOfflineMap() {
+    public LiveData<Resource<Integer>> getLoadingOfflineMap() {
         return loadingOfflineMap;
     }
+
+    public LiveData<Location> getMyLocation() {
+        return myLocation;
+    }
+
+    @SuppressLint("MissingPermission")
+    public void initMyLocation() {
+        if (locationEngine == null) {
+            locationEngine = LocationEngineProvider.getBestLocationEngine(getApplication());
+            LocationEngineRequest request = new LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
+                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                    .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME).build();
+
+            locationEngine.requestLocationUpdates(request, locationCallback, getMainLooper());
+            locationEngine.getLastLocation(locationCallback);
+        }
+    }
+
+    private LocationEngineCallback<LocationEngineResult> locationCallback = new LocationEngineCallback<LocationEngineResult>() {
+        @Override
+        public void onSuccess(LocationEngineResult result) {
+            if (result != null) {
+                myLocation.setValue(result.getLastLocation());
+            }
+        }
+
+        @Override
+        public void onFailure(@NonNull Exception exception) {
+        }
+    };
 
     public void drawGeoJson(String path) {
         Runnable runnable = () -> {
@@ -136,4 +187,3 @@ public class NewMapActivityVM extends AndroidViewModel {
                 });
     }
 }
-

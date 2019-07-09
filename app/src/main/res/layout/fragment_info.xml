@@ -1,9 +1,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:background="@color/secondaryBackgroundColor"
-             tools:context="com.keyVas.key.my_carpathians.fragments.InfoFragment">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/secondaryBackgroundColor"
+    tools:context="com.keyVas.key.my_carpathians.fragments.InfoFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -14,10 +14,10 @@
 
         <TextView
             android:id="@+id/textViewNameObject"
+            style="@style/list_header_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/list_header_text"
-            tools:text="Sample"/>
+            tools:text="Sample" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -28,15 +28,15 @@
                 android:id="@+id/groupForRout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/default_half_margin"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="@dimen/default_half_margin">
 
                 <TextView
                     android:id="@+id/textView10"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/level"/>
+                    android:text="@string/level" />
 
                 <TextView
                     android:id="@+id/textDifficultyValue"
@@ -45,20 +45,20 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="@string/difficulty"
-                    android:textColor="@color/color_level_green"/>
+                    android:textColor="@color/color_level_green" />
 
                 <View
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
-                    android:background="@color/primaryLightColor"
-                    android:layout_marginRight="@dimen/default_margin"/>
+                    android:layout_marginRight="@dimen/default_margin"
+                    android:background="@color/primaryLightColor" />
 
                 <TextView
                     android:id="@+id/textView11"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/length"/>
+                    android:text="@string/length" />
 
                 <TextView
                     android:id="@+id/textRoutLength"
@@ -67,13 +67,13 @@
                     android:layout_weight="1"
                     android:gravity="right"
                     android:paddingRight="5dp"
-                    android:text="33км"/>
+                    android:text="33км" />
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/primaryLightColor"/>
+                android:background="@color/primaryLightColor" />
 
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
@@ -83,7 +83,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical" >
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/titleText"
